@@ -20,8 +20,13 @@ export const restoreImage = async (file: File): Promise<string> => {
     // Agora usamos a chave diretamente no cliente para facilitar (sem backend)
     const apiKey = process.env.API_KEY;
     
-    if (!apiKey) {
-        throw new Error("Chave de API não encontrada. Certifique-se que tem o ficheiro .env configurado.");
+    if (!apiKey || apiKey.includes("INSIRA_A_SUA_CHAVE")) {
+        throw new Error("Chave de API não configurada. Edite o ficheiro .env com a sua chave da Google AI.");
+    }
+
+    // Validação extra: Chaves da Google geralmente começam com AIzaSy
+    if (!apiKey.startsWith("AIzaSy")) {
+         throw new Error("A chave de API parece incorreta (deve começar por 'AIzaSy'). Verifique se copiou a chave completa no Google AI Studio e não apenas o nome do projeto.");
     }
 
     const ai = new GoogleGenAI({ apiKey });
@@ -65,6 +70,13 @@ export const restoreImage = async (file: File): Promise<string> => {
 
   } catch (error: any) {
     console.error("Service Error:", error);
-    throw new Error(error.message || "Falha ao restaurar a imagem. Tente novamente.");
+    
+    let msg = error.message || "Falha ao restaurar a imagem. Tente novamente.";
+    // Melhorar mensagens para erros comuns
+    if (msg.includes("403") || msg.includes("API key")) {
+        msg = "Chave de API inválida ou expirada. Verifique o ficheiro .env.";
+    }
+    
+    throw new Error(msg);
   }
 };

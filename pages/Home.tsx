@@ -1,14 +1,37 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { Upload, Wand2, Download, Zap, Heart, Shield } from 'lucide-react';
+import { Upload, Wand2, Download, Zap, Heart, Shield, CheckCircle2, ChevronLeft, ChevronRight, Star } from 'lucide-react';
 import { useConfig } from '../contexts/ConfigContext';
 import BeforeAfterSlider from '../components/BeforeAfterSlider';
+import { PricingTier } from '../types';
 
 const Home: React.FC = () => {
   const { config } = useConfig();
+  const carouselRef = useRef<HTMLDivElement>(null);
 
-  // Helper to highlight part of the text if desired, or just render straight
-  // We'll split the title for the gradient effect roughly
+  // Definição dos Bundles
+  const pricingTiers: PricingTier[] = [
+    { id: 'single', photos: 1, price: 4, label: 'Uma Foto', savings: '' },
+    { id: 'pack5', photos: 5, price: 10, label: 'Pack Mini', savings: 'Poupe 50%', popular: true },
+    { id: 'pack12', photos: 12, price: 20, label: 'Pack Família', savings: '1.66€ / foto' },
+    { id: 'pack25', photos: 25, price: 40, label: 'Pack Álbum', savings: '1.60€ / foto' },
+    { id: 'pack100', photos: 100, price: 50, label: 'Pack Estúdio', savings: 'Melhor Valor: 0.50€ / foto' },
+  ];
+
+  const scrollCarousel = (direction: 'left' | 'right') => {
+    if (carouselRef.current) {
+      const scrollAmount = 320; // Largura aproximada do card + gap
+      const newScrollLeft = direction === 'left' 
+        ? carouselRef.current.scrollLeft - scrollAmount 
+        : carouselRef.current.scrollLeft + scrollAmount;
+      
+      carouselRef.current.scrollTo({
+        left: newScrollLeft,
+        behavior: 'smooth'
+      });
+    }
+  };
+
   const renderTitle = () => {
     const parts = config.heroTitle.split(' ');
     const half = Math.ceil(parts.length / 2);
@@ -135,6 +158,94 @@ const Home: React.FC = () => {
         </div>
       </section>
 
+      {/* Pricing Carousel Section */}
+      <section id="pricing" className="py-24 bg-indigo-900 text-white overflow-hidden relative">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold mb-4">Pacotes de Restauração</h2>
+            <p className="text-xl text-indigo-200">
+              Escolha o pacote ideal para si. Quanto mais fotos restaurar, maior o desconto.
+            </p>
+          </div>
+
+          <div className="relative">
+            {/* Arrows */}
+            <button 
+              onClick={() => scrollCarousel('left')}
+              className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 lg:-translate-x-12 z-20 bg-white/10 hover:bg-white/20 p-3 rounded-full backdrop-blur-sm transition-all hidden md:block"
+            >
+              <ChevronLeft className="h-8 w-8 text-white" />
+            </button>
+            <button 
+              onClick={() => scrollCarousel('right')}
+              className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 lg:translate-x-12 z-20 bg-white/10 hover:bg-white/20 p-3 rounded-full backdrop-blur-sm transition-all hidden md:block"
+            >
+              <ChevronRight className="h-8 w-8 text-white" />
+            </button>
+
+            {/* Carousel Container */}
+            <div 
+              ref={carouselRef}
+              className="flex gap-6 overflow-x-auto snap-x snap-mandatory pb-8 px-4 scrollbar-hide"
+              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            >
+              {pricingTiers.map((tier) => (
+                <div 
+                  key={tier.id}
+                  className={`flex-none w-80 snap-center relative bg-white text-slate-900 rounded-2xl shadow-xl overflow-hidden transform transition-transform hover:scale-105 duration-300 ${
+                    tier.popular ? 'border-4 border-indigo-400' : ''
+                  }`}
+                >
+                  {tier.popular && (
+                    <div className="bg-indigo-500 text-white text-xs font-bold uppercase py-1 px-4 absolute top-0 right-0 rounded-bl-xl z-10 flex items-center gap-1">
+                      <Star className="h-3 w-3 fill-current" /> Mais Popular
+                    </div>
+                  )}
+                  
+                  <div className="p-8 flex flex-col h-full">
+                    <h3 className="text-lg font-semibold text-slate-500 uppercase tracking-wider mb-2">{tier.label}</h3>
+                    <div className="flex items-baseline mb-2">
+                      <span className="text-5xl font-extrabold tracking-tight">{tier.price}€</span>
+                    </div>
+                    {tier.savings && (
+                       <span className="inline-block bg-green-100 text-green-700 text-xs font-bold px-2 py-1 rounded-full mb-6 w-fit">
+                         {tier.savings}
+                       </span>
+                    )}
+
+                    <ul className="space-y-4 mb-8 flex-1">
+                      <li className="flex items-center text-slate-600">
+                        <CheckCircle2 className="h-5 w-5 text-green-500 mr-3 flex-shrink-0" />
+                        <span className="font-medium">{tier.photos} {tier.photos === 1 ? 'Foto Restaurada' : 'Fotos Restauradas'}</span>
+                      </li>
+                      <li className="flex items-center text-slate-600">
+                        <CheckCircle2 className="h-5 w-5 text-green-500 mr-3 flex-shrink-0" />
+                        Alta Resolução
+                      </li>
+                      <li className="flex items-center text-slate-600">
+                        <CheckCircle2 className="h-5 w-5 text-green-500 mr-3 flex-shrink-0" />
+                        Sem Marca d'água
+                      </li>
+                    </ul>
+
+                    <Link 
+                      to="/restore"
+                      className={`block w-full py-4 px-6 rounded-xl font-bold text-center transition-colors ${
+                        tier.popular 
+                          ? 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-500/30' 
+                          : 'bg-slate-100 hover:bg-slate-200 text-slate-900'
+                      }`}
+                    >
+                      Escolher {tier.label}
+                    </Link>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Comparison/Example Section (Lion) */}
       <section className="py-24 bg-white overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -201,66 +312,8 @@ const Home: React.FC = () => {
           </div>
         </div>
       </section>
-      
-      {/* Pricing Teaser */}
-      <section id="pricing" className="py-20 bg-indigo-900 text-white text-center">
-        <div className="max-w-3xl mx-auto px-4">
-          <h2 className="text-3xl font-bold mb-6">Qualidade de Estúdio por um Preço Simbólico</h2>
-          <p className="text-xl text-indigo-200 mb-8">
-            Enquanto estúdios tradicionais cobram centenas de euros, nós usamos o poder da IA para oferecer resultados incríveis por apenas o preço de um café.
-          </p>
-          <div className="inline-block bg-white text-indigo-900 rounded-2xl p-8 shadow-2xl transform hover:scale-105 transition-transform duration-300">
-            <span className="block text-sm font-semibold uppercase tracking-wider text-indigo-500 mb-2">Preço Único</span>
-            <div className="flex items-baseline justify-center gap-1">
-              <span className="text-5xl font-extrabold">4€</span>
-              <span className="text-xl text-gray-500">/foto</span>
-            </div>
-            <ul className="mt-6 space-y-3 text-left">
-              <li className="flex items-center text-gray-600">
-                <CheckCircle2 className="h-5 w-5 text-green-500 mr-2" />
-                Alta Resolução
-              </li>
-              <li className="flex items-center text-gray-600">
-                <CheckCircle2 className="h-5 w-5 text-green-500 mr-2" />
-                Sem Marca d'água
-              </li>
-              <li className="flex items-center text-gray-600">
-                <CheckCircle2 className="h-5 w-5 text-green-500 mr-2" />
-                Recolorização Avançada
-              </li>
-            </ul>
-            <Link 
-              to="/restore"
-              className="mt-8 block w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg transition-colors"
-            >
-              Restaurar Agora
-            </Link>
-          </div>
-        </div>
-      </section>
     </div>
   );
 };
-
-// Helper icon
-function CheckCircle2(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg 
-      {...props} 
-      xmlns="http://www.w3.org/2000/svg" 
-      width="24" 
-      height="24" 
-      viewBox="0 0 24 24" 
-      fill="none" 
-      stroke="currentColor" 
-      strokeWidth="2" 
-      strokeLinecap="round" 
-      strokeLinejoin="round"
-    >
-      <circle cx="12" cy="12" r="10" />
-      <path d="m9 12 2 2 4-4" />
-    </svg>
-  );
-}
 
 export default Home;

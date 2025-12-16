@@ -65,7 +65,7 @@ const Restore: React.FC = () => {
     setShowPayment(true);
   };
 
-  const handlePaymentSuccess = (method: string) => {
+  const handlePaymentSuccess = (method: string, amount: number, itemDescription: string) => {
     setShowPayment(false);
     if (restoredUrl) {
       // Register order in admin panel
@@ -73,10 +73,11 @@ const Restore: React.FC = () => {
         id: `ORD-${Date.now().toString().slice(-6)}`,
         customerName: 'Cliente Visitante',
         date: new Date().toISOString(),
-        amount: 4.00,
+        amount: amount,
         status: 'completed',
         imageUrl: restoredUrl,
-        paymentMethod: method
+        paymentMethod: method,
+        items: itemDescription
       });
 
       // Create temporary link to download
@@ -195,7 +196,7 @@ const Restore: React.FC = () => {
                         className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium shadow-lg hover:shadow-green-500/30 transition-all flex items-center gap-2 animate-bounce"
                       >
                         <Download className="h-5 w-5" />
-                        Baixar Imagem (4€)
+                        Obter Imagem
                       </button>
                     )}
                   </div>
@@ -210,7 +211,6 @@ const Restore: React.FC = () => {
         isOpen={showPayment} 
         onClose={() => setShowPayment(false)} 
         onSuccess={handlePaymentSuccess}
-        price="4,00 €"
       />
     </div>
   );

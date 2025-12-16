@@ -21,6 +21,15 @@ export interface RestoredImage {
   restoredUrl: string;
 }
 
+export interface PricingTier {
+  id: string;
+  photos: number;
+  price: number;
+  label: string;
+  popular?: boolean;
+  savings?: string;
+}
+
 // Admin & Store Types
 export interface Order {
   id: string;
@@ -30,6 +39,7 @@ export interface Order {
   status: 'completed' | 'pending' | 'refunded';
   imageUrl?: string;
   paymentMethod?: string;
+  items?: string; // Descrição do que foi comprado (ex: 5 fotos)
 }
 
 export interface PaymentMethod {

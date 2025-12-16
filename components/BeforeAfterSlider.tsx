@@ -10,6 +10,7 @@ interface BeforeAfterSliderProps {
 const BeforeAfterSlider: React.FC<BeforeAfterSliderProps> = ({ beforeImage, afterImage, className = '' }) => {
   const [sliderPosition, setSliderPosition] = useState(50);
   const [isDragging, setIsDragging] = useState(false);
+  const [imageError, setImageError] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const handleMove = useCallback((clientX: number) => {
@@ -32,8 +33,7 @@ const BeforeAfterSlider: React.FC<BeforeAfterSliderProps> = ({ beforeImage, afte
   };
 
   const handleInteractionStart = () => setIsDragging(true);
-  const handleInteractionEnd = () => setIsDragging(false);
-
+  
   // Stop dragging if mouse leaves window or is released anywhere
   useEffect(() => {
     const handleGlobalMouseUp = () => setIsDragging(false);
@@ -44,6 +44,10 @@ const BeforeAfterSlider: React.FC<BeforeAfterSliderProps> = ({ beforeImage, afte
       window.removeEventListener('touchend', handleGlobalMouseUp);
     };
   }, []);
+
+  // Fallbacks em caso de erro (ex: utilizador ainda não criou os ficheiros locais)
+  const currentBefore = imageError ? "https://images.unsplash.com/photo-1550948537-130a1ce83314?q=80&w=800&auto=format&fit=crop&sat=-100" : beforeImage;
+  const currentAfter = imageError ? "https://images.unsplash.com/photo-1550948537-130a1ce83314?q=80&w=800&auto=format&fit=crop" : afterImage;
 
   return (
     <div 
@@ -56,10 +60,11 @@ const BeforeAfterSlider: React.FC<BeforeAfterSliderProps> = ({ beforeImage, afte
     >
       {/* After Image (Background - Full Color/Restored) */}
       <img 
-        src={afterImage} 
+        src={currentAfter} 
         alt="Depois" 
         className="absolute top-0 left-0 w-full h-full object-cover pointer-events-none" 
         draggable={false}
+        onError={() => setImageError(true)}
       />
       
       {/* Label After */}
@@ -73,11 +78,12 @@ const BeforeAfterSlider: React.FC<BeforeAfterSliderProps> = ({ beforeImage, afte
         style={{ width: `${sliderPosition}%` }}
       >
         <img 
-          src={beforeImage} 
+          src={currentBefore} 
           alt="Antes" 
           className="absolute top-0 left-0 max-w-none h-full object-cover"
           style={{ width: containerRef.current?.offsetWidth || '100%' }}
           draggable={false}
+          onError={() => setImageError(true)}
         />
         {/* Label Before */}
         <div className="absolute top-4 left-4 bg-black/50 backdrop-blur-sm text-white text-xs font-bold px-2 py-1 rounded z-10">

@@ -1,6 +1,7 @@
+
 import React, { useState } from 'react';
-import { Outlet, NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, ShoppingCart, Settings, LogOut, Wand2, Lock } from 'lucide-react';
+import { Outlet, NavLink } from 'react-router-dom';
+import { LayoutDashboard, ShoppingCart, Settings, LogOut, Wand2, Lock, Package, Users, PieChart, ShieldCheck } from 'lucide-react';
 import { useConfig } from '../../contexts/ConfigContext';
 
 const AdminLayout: React.FC = () => {
@@ -54,54 +55,61 @@ const AdminLayout: React.FC = () => {
     );
   }
 
+  const navItemClass = ({ isActive }: { isActive: boolean }) => 
+    `flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-sm font-medium ${isActive ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`;
+
   return (
     <div className="min-h-screen bg-slate-100 flex">
       {/* Sidebar */}
-      <aside className="w-64 bg-slate-900 text-white flex-shrink-0 flex flex-col">
+      <aside className="w-64 bg-slate-900 text-white flex-shrink-0 flex flex-col shadow-xl z-10">
         <div className="p-6 flex items-center gap-2 border-b border-slate-800">
           <Wand2 className="h-6 w-6 text-indigo-400" />
           <span className="font-bold text-lg">{config.storeName}</span>
         </div>
         
-        <nav className="flex-1 p-4 space-y-2">
-          <NavLink
-            to="/admin"
-            end
-            className={({ isActive }) => `flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${isActive ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`}
-          >
-            <LayoutDashboard className="h-5 w-5" />
-            Dashboard
+        <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+          <p className="px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 mt-2">Visão Geral</p>
+          <NavLink to="/admin" end className={navItemClass}>
+            <LayoutDashboard className="h-4 w-4" /> Dashboard
           </NavLink>
-          <NavLink
-            to="/admin/orders"
-            className={({ isActive }) => `flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${isActive ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`}
-          >
-            <ShoppingCart className="h-5 w-5" />
-            Encomendas
+          <NavLink to="/admin/financials" className={navItemClass}>
+            <PieChart className="h-4 w-4" /> Finanças
           </NavLink>
-          <NavLink
-            to="/admin/settings"
-            className={({ isActive }) => `flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${isActive ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`}
-          >
-            <Settings className="h-5 w-5" />
-            Loja & Menus
+
+          <p className="px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 mt-6">Gestão</p>
+          <NavLink to="/admin/orders" className={navItemClass}>
+            <ShoppingCart className="h-4 w-4" /> Encomendas
+          </NavLink>
+          <NavLink to="/admin/products" className={navItemClass}>
+            <Package className="h-4 w-4" /> Produtos (Bundles)
+          </NavLink>
+          <NavLink to="/admin/customers" className={navItemClass}>
+            <Users className="h-4 w-4" /> Clientes
+          </NavLink>
+
+          <p className="px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 mt-6">Sistema</p>
+          <NavLink to="/admin/settings" className={navItemClass}>
+            <Settings className="h-4 w-4" /> Loja & API
+          </NavLink>
+          <NavLink to="/admin/security" className={navItemClass}>
+            <ShieldCheck className="h-4 w-4" /> Segurança
           </NavLink>
         </nav>
 
         <div className="p-4 border-t border-slate-800">
           <button
             onClick={logout}
-            className="flex items-center gap-3 px-4 py-3 w-full text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
+            className="flex items-center gap-3 px-4 py-3 w-full text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors text-sm"
           >
-            <LogOut className="h-5 w-5" />
+            <LogOut className="h-4 w-4" />
             Sair
           </button>
         </div>
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-auto">
-        <div className="p-8">
+      <main className="flex-1 overflow-auto bg-slate-100">
+        <div className="p-8 max-w-7xl mx-auto">
           <Outlet />
         </div>
       </main>

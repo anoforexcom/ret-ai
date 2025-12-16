@@ -1,22 +1,16 @@
+
 import React, { useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Upload, Wand2, Download, Zap, Heart, Shield, CheckCircle2, ChevronLeft, ChevronRight, Star } from 'lucide-react';
 import { useConfig } from '../contexts/ConfigContext';
 import BeforeAfterSlider from '../components/BeforeAfterSlider';
-import { PricingTier } from '../types';
 
 const Home: React.FC = () => {
   const { config } = useConfig();
   const carouselRef = useRef<HTMLDivElement>(null);
-
-  // Definição dos Bundles
-  const pricingTiers: PricingTier[] = [
-    { id: 'single', photos: 1, price: 4, label: 'Uma Foto', savings: '' },
-    { id: 'pack5', photos: 5, price: 10, label: 'Pack Mini', savings: 'Poupe 50%', popular: true },
-    { id: 'pack12', photos: 12, price: 20, label: 'Pack Família', savings: '1.66€ / foto' },
-    { id: 'pack25', photos: 25, price: 40, label: 'Pack Álbum', savings: '1.60€ / foto' },
-    { id: 'pack100', photos: 100, price: 50, label: 'Pack Estúdio', savings: 'Melhor Valor: 0.50€ / foto' },
-  ];
+  
+  // Usar bundles da configuração global e filtrar apenas os ativos
+  const activeBundles = config.bundles.filter(b => b.active);
 
   const scrollCarousel = (direction: 'left' | 'right') => {
     if (carouselRef.current) {
@@ -92,10 +86,6 @@ const Home: React.FC = () => {
             <div className="flex-1 w-full max-w-lg lg:max-w-xl relative z-10">
               <div className="relative rounded-2xl overflow-hidden shadow-2xl border-4 border-slate-800/50 transform rotate-1 hover:rotate-0 transition-transform duration-500">
                 <div className="aspect-[3/4]">
-                   {/* 
-                      IMPORTANTE: Certifique-se de que os arquivos 'casal-antes.jpg' e 'casal-depois.jpg'
-                      estão na pasta 'public' na raiz do seu projeto.
-                   */}
                    <BeforeAfterSlider 
                       beforeImage="/casal-antes.jpg"
                       afterImage="/casal-depois.jpg"
@@ -193,7 +183,7 @@ const Home: React.FC = () => {
               className="flex gap-6 overflow-x-auto snap-x snap-mandatory pb-8 px-4 scrollbar-hide"
               style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
             >
-              {pricingTiers.map((tier) => (
+              {activeBundles.map((tier) => (
                 <div 
                   key={tier.id}
                   className={`flex-none w-80 snap-center relative bg-white text-slate-900 rounded-2xl shadow-xl overflow-hidden transform transition-transform hover:scale-105 duration-300 ${

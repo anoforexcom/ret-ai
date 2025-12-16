@@ -1,31 +1,23 @@
+
 import React, { useState, useEffect } from 'react';
 import { X, Lock, CreditCard, Smartphone, Wallet, Package, Check } from 'lucide-react';
 import { useConfig } from '../contexts/ConfigContext';
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
-import { PricingTier } from '../types';
 
 interface PaymentModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: (method: string, amount: number, itemDescription: string) => void;
-  defaultPrice?: number; // Opcional, agora usamos tiers
+  defaultPrice?: number;
 }
-
-const pricingTiers: PricingTier[] = [
-  { id: 'single', photos: 1, price: 4, label: '1 Foto' },
-  { id: 'pack5', photos: 5, price: 10, label: '5 Fotos', savings: '-50%' },
-  { id: 'pack12', photos: 12, price: 20, label: '12 Fotos', savings: '-58%' },
-  { id: 'pack25', photos: 25, price: 40, label: '25 Fotos', savings: '-60%' },
-  { id: 'pack100', photos: 100, price: 50, label: '100 Fotos', savings: '-87%' },
-];
 
 const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onSuccess }) => {
   const { config } = useConfig();
+  const activeBundles = config.bundles.filter(b => b.active);
   const enabledMethods = config.paymentMethods.filter(m => m.enabled);
-  const [selectedMethod, setSelectedMethod] = useState<string>(enabledMethods[0]?.id || '');
   
-  // State for bundle selection
-  const [selectedTierId, setSelectedTierId] = useState<string>('single');
+  const [selectedMethod, setSelectedMethod] = useState<string>(enabledMethods[0]?.id || '');
+  const [selectedTierId, setSelectedTierId] = useState<string>('');
   
   const [isProcessing, setIsProcessing] = useState(false);
   const [cardNumber, setCardNumber] = useState('');
@@ -34,17 +26,22 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onSuccess 
   const [mbWayPhone, setMbWayPhone] = useState('');
   const [mbWaySent, setMbWaySent] = useState(false);
 
-  const selectedTier = pricingTiers.find(t => t.id === selectedTierId) || pricingTiers[0];
+  useEffect(() => {
+    if (activeBundles.length > 0 && !selectedTierId) {
+        setSelectedTierId(activeBundles[0].id);
+    }
+  }, [activeBundles, selectedTierId]);
+
+  const selectedTier = activeBundles.find(t => t.id === selectedTierId) || activeBundles[0];
 
   useEffect(() => {
     if (isOpen) {
-      // Reset states when opening
       setMbWaySent(false);
       setIsProcessing(false);
     }
   }, [isOpen]);
 
-  if (!isOpen) return null;
+  if (!isOpen || !selectedTier) return null;
 
   const handleSimulationSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -107,8 +104,8 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onSuccess 
                     <Package className="h-4 w-4" /> Resumo do Pedido
                 </h4>
                 
-                <div className="space-y-3 mb-6">
-                    {pricingTiers.map(tier => (
+                <div className="space-y-3 mb-6 max-h-60 overflow-y-auto pr-1">
+                    {activeBundles.map(tier => (
                         <div 
                             key={tier.id}
                             onClick={() => setSelectedTierId(tier.id)}

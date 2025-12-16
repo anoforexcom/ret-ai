@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 import { ConfigProvider } from './contexts/ConfigContext';
@@ -17,6 +18,10 @@ import AdminLayout from './pages/admin/AdminLayout';
 import Dashboard from './pages/admin/Dashboard';
 import Orders from './pages/admin/Orders';
 import StoreSettings from './pages/admin/StoreSettings';
+import Products from './pages/admin/Products';
+import Customers from './pages/admin/Customers';
+import Financials from './pages/admin/Financials';
+import Security from './pages/admin/Security';
 
 function App() {
   return (
@@ -24,11 +29,15 @@ function App() {
       <Router>
         <div className="flex flex-col min-h-screen">
           <Routes>
-            {/* Admin Routes - Rendered without Header/Footer of main site ideally, but for simplicity we hide them via layout or CSS in AdminLayout */}
+            {/* Admin Routes */}
             <Route path="/admin" element={<AdminLayout />}>
               <Route index element={<Dashboard />} />
               <Route path="orders" element={<Orders />} />
               <Route path="settings" element={<StoreSettings />} />
+              <Route path="products" element={<Products />} />
+              <Route path="customers" element={<Customers />} />
+              <Route path="financials" element={<Financials />} />
+              <Route path="security" element={<Security />} />
             </Route>
 
             {/* Public Routes */}

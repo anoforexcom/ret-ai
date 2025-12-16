@@ -1,18 +1,29 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { StoreConfig, Order, NavigationLink, PaymentMethod } from '../types';
+import { StoreConfig, Order, NavigationLink, ProductBundle, AuditLog } from '../types';
 import { db } from '../firebaseConfig';
 import { collection, addDoc, onSnapshot, query, orderBy, updateDoc, doc } from 'firebase/firestore';
 
 interface ConfigContextType {
   config: StoreConfig;
   orders: Order[];
+  auditLogs: AuditLog[];
   updateConfig: (newConfig: Partial<StoreConfig>) => void;
   addOrder: (order: Order) => void;
   updateOrder: (id: string, status: Order['status']) => void;
+  addAuditLog: (action: string, details: string) => void;
   isAdmin: boolean;
   login: () => void;
   logout: () => void;
 }
+
+const defaultBundles: ProductBundle[] = [
+  { id: 'single', photos: 1, price: 4, label: 'Uma Foto', savings: '', active: true },
+  { id: 'pack5', photos: 5, price: 10, label: 'Pack Mini', savings: 'Poupe 50%', popular: true, active: true },
+  { id: 'pack12', photos: 12, price: 20, label: 'Pack Família', savings: '1.66€ / foto', active: true },
+  { id: 'pack25', photos: 25, price: 40, label: 'Pack Álbum', savings: '1.60€ / foto', active: true },
+  { id: 'pack100', photos: 100, price: 50, label: 'Pack Estúdio', savings: 'Melhor Valor', active: true },
+];
 
 const defaultStats: StoreConfig = {
   storeName: 'RetroColor AI',
@@ -36,8 +47,9 @@ const defaultStats: StoreConfig = {
     { id: 'mbway', name: 'MB Way', enabled: true, type: 'mbway' },
     { id: 'paypal', name: 'PayPal', enabled: true, type: 'paypal' },
   ],
+  bundles: defaultBundles,
   apiKeys: {
-    paypalClientId: '', // Vazio por defeito
+    paypalClientId: '', 
   }
 };
 
@@ -47,10 +59,18 @@ export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   // Configuração Local
   const [config, setConfig] = useState<StoreConfig>(() => {
     const saved = localStorage.getItem('retro_config');
-    return saved ? { ...defaultStats, ...JSON.parse(saved) } : defaultStats;
+    // Merge deep para garantir que novos campos (como bundles) apareçam mesmo se o utilizador tiver config antiga
+    if (saved) {
+        const parsed = JSON.parse(saved);
+        return { ...defaultStats, ...parsed, bundles: parsed.bundles || defaultStats.bundles };
+    }
+    return defaultStats;
   });
 
   const [orders, setOrders] = useState<Order[]>([]);
+  const [auditLogs, setAuditLogs] = useState<AuditLog[]>([
+      { id: '1', action: 'System Init', user: 'System', date: new Date().toISOString(), details: 'Dashboard initialized' }
+  ]);
   const [isAdmin, setIsAdmin] = useState(false);
 
   // Guardar config localmente quando muda
@@ -60,10 +80,10 @@ export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   // Sincronizar Encomendas com o Firebase Firestore (Tempo Real)
   useEffect(() => {
-    // Se a DB não estiver configurada (Modo Demo/Local), não fazer nada no Firebase
     if (!db) {
         setOrders([
-            { id: 'DEMO-001', customerName: 'Modo Local (Sem Firebase)', date: new Date().toISOString(), amount: 0.00, status: 'pending', paymentMethod: 'N/A' }
+            { id: 'DEMO-001', customerName: 'João Silva', customerEmail: 'joao@exemplo.com', date: new Date(Date.now() - 86400000).toISOString(), amount: 10.00, status: 'completed', paymentMethod: 'MB Way', items: 'Pack Mini' },
+            { id: 'DEMO-002', customerName: 'Maria Santos', customerEmail: 'maria@exemplo.com', date: new Date().toISOString(), amount: 4.00, status: 'pending', paymentMethod: 'Cartão', items: 'Uma Foto' }
         ]);
         return;
     }
@@ -78,7 +98,6 @@ export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             setOrders(ordersData);
         }, (error) => {
             console.error("Erro ao ler dados do Firebase:", error);
-            // Fallback silencioso para não incomodar o utilizador
         });
         return () => unsubscribe();
     } catch (e) {
@@ -88,25 +107,24 @@ export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   const updateConfig = (newConfig: Partial<StoreConfig>) => {
     setConfig(prev => ({ ...prev, ...newConfig }));
+    addAuditLog("Update Config", `Updated fields: ${Object.keys(newConfig).join(', ')}`);
   };
 
   const addOrder = async (order: Order) => {
     if (db) {
         try {
-            // Remove o ID manual, o Firestore cria um automático
             const { id, ...orderData } = order; 
             await addDoc(collection(db, 'orders'), orderData);
-            return; // Sucesso, o onSnapshot atualiza a UI
+            return; 
         } catch (e) {
             console.error("Erro ao adicionar encomenda ao Firebase:", e);
         }
     }
-    
-    // Fallback: Adicionar localmente se Firebase falhar ou não existir
     setOrders(prev => [order, ...prev]);
   };
 
   const updateOrder = async (id: string, status: Order['status']) => {
+    addAuditLog("Update Order", `Order #${id} status changed to ${status}`);
     if (db) {
         try {
             const orderRef = doc(db, 'orders', id);
@@ -116,16 +134,32 @@ export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             console.error("Erro ao atualizar encomenda no Firebase:", e);
         }
     }
-    
-    // Fallback local
     setOrders(prev => prev.map(o => o.id === id ? { ...o, status } : o));
   };
 
-  const login = () => setIsAdmin(true);
-  const logout = () => setIsAdmin(false);
+  const addAuditLog = (action: string, details: string) => {
+      const newLog: AuditLog = {
+          id: Date.now().toString(),
+          action,
+          details,
+          date: new Date().toISOString(),
+          user: isAdmin ? 'Admin' : 'System/User'
+      };
+      setAuditLogs(prev => [newLog, ...prev.slice(0, 49)]); // Manter apenas os últimos 50
+  };
+
+  const login = () => {
+      setIsAdmin(true);
+      addAuditLog("Login", "Admin logged in");
+  };
+  
+  const logout = () => {
+      setIsAdmin(false);
+      addAuditLog("Logout", "Admin logged out");
+  };
 
   return (
-    <ConfigContext.Provider value={{ config, orders, updateConfig, addOrder, updateOrder, isAdmin, login, logout }}>
+    <ConfigContext.Provider value={{ config, orders, auditLogs, updateConfig, addOrder, updateOrder, addAuditLog, isAdmin, login, logout }}>
       {children}
     </ConfigContext.Provider>
   );

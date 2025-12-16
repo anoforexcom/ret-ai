@@ -1,3 +1,4 @@
+
 export enum AppStatus {
   IDLE = 'IDLE',
   PROCESSING = 'PROCESSING',
@@ -21,19 +22,22 @@ export interface RestoredImage {
   restoredUrl: string;
 }
 
-export interface PricingTier {
+export interface ProductBundle {
   id: string;
   photos: number;
   price: number;
   label: string;
+  description?: string;
   popular?: boolean;
   savings?: string;
+  active: boolean;
 }
 
 // Admin & Store Types
 export interface Order {
   id: string;
   customerName: string; // Simulação
+  customerEmail?: string; // Novo
   date: string;
   amount: number;
   status: 'completed' | 'pending' | 'refunded';
@@ -54,6 +58,14 @@ export interface StoreApiKeys {
   stripePublicKey?: string; // Para futuro uso
 }
 
+export interface AuditLog {
+  id: string;
+  action: string;
+  user: string;
+  date: string;
+  details: string;
+}
+
 export interface StoreConfig {
   storeName: string;
   heroTitle: string;
@@ -62,6 +74,7 @@ export interface StoreConfig {
   mainMenu: NavigationLink[];
   footerMenu: NavigationLink[];
   paymentMethods: PaymentMethod[];
+  bundles: ProductBundle[]; // Novo: Bundles dinâmicos
   apiKeys: StoreApiKeys;
 }
 

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Wand2 } from 'lucide-react';
@@ -24,7 +25,7 @@ const Footer: React.FC = () => {
             <h3 className="text-sm font-semibold text-white tracking-wider uppercase mb-4">Produto</h3>
             <ul className="space-y-3">
               <li><Link to="/restore" className="text-sm hover:text-white transition-colors">Restaurar Foto</Link></li>
-              <li><Link to="/#pricing" className="text-sm hover:text-white transition-colors">Preços</Link></li>
+              <li><Link to="/pricing" className="text-sm hover:text-white transition-colors">Preços</Link></li>
               <li><Link to="/faq" className="text-sm hover:text-white transition-colors">Perguntas Frequentes</Link></li>
             </ul>
           </div>

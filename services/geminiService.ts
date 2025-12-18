@@ -1,12 +1,14 @@
+
 import { GoogleGenAI } from "@google/genai";
 
-// Helper to convert file to base64
+/**
+ * Converte um ficheiro para uma string base64 sem o prefixo de URL de dados.
+ */
 export const fileToGenerativePart = async (file: File): Promise<string> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onloadend = () => {
       const base64String = reader.result as string;
-      // Remove data url prefix (e.g. "data:image/jpeg;base64,")
       const base64Data = base64String.split(',')[1];
       resolve(base64Data);
     };
@@ -15,23 +17,15 @@ export const fileToGenerativePart = async (file: File): Promise<string> => {
   });
 };
 
+/**
+ * Envia uma foto antiga para o Gemini para ser restaurada e colorida.
+ * Utiliza o modelo gemini-2.5-flash-image para edição de imagem.
+ */
 export const restoreImage = async (file: File): Promise<string> => {
   try {
-    // Agora usamos a chave diretamente no cliente para facilitar (sem backend)
-    const apiKey = process.env.API_KEY;
-    
-    if (!apiKey || apiKey.includes("INSIRA_A_SUA_CHAVE")) {
-        throw new Error("Chave de API não configurada. Edite o ficheiro .env com a sua chave da Google AI.");
-    }
-
-    // Validação extra: Chaves da Google geralmente começam com AIzaSy
-    if (!apiKey.startsWith("AIzaSy")) {
-         throw new Error("A chave de API parece incorreta (deve começar por 'AIzaSy'). Verifique se copiou a chave completa no Google AI Studio e não apenas o nome do projeto.");
-    }
-
-    const ai = new GoogleGenAI({ apiKey });
-    
-    // Converter ficheiro para base64
+    // Create a new GoogleGenAI instance right before making an API call
+    // The API key is obtained exclusively from process.env.API_KEY
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY as string });
     const base64Data = await fileToGenerativePart(file);
 
     const response = await ai.models.generateContent({
@@ -45,16 +39,17 @@ export const restoreImage = async (file: File): Promise<string> => {
             },
           },
           {
-            text: 'Restore this old photo. Remove scratches, noise, and blur. Colorize it to make it look like a high-quality modern photo with natural, vibrant colors. Return ONLY the image.',
+            text: 'Restore this old photo. Remove scratches, noise, and digital artifacts. Enhance clarity and sharpness. Colorize it with natural, realistic colors appropriate for the scene. Preserve the historical essence while making it look like a high-quality modern photograph. Return ONLY the restored image.',
           },
         ],
       },
     });
 
     let restoredUrl = null;
+    
+    // O modelo gemini-2.5-flash-image retorna a imagem dentro de candidates[0].content.parts
     if (response.candidates && response.candidates.length > 0) {
-      const parts = response.candidates[0].content.parts;
-      for (const part of parts) {
+      for (const part of response.candidates[0].content.parts) {
         if (part.inlineData && part.inlineData.data) {
           restoredUrl = `data:image/png;base64,${part.inlineData.data}`;
           break;
@@ -63,20 +58,18 @@ export const restoreImage = async (file: File): Promise<string> => {
     }
 
     if (!restoredUrl) {
-       throw new Error("A IA não conseguiu gerar a imagem. Tente novamente.");
+      // Accessing .text property directly (not as a method)
+      const textOutput = response.text;
+      if (textOutput) {
+        throw new Error(`A IA não conseguiu processar a imagem: ${textOutput}`);
+      }
+      throw new Error("Não foi possível gerar a imagem restaurada.");
     }
 
     return restoredUrl;
 
   } catch (error: any) {
-    console.error("Service Error:", error);
-    
-    let msg = error.message || "Falha ao restaurar a imagem. Tente novamente.";
-    // Melhorar mensagens para erros comuns
-    if (msg.includes("403") || msg.includes("API key")) {
-        msg = "Chave de API inválida ou expirada. Verifique o ficheiro .env.";
-    }
-    
-    throw new Error(msg);
+    console.error("Erro no Serviço de Restauração:", error);
+    throw new Error(error.message || "Falha ao restaurar a imagem.");
   }
 };

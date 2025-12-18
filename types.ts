@@ -22,6 +22,16 @@ export interface RestoredImage {
   restoredUrl: string;
 }
 
+export interface Testimonial {
+  id: string;
+  name: string;
+  location: string;
+  text: string;
+  rating: number;
+  avatarUrl?: string;
+  date: string;
+}
+
 export interface ProductBundle {
   id: string;
   photos: number;
@@ -33,29 +43,48 @@ export interface ProductBundle {
   active: boolean;
 }
 
+export interface Expense {
+  id: string;
+  date: string;
+  category: 'api' | 'marketing' | 'infra' | 'outro';
+  amount: number;
+  description: string;
+}
+
+export interface ThemeConfig {
+  primaryColor: string;
+  secondaryColor: string;
+  borderRadius: '0px' | '4px' | '8px' | '16px' | '24px';
+  fontFamily: 'Inter' | 'serif' | 'mono' | 'sans-serif';
+}
+
 // Admin & Store Types
 export interface Order {
   id: string;
-  customerName: string; // Simulação
-  customerEmail?: string; // Novo
+  customerName: string; 
+  customerEmail?: string; 
   date: string;
   amount: number;
   status: 'completed' | 'pending' | 'refunded';
   imageUrl?: string;
   paymentMethod?: string;
-  items?: string; // Descrição do que foi comprado (ex: 5 fotos)
+  items?: string; 
 }
 
 export interface PaymentMethod {
   id: string;
   name: string;
   enabled: boolean;
-  type: 'card' | 'paypal' | 'mbway';
+  type: 'card' | 'paypal' | 'mbway' | 'stripe' | 'multibanco' | 'apple_pay';
+  provider: 'stripe' | 'paypal' | 'sibs' | 'manual' | 'adyen';
+  apiKey?: string;
+  clientId?: string;
+  environment?: 'sandbox' | 'live';
 }
 
 export interface StoreApiKeys {
   paypalClientId?: string;
-  stripePublicKey?: string; // Para futuro uso
+  stripePublicKey?: string; 
 }
 
 export interface AuditLog {
@@ -74,12 +103,15 @@ export interface StoreConfig {
   mainMenu: NavigationLink[];
   footerMenu: NavigationLink[];
   paymentMethods: PaymentMethod[];
-  bundles: ProductBundle[]; // Novo: Bundles dinâmicos
+  bundles: ProductBundle[]; 
+  testimonials: Testimonial[];
+  expenses: Expense[];
   apiKeys: StoreApiKeys;
+  theme: ThemeConfig;
 }
 
 export interface DashboardStats {
   totalRevenue: number;
   totalOrders: number;
-  visitorsToday: number; // Simulado
+  visitorsToday: number; 
 }

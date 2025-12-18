@@ -25,9 +25,10 @@ export const restoreImage = async (file: File): Promise<string> => {
   try {
     // Create a new GoogleGenAI instance right before making an API call
     // The API key is obtained exclusively from process.env.API_KEY
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY as string });
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const base64Data = await fileToGenerativePart(file);
 
+    // Call generateContent with both model name and prompt directly
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash-image',
       contents: {
@@ -45,9 +46,10 @@ export const restoreImage = async (file: File): Promise<string> => {
       },
     });
 
-    let restoredUrl = null;
+    let restoredUrl: string | null = null;
     
-    // O modelo gemini-2.5-flash-image retorna a imagem dentro de candidates[0].content.parts
+    // The gemini-2.5-flash-image model returns output in candidates[0].content.parts
+    // Iterate through parts to find the image part as per world-class guidelines
     if (response.candidates && response.candidates.length > 0) {
       for (const part of response.candidates[0].content.parts) {
         if (part.inlineData && part.inlineData.data) {

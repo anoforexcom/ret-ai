@@ -58,6 +58,17 @@ export interface ThemeConfig {
   fontFamily: 'Inter' | 'serif' | 'mono' | 'sans-serif';
 }
 
+export type MemberRole = 'owner' | 'admin' | 'manager' | 'viewer';
+
+export interface StoreMember {
+  id: string;
+  name: string;
+  email: string;
+  role: MemberRole;
+  status: 'active' | 'invited';
+  addedAt: string;
+}
+
 // Admin & Store Types
 export interface Order {
   id: string;
@@ -106,6 +117,7 @@ export interface StoreConfig {
   bundles: ProductBundle[]; 
   testimonials: Testimonial[];
   expenses: Expense[];
+  members: StoreMember[];
   apiKeys: StoreApiKeys;
   theme: ThemeConfig;
 }

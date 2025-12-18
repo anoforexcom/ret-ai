@@ -1,18 +1,9 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { StoreConfig, Order, NavigationLink, ProductBundle, AuditLog, Testimonial, Expense, ThemeConfig, PaymentMethod } from '../types';
+import { StoreConfig, Order, NavigationLink, ProductBundle, AuditLog, Testimonial, Expense, ThemeConfig, PaymentMethod, StoreMember } from '../types';
 import { db } from '../firebaseConfig';
-import { 
-  collection, 
-  query, 
-  orderBy, 
-  onSnapshot, 
-  addDoc, 
-  updateDoc, 
-  doc,
-  DocumentData,
-  QuerySnapshot
-} from 'firebase/firestore';
+
+const ConfigContext = createContext<ConfigContextType | undefined>(undefined);
 
 interface ConfigContextType {
   config: StoreConfig;
@@ -69,6 +60,10 @@ const defaultPaymentMethods: PaymentMethod[] = [
   { id: 'paypal_std', name: 'PayPal', enabled: true, type: 'paypal', provider: 'paypal', environment: 'sandbox' },
 ];
 
+const defaultMembers: StoreMember[] = [
+  { id: 'm1', name: 'Administrador Principal', email: 'admin@retrocolor.ai', role: 'owner', status: 'active', addedAt: '2024-01-01T00:00:00.000Z' }
+];
+
 const defaultStats: StoreConfig = {
   storeName: 'RetroColor AI',
   heroTitle: 'Traga as suas memórias antigas de volta à vida',
@@ -91,6 +86,7 @@ const defaultStats: StoreConfig = {
   bundles: defaultBundles,
   testimonials: defaultTestimonials,
   expenses: [],
+  members: defaultMembers,
   apiKeys: {
     paypalClientId: '', 
   },
@@ -106,13 +102,9 @@ const ConfigContext = createContext<ConfigContextType | undefined>(undefined);
 
 export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [config, setConfig] = useState<StoreConfig>(() => {
-    const saved = localStorage.getItem('retro_config_v7');
+    const saved = localStorage.getItem('retro_config_v9');
     if (saved) {
         const parsed = JSON.parse(saved);
-        // Migração para novos campos de pagamento se necessário
-        if (parsed.paymentMethods && parsed.paymentMethods.length > 0 && !parsed.paymentMethods[0].provider) {
-           parsed.paymentMethods = defaultPaymentMethods;
-        }
         return { ...defaultStats, ...parsed };
     }
     return defaultStats;
@@ -123,16 +115,18 @@ export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    localStorage.setItem('retro_config_v7', JSON.stringify(config));
+    localStorage.setItem('retro_config_v9', JSON.stringify(config));
   }, [config]);
 
+  // Using namespaced (v8) Firebase syntax to resolve modular import errors
   useEffect(() => {
     if (!db) return;
     try {
-        const q = query(collection(db, 'orders'), orderBy('date', 'desc'));
-        const unsubscribe = onSnapshot(q, (querySnapshot: QuerySnapshot<DocumentData>) => {
+        const unsubscribe = db.collection('orders')
+          .orderBy('date', 'desc')
+          .onSnapshot((querySnapshot: any) => {
             const ordersData: Order[] = [];
-            querySnapshot.forEach((doc) => {
+            querySnapshot.forEach((doc: any) => {
                 ordersData.push({ id: doc.id, ...doc.data() } as Order);
             });
             setOrders(ordersData);
@@ -143,21 +137,23 @@ export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   const updateConfig = (newConfig: Partial<StoreConfig>) => setConfig(prev => ({ ...prev, ...newConfig }));
 
+  // Refactored to namespaced add call
   const addOrder = async (order: Order) => {
     if (db) {
         try {
             const { id, ...orderData } = order; 
-            await addDoc(collection(db, 'orders'), orderData);
+            await db.collection('orders').add(orderData);
         } catch (e) { console.error(e); }
     }
     setOrders(prev => [order, ...prev]);
   };
 
+  // Refactored to namespaced doc update call
   const updateOrder = async (id: string, status: Order['status']) => {
     if (db) {
         try {
-            const orderRef = doc(db, 'orders', id);
-            await updateDoc(orderRef, { status });
+            const orderRef = db.collection('orders').doc(id);
+            await orderRef.update({ status });
         } catch (e) { console.error(e); }
     }
     setOrders(prev => prev.map(o => o.id === id ? { ...o, status } : o));

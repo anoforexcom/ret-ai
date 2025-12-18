@@ -1,10 +1,10 @@
 
-import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getFirestore } from 'firebase/firestore';
-import { getAuth } from 'firebase/auth';
+// Use namespaced imports to resolve missing modular export errors
+import firebase from 'firebase/app';
+import 'firebase/firestore';
+import 'firebase/auth';
 
 // SUBSTITUA COM A SUA CONFIGURAÇÃO DO FIREBASE CONSOLE
-// (Vá a Project Settings > General > Your apps > SDK setup and configuration)
 const firebaseConfig = {
   apiKey: "SUA_API_KEY_AQUI",
   authDomain: "SEU_PROJETO.firebaseapp.com",
@@ -25,10 +25,11 @@ const isConfigured = firebaseConfig.apiKey !== "SUA_API_KEY_AQUI" &&
 
 if (isConfigured) {
   try {
-    const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
-    db = getFirestore(app);
-    auth = getAuth(app);
-    console.log("Firebase modular inicializado com sucesso.");
+    // Usando a sintaxe namespaced (v8) para compatibilidade com o ambiente
+    const app = firebase.apps.length === 0 ? firebase.initializeApp(firebaseConfig) : firebase.app();
+    db = app.firestore();
+    auth = app.auth();
+    console.log("Firebase inicializado com sucesso (Sintaxe Namespaced).");
   } catch (e) {
     console.error("Erro ao inicializar Firebase. A usar modo offline:", e);
     db = null;

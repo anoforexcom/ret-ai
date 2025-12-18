@@ -1,8 +1,8 @@
 
-// Use namespaced imports to resolve missing modular export errors
-import firebase from 'firebase/app';
-import 'firebase/firestore';
-import 'firebase/auth';
+// Use namespaced compat imports to resolve missing modular export errors in Firebase v9+
+import firebase from 'firebase/compat/app';
+import 'firebase/compat/firestore';
+import 'firebase/compat/auth';
 
 // SUBSTITUA COM A SUA CONFIGURAÇÃO DO FIREBASE CONSOLE
 const firebaseConfig = {
@@ -25,7 +25,8 @@ const isConfigured = firebaseConfig.apiKey !== "SUA_API_KEY_AQUI" &&
 
 if (isConfigured) {
   try {
-    // Usando a sintaxe namespaced (v8) para compatibilidade com o ambiente
+    // Usando a sintaxe namespaced (v8 compat) para compatibilidade com o ambiente
+    // Fix: Accessing apps, initializeApp, and app via compat layer
     const app = firebase.apps.length === 0 ? firebase.initializeApp(firebaseConfig) : firebase.app();
     db = app.firestore();
     auth = app.auth();

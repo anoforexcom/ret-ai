@@ -3,8 +3,6 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { StoreConfig, Order, NavigationLink, ProductBundle, AuditLog, Testimonial, Expense, ThemeConfig, PaymentMethod, StoreMember } from '../types';
 import { db } from '../firebaseConfig';
 
-const ConfigContext = createContext<ConfigContextType | undefined>(undefined);
-
 interface ConfigContextType {
   config: StoreConfig;
   orders: Order[];
@@ -17,6 +15,8 @@ interface ConfigContextType {
   login: () => void;
   logout: () => void;
 }
+
+const ConfigContext = createContext<ConfigContextType | undefined>(undefined);
 
 const defaultBundles: ProductBundle[] = [
   { id: 'single', photos: 1, price: 4, label: 'Uma Foto', savings: '', active: true },
@@ -98,8 +98,6 @@ const defaultStats: StoreConfig = {
   }
 };
 
-const ConfigContext = createContext<ConfigContextType | undefined>(undefined);
-
 export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [config, setConfig] = useState<StoreConfig>(() => {
     const saved = localStorage.getItem('retro_config_v9');
@@ -118,7 +116,6 @@ export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     localStorage.setItem('retro_config_v9', JSON.stringify(config));
   }, [config]);
 
-  // Using namespaced (v8) Firebase syntax to resolve modular import errors
   useEffect(() => {
     if (!db) return;
     try {
@@ -137,7 +134,6 @@ export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   const updateConfig = (newConfig: Partial<StoreConfig>) => setConfig(prev => ({ ...prev, ...newConfig }));
 
-  // Refactored to namespaced add call
   const addOrder = async (order: Order) => {
     if (db) {
         try {
@@ -148,7 +144,6 @@ export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     setOrders(prev => [order, ...prev]);
   };
 
-  // Refactored to namespaced doc update call
   const updateOrder = async (id: string, status: Order['status']) => {
     if (db) {
         try {

@@ -1,7 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-// Added Box to the list of icons imported from lucide-react
-import { X, Lock, CreditCard, Smartphone, Wallet, Package, Check, Apple, Box } from 'lucide-react';
+import { X, Lock, CreditCard, Smartphone, Wallet, Package, Check, Apple, Box, User, Mail, UserPlus, Coins, AlertCircle } from 'lucide-react';
 import { useConfig } from '../contexts/ConfigContext';
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import { PaymentMethod } from '../types';
@@ -14,20 +13,29 @@ interface PaymentModalProps {
 }
 
 const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onSuccess }) => {
-  const { config } = useConfig();
-  const activeBundles = config.bundles.filter(b => b.active);
-  const enabledMethods = config.paymentMethods.filter(m => m.enabled);
+  const { config, currentCustomer, registerCustomer, updateCustomerBalance } = useConfig();
   
-  const [selectedMethodId, setSelectedMethodId] = useState<string>(enabledMethods[0]?.id || '');
+  const activeBundles = config.bundles.filter(b => b.active);
+  const enabledMethods = config.paymentMethods.filter(m => {
+    // Apenas mostra saldo se o cliente estiver logado
+    if (m.type === 'balance') return !!currentCustomer;
+    return m.enabled;
+  });
+  
+  const [selectedMethodId, setSelectedMethodId] = useState<string>('');
   const [selectedTierId, setSelectedTierId] = useState<string>('');
   
+  // Guest Info
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [email, setEmail] = useState('');
+  const [shouldRegister, setShouldRegister] = useState(true);
+
   const [isProcessing, setIsProcessing] = useState(false);
-  const [cardNumber, setCardNumber] = useState('');
-  const [expiry, setExpiry] = useState('');
-  const [cvc, setCvc] = useState('');
   const [mbWayPhone, setMbWayPhone] = useState('');
   const [mbWaySent, setMbWaySent] = useState(false);
 
+  // Inicialização de Tiers
   useEffect(() => {
     if (activeBundles.length > 0 && !selectedTierId) {
         setSelectedTierId(activeBundles[0].id);
@@ -37,18 +45,54 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onSuccess 
   const selectedTier = activeBundles.find(t => t.id === selectedTierId) || activeBundles[0];
   const activeMethod = config.paymentMethods.find(m => m.id === selectedMethodId);
 
+  // Auto-seleção de método de pagamento (Prioridade ao Saldo)
+  useEffect(() => {
+    if (isOpen && enabledMethods.length > 0) {
+      const balanceMethod = enabledMethods.find(m => m.type === 'balance');
+      const hasEnoughBalance = currentCustomer && selectedTier && currentCustomer.balance >= selectedTier.price;
+      
+      if (hasEnoughBalance && balanceMethod) {
+        setSelectedMethodId(balanceMethod.id);
+      } else if (!selectedMethodId || !enabledMethods.find(m => m.id === selectedMethodId)) {
+        setSelectedMethodId(enabledMethods[0].id);
+      }
+    }
+  }, [isOpen, currentCustomer, selectedTier, enabledMethods, selectedMethodId]);
+
   useEffect(() => {
     if (isOpen) {
       setMbWaySent(false);
       setIsProcessing(false);
+      if (currentCustomer) {
+        setFirstName(currentCustomer.firstName);
+        setLastName(currentCustomer.lastName);
+        setEmail(currentCustomer.email);
+      }
     }
-  }, [isOpen]);
+  }, [isOpen, currentCustomer]);
 
   if (!isOpen || !selectedTier) return null;
 
-  const handleSimulationSubmit = (e: React.FormEvent) => {
+  const handleCheckoutSuccess = (methodName: string) => {
+    if (activeMethod?.type === 'balance' && currentCustomer) {
+      updateCustomerBalance(currentCustomer.id, -selectedTier.price);
+    } else if (!currentCustomer && shouldRegister && email && firstName) {
+      registerCustomer({ firstName, lastName, email });
+    }
+
+    onSuccess(methodName, selectedTier.price, selectedTier.label);
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (activeMethod?.type === 'balance') {
+      if (!currentCustomer || currentCustomer.balance < selectedTier.price) {
+        alert("Saldo insuficiente na conta para realizar esta operação.");
+        return;
+      }
+    }
+
     if (activeMethod?.type === 'mbway' && !mbWaySent) {
         setIsProcessing(true);
         setTimeout(() => {
@@ -58,21 +102,11 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onSuccess 
         return;
     }
 
-    if (activeMethod?.type === 'mbway' && mbWaySent) {
-         setIsProcessing(true);
-         setTimeout(() => {
-             setIsProcessing(false);
-             onSuccess(activeMethod.name, selectedTier.price, selectedTier.label);
-         }, 1500);
-         return;
-    }
-
-    // Card/Stripe Simulation or real logic would go here
     setIsProcessing(true);
     setTimeout(() => {
       setIsProcessing(false);
-      onSuccess(activeMethod?.name || 'Pagamento', selectedTier.price, selectedTier.label);
-    }, 2000);
+      handleCheckoutSuccess(activeMethod?.name || 'Pagamento');
+    }, 1800);
   };
 
   return (
@@ -84,12 +118,12 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onSuccess 
 
         <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
 
-        <div className="inline-block align-bottom bg-white rounded-3xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl w-full">
+        <div className="inline-block align-bottom bg-white rounded-3xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-3xl w-full">
           {/* Header */}
           <div className="bg-slate-50 px-6 py-4 border-b border-slate-100 flex justify-between items-center">
             <h3 className="text-lg leading-6 font-bold text-slate-900 flex items-center gap-2">
                <Lock className="h-5 w-5 text-indigo-600" />
-               Checkout Seguro
+               Finalizar Encomenda
             </h3>
             <button onClick={onClose} className="text-slate-400 hover:text-slate-500 transition-colors">
                 <X className="h-6 w-6" />
@@ -97,40 +131,86 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onSuccess 
           </div>
 
           <div className="flex flex-col md:flex-row">
-            {/* Left Side: Order Summary */}
+            {/* Left Side: Order & Identity */}
             <div className="bg-slate-50 p-6 md:w-5/12 border-r border-slate-100 flex flex-col">
-                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2">
-                    <Package className="h-4 w-4" /> Resumo
+                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                    <User className="h-4 w-4" /> Seus Dados
                 </h4>
                 
-                <div className="space-y-3 mb-6 flex-grow pr-1 overflow-y-auto max-h-[300px] scrollbar-hide">
+                <div className="space-y-3 mb-6">
+                   {!currentCustomer ? (
+                     <>
+                        <div className="grid grid-cols-2 gap-2">
+                          <input 
+                            type="text" 
+                            placeholder="Nome" 
+                            value={firstName} 
+                            onChange={e => setFirstName(e.target.value)}
+                            className="w-full px-3 py-2 text-sm bg-white border border-slate-200 rounded-lg outline-none focus:ring-1 focus:ring-indigo-500"
+                          />
+                          <input 
+                            type="text" 
+                            placeholder="Apelido" 
+                            value={lastName} 
+                            onChange={e => setLastName(e.target.value)}
+                            className="w-full px-3 py-2 text-sm bg-white border border-slate-200 rounded-lg outline-none focus:ring-1 focus:ring-indigo-500"
+                          />
+                        </div>
+                        <div className="relative">
+                          <Mail className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                          <input 
+                            type="email" 
+                            placeholder="Seu melhor email" 
+                            value={email} 
+                            onChange={e => setEmail(e.target.value)}
+                            className="w-full pl-9 pr-3 py-2 text-sm bg-white border border-slate-200 rounded-lg outline-none focus:ring-1 focus:ring-indigo-500"
+                          />
+                        </div>
+                        <label className="flex items-center gap-2 p-2 bg-indigo-50 rounded-lg cursor-pointer">
+                           <input 
+                            type="checkbox" 
+                            checked={shouldRegister} 
+                            onChange={e => setShouldRegister(e.target.checked)}
+                            className="rounded text-indigo-600"
+                           />
+                           <span className="text-[10px] font-bold text-indigo-700 flex items-center gap-1">
+                             <UserPlus className="h-3 w-3" /> CRIAR CONTA PARA ACEDER DEPOIS
+                           </span>
+                        </label>
+                     </>
+                   ) : (
+                     <div className="bg-white p-3 rounded-xl border border-indigo-100 flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-xs">
+                          {currentCustomer.firstName.charAt(0)}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                           <p className="text-xs font-bold text-slate-900 truncate">{currentCustomer.firstName} {currentCustomer.lastName}</p>
+                           <p className="text-[10px] text-slate-500 truncate">{currentCustomer.email}</p>
+                        </div>
+                     </div>
+                   )}
+                </div>
+
+                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                    <Package className="h-4 w-4" /> Seleção
+                </h4>
+                
+                <div className="space-y-2 mb-6 flex-grow overflow-y-auto max-h-[150px] scrollbar-hide">
                     {activeBundles.map(tier => (
                         <div 
                             key={tier.id}
                             onClick={() => setSelectedTierId(tier.id)}
-                            className={`relative p-4 rounded-2xl border-2 cursor-pointer transition-all ${
+                            className={`p-3 rounded-xl border-2 cursor-pointer transition-all ${
                                 selectedTierId === tier.id 
-                                ? 'bg-white border-indigo-600 shadow-lg shadow-indigo-500/10' 
-                                : 'bg-transparent border-slate-200 hover:border-indigo-300'
+                                ? 'bg-white border-indigo-600 shadow-sm' 
+                                : 'bg-transparent border-slate-200 hover:border-indigo-200'
                             }`}
                         >
                             <div className="flex justify-between items-center">
-                                <div>
-                                    <span className={`block font-bold text-sm ${selectedTierId === tier.id ? 'text-indigo-900' : 'text-slate-700'}`}>
-                                        {tier.label}
-                                    </span>
-                                    <span className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">
-                                        {(tier.price / tier.photos).toFixed(2)}€ / foto
-                                    </span>
-                                </div>
-                                <div className="text-right">
-                                    <span className="block font-bold text-slate-900">{tier.price}€</span>
-                                    {tier.savings && (
-                                        <span className="text-[9px] font-black text-green-600 bg-green-100 px-1.5 py-0.5 rounded-full uppercase">
-                                            {tier.savings}
-                                        </span>
-                                    )}
-                                </div>
+                                <span className={`text-xs font-bold ${selectedTierId === tier.id ? 'text-indigo-900' : 'text-slate-600'}`}>
+                                    {tier.label}
+                                </span>
+                                <span className="font-bold text-slate-900 text-xs">{tier.price}€</span>
                             </div>
                         </div>
                     ))}
@@ -139,7 +219,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onSuccess 
                 <div className="border-t border-slate-200 pt-4 mt-auto">
                     <div className="flex justify-between items-baseline">
                         <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total</span>
-                        <span className="text-3xl font-black text-slate-900">{selectedTier.price.toFixed(2)}€</span>
+                        <span className="text-2xl font-black text-slate-900">{selectedTier.price.toFixed(2)}€</span>
                     </div>
                 </div>
             </div>
@@ -147,168 +227,97 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onSuccess 
             {/* Right Side: Payment Methods */}
             <div className="p-6 md:w-7/12">
                 <div className="mb-6">
-                    <h4 className="text-sm font-bold text-slate-900 mb-4">Escolha o pagamento</h4>
-                    {enabledMethods.length > 0 ? (
-                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                            {enabledMethods.map(method => (
-                                <button
-                                    key={method.id}
-                                    onClick={() => {
-                                        setSelectedMethodId(method.id);
-                                        setMbWaySent(false);
-                                    }}
-                                    className={`flex flex-col items-center justify-center p-3 rounded-2xl border-2 transition-all ${
-                                        selectedMethodId === method.id 
-                                        ? 'border-indigo-600 bg-indigo-50 text-indigo-700 shadow-md ring-1 ring-indigo-600' 
-                                        : 'border-slate-100 hover:border-slate-300 text-slate-500'
-                                    }`}
-                                >
-                                    {method.type === 'card' && <CreditCard className="h-6 w-6 mb-1" />}
-                                    {method.type === 'mbway' && <Smartphone className="h-6 w-6 mb-1" />}
-                                    {method.type === 'paypal' && <Wallet className="h-6 w-6 mb-1" />}
-                                    {method.type === 'apple_pay' && <Apple className="h-6 w-6 mb-1" />}
-                                    {method.type === 'multibanco' && <Box className="h-6 w-6 mb-1" />}
-                                    <span className="text-[10px] font-bold text-center leading-tight">{method.name}</span>
-                                </button>
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="text-center text-red-500 p-4 bg-red-50 rounded-2xl text-xs font-medium border border-red-100">
-                            Nenhum método de pagamento disponível no momento.
-                        </div>
-                    )}
+                    <h4 className="text-sm font-bold text-slate-900 mb-4">Forma de Pagamento</h4>
+                    <div className="grid grid-cols-2 gap-3">
+                        {enabledMethods.map(method => (
+                            <button
+                                key={method.id}
+                                onClick={() => {
+                                    setSelectedMethodId(method.id);
+                                    setMbWaySent(false);
+                                }}
+                                className={`flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all ${
+                                    selectedMethodId === method.id 
+                                    ? 'border-indigo-600 bg-indigo-50 text-indigo-700 shadow-sm ring-1 ring-indigo-600' 
+                                    : 'border-slate-100 hover:border-slate-300 text-slate-500'
+                                }`}
+                            >
+                                {method.type === 'card' && <CreditCard className="h-5 w-5 mb-1" />}
+                                {method.type === 'mbway' && <Smartphone className="h-5 w-5 mb-1" />}
+                                {method.type === 'paypal' && <Wallet className="h-5 w-5 mb-1" />}
+                                {method.type === 'balance' && <Coins className="h-5 w-5 mb-1" />}
+                                <span className="text-[10px] font-bold text-center leading-tight">{method.name}</span>
+                                {method.type === 'balance' && currentCustomer && (
+                                  <span className={`text-[9px] font-bold mt-1 ${currentCustomer.balance >= selectedTier.price ? 'text-green-600' : 'text-red-400'}`}>
+                                    {currentCustomer.balance.toFixed(2)}€ disp.
+                                  </span>
+                                )}
+                            </button>
+                        ))}
+                    </div>
                 </div>
 
-                {/* Dynamic Forms based on Active Method */}
                 {activeMethod && (
                   <div className="animate-fadeIn">
-                    {activeMethod.provider === 'paypal' && activeMethod.clientId ? (
-                      <PayPalScriptProvider options={{ clientId: activeMethod.clientId, currency: "EUR" }}>
-                          <PayPalButtons 
-                              style={{ layout: "vertical", shape: "rect", borderRadius: 12 }}
-                              forceReRender={[selectedTier.price]}
-                              createOrder={(data, actions) => {
-                                  return actions.order.create({
-                                      intent: "CAPTURE",
-                                      purchase_units: [{
-                                          amount: {
-                                              currency_code: "EUR",
-                                              value: selectedTier.price.toString()
-                                          },
-                                          description: `RetroColor AI - ${selectedTier.label}`
-                                      }]
-                                  });
-                              }}
-                              onApprove={async (data, actions) => {
-                                  if (actions.order) {
-                                      await actions.order.capture();
-                                      onSuccess(activeMethod.name, selectedTier.price, selectedTier.label);
-                                  }
-                              }}
-                          />
-                      </PayPalScriptProvider>
+                    {activeMethod.type === 'balance' ? (
+                      <div className="p-6 bg-indigo-50 rounded-2xl border border-indigo-100 text-center">
+                         <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
+                            <Coins className="h-10 w-10 text-indigo-600" />
+                         </div>
+                         <h5 className="font-bold text-slate-900">Pagamento via Saldo Interno</h5>
+                         <p className="text-xs text-slate-500 mt-2 mb-6">
+                            Ao confirmar, o valor de <b className="text-slate-900">{selectedTier.price.toFixed(2)}€</b> será descontado do seu saldo atual.
+                         </p>
+                         
+                         {currentCustomer && currentCustomer.balance >= selectedTier.price ? (
+                            <button
+                                onClick={handleSubmit}
+                                disabled={isProcessing}
+                                className="w-full py-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-black shadow-xl shadow-indigo-500/20 transition-all flex items-center justify-center gap-2"
+                            >
+                                {isProcessing ? 'A DESCONTAR...' : 'CONFIRMAR E PAGAR AGORA'}
+                            </button>
+                         ) : (
+                            <div className="p-4 bg-red-50 border border-red-100 rounded-xl text-red-600 text-xs font-bold flex items-center gap-2">
+                                <AlertCircle className="h-4 w-4" /> Saldo insuficiente. Carregue saldo na sua dashboard.
+                            </div>
+                         )}
+                      </div>
                     ) : activeMethod.type === 'mbway' ? (
-                      <form onSubmit={handleSimulationSubmit} className="space-y-4">
+                      <form onSubmit={handleSubmit} className="space-y-4">
                         {!mbWaySent ? (
                             <>
-                                <div>
-                                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Telemóvel MB Way</label>
-                                    <div className="relative">
-                                        <input
-                                        type="tel"
-                                        required
-                                        placeholder="9xx xxx xxx"
-                                        value={mbWayPhone}
-                                        onChange={(e) => setMbWayPhone(e.target.value)}
-                                        className="block w-full border border-slate-200 rounded-xl py-3 pl-4 focus:ring-2 focus:ring-red-500 outline-none text-sm font-bold"
-                                        />
-                                        <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
-                                            <Smartphone className="h-5 w-5 text-red-500" />
-                                        </div>
-                                    </div>
-                                </div>
+                                <input
+                                    type="tel"
+                                    required
+                                    placeholder="Nº Telemóvel MB Way"
+                                    value={mbWayPhone}
+                                    onChange={(e) => setMbWayPhone(e.target.value)}
+                                    className="block w-full border border-slate-200 rounded-xl py-3 px-4 focus:ring-1 focus:ring-indigo-500 outline-none text-sm font-bold"
+                                />
                                 <button
                                     type="submit"
                                     disabled={isProcessing || mbWayPhone.length < 9}
-                                    className={`w-full flex justify-center py-4 px-4 rounded-2xl shadow-lg text-sm font-black text-white transition-all ${
-                                    isProcessing ? 'bg-red-400' : 'bg-red-600 hover:bg-red-700 shadow-red-500/30'
-                                    }`}
+                                    className="w-full flex justify-center py-4 rounded-xl bg-red-600 hover:bg-red-700 text-white font-black text-sm"
                                 >
-                                    {isProcessing ? 'PROCESSANDO...' : `PEDIR ${selectedTier.price.toFixed(2)}€`}
+                                    {isProcessing ? '...' : `PEDIR ${selectedTier.price.toFixed(2)}€ NO MB WAY`}
                                 </button>
                             </>
                         ) : (
-                            <div className="text-center py-4 bg-green-50 rounded-2xl border border-green-100">
-                                <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-white shadow-sm mb-3 animate-bounce">
-                                    <Smartphone className="h-6 w-6 text-green-600" />
-                                </div>
-                                <h4 className="text-sm font-bold text-slate-900">Confirmar no Telemóvel</h4>
-                                <p className="text-[10px] text-slate-500 mt-1 mb-6">Enviámos o pedido para {mbWayPhone}.</p>
-                                
-                                <div className="px-6 space-y-2">
-                                  <button
-                                      type="submit"
-                                      disabled={isProcessing}
-                                      className="w-full bg-slate-900 text-white py-3 rounded-xl text-xs font-black uppercase tracking-wider hover:bg-slate-800 transition-all"
-                                  >
-                                      {isProcessing ? 'VERIFICANDO...' : 'JÁ CONFIRMEI'}
-                                  </button>
-                                  <button 
-                                      type="button"
-                                      onClick={() => setMbWaySent(false)}
-                                      className="text-[10px] text-slate-400 hover:text-slate-600 font-bold uppercase tracking-tight underline"
-                                  >
-                                      Alterar número
-                                  </button>
-                                </div>
+                            <div className="text-center py-4 bg-green-50 rounded-2xl">
+                                <p className="text-sm font-bold text-slate-900">Confirme no seu telemóvel</p>
+                                <button type="submit" className="mt-4 w-full bg-slate-900 text-white py-3 rounded-xl font-bold">JÁ CONFIRMEI</button>
                             </div>
                         )}
                       </form>
                     ) : (
-                      <form onSubmit={handleSimulationSubmit} className="space-y-4">
-                        <div>
-                          <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Dados do Cartão</label>
-                          <div className="relative">
-                              <input
-                                type="text"
-                                required
-                                placeholder="0000 0000 0000 0000"
-                                value={cardNumber}
-                                onChange={(e) => setCardNumber(e.target.value)}
-                                className="block w-full border border-slate-200 rounded-xl py-3 pl-4 pr-12 focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-bold"
-                              />
-                              <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
-                                <CreditCard className="h-5 w-5 text-slate-300" />
-                              </div>
-                          </div>
-                        </div>
-
+                      <form onSubmit={handleSubmit} className="space-y-4">
+                        <input type="text" placeholder="Número do Cartão" required className="block w-full border border-slate-200 rounded-xl py-3 px-4 text-sm font-bold" />
                         <div className="grid grid-cols-2 gap-4">
-                          <input
-                            type="text"
-                            required
-                            placeholder="MM/AA"
-                            value={expiry}
-                            onChange={(e) => setExpiry(e.target.value)}
-                            className="block w-full border border-slate-200 rounded-xl py-3 px-4 focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-bold"
-                          />
-                          <input
-                            type="text"
-                            required
-                            placeholder="CVC"
-                            value={cvc}
-                            onChange={(e) => setCvc(e.target.value)}
-                            className="block w-full border border-slate-200 rounded-xl py-3 px-4 focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-bold"
-                          />
+                          <input type="text" placeholder="MM/AA" required className="block w-full border border-slate-200 rounded-xl py-3 px-4 text-sm font-bold" />
+                          <input type="text" placeholder="CVC" required className="block w-full border border-slate-200 rounded-xl py-3 px-4 text-sm font-bold" />
                         </div>
-
-                        <button
-                            type="submit"
-                            disabled={isProcessing}
-                            className={`w-full mt-4 flex justify-center py-4 px-4 rounded-2xl shadow-xl text-sm font-black text-white transition-all ${
-                            isProcessing ? 'bg-indigo-400' : 'bg-indigo-600 hover:bg-indigo-700 shadow-indigo-500/30'
-                            }`}
-                        >
+                        <button type="submit" disabled={isProcessing} className="w-full py-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-black">
                             {isProcessing ? 'PROCESSANDO...' : `PAGAR ${selectedTier.price.toFixed(2)}€`}
                         </button>
                       </form>
@@ -317,19 +326,8 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onSuccess 
                 )}
             </div>
           </div>
-          
-          <div className="bg-slate-50 px-8 py-4 border-t border-slate-100 text-center">
-             <div className="flex items-center justify-center gap-2 text-[10px] text-slate-400 font-bold uppercase tracking-widest">
-                <Lock className="h-3 w-3" />
-                <span>Transação 256-bit SSL Segura • Garantia de Satisfação</span>
-             </div>
-          </div>
         </div>
       </div>
-      <style>{`
-        .scrollbar-hide::-webkit-scrollbar { display: none; }
-        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-      `}</style>
     </div>
   );
 };

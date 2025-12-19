@@ -17,11 +17,6 @@ export interface FaqItem {
   answer: string;
 }
 
-export interface RestoredImage {
-  originalUrl: string;
-  restoredUrl: string;
-}
-
 export interface Testimonial {
   id: string;
   name: string;
@@ -69,9 +64,19 @@ export interface StoreMember {
   addedAt: string;
 }
 
-// Admin & Store Types
+export interface CustomerAccount {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  balance: number;
+  createdAt: string;
+  password?: string;
+}
+
 export interface Order {
   id: string;
+  customerId?: string;
   customerName: string; 
   customerEmail?: string; 
   date: string;
@@ -86,8 +91,8 @@ export interface PaymentMethod {
   id: string;
   name: string;
   enabled: boolean;
-  type: 'card' | 'paypal' | 'mbway' | 'stripe' | 'multibanco' | 'apple_pay';
-  provider: 'stripe' | 'paypal' | 'sibs' | 'manual' | 'adyen';
+  type: 'card' | 'paypal' | 'mbway' | 'stripe' | 'multibanco' | 'apple_pay' | 'balance';
+  provider: 'stripe' | 'paypal' | 'sibs' | 'manual' | 'adyen' | 'internal';
   apiKey?: string;
   clientId?: string;
   environment?: 'sandbox' | 'live';
@@ -108,6 +113,7 @@ export interface AuditLog {
 
 export interface StoreConfig {
   storeName: string;
+  adminPassword?: string;
   heroTitle: string;
   heroSubtitle: string;
   footerText: string;
@@ -118,12 +124,7 @@ export interface StoreConfig {
   testimonials: Testimonial[];
   expenses: Expense[];
   members: StoreMember[];
+  customers: CustomerAccount[];
   apiKeys: StoreApiKeys;
   theme: ThemeConfig;
-}
-
-export interface DashboardStats {
-  totalRevenue: number;
-  totalOrders: number;
-  visitorsToday: number; 
 }

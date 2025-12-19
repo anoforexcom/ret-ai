@@ -17,29 +17,37 @@ const StoreSettings: React.FC = () => {
   };
 
   const handleMenuChange = (menuType: 'mainMenu' | 'footerMenu', index: number, field: 'label' | 'path', value: string) => {
-    const newMenu = [...config[menuType]];
-    newMenu[index] = { ...newMenu[index], [field]: value };
-    updateConfig({ [menuType]: newMenu });
+    const currentMenu = config[menuType] || [];
+    const newMenu = [...currentMenu];
+    if (newMenu[index]) {
+        newMenu[index] = { ...newMenu[index], [field]: value };
+        updateConfig({ [menuType]: newMenu });
+    }
   };
 
   const addMenuItem = (menuType: 'mainMenu' | 'footerMenu') => {
-    const newMenu = [...config[menuType], { id: Date.now().toString(), label: 'Novo Link', path: '/' }];
+    const currentMenu = config[menuType] || [];
+    const newMenu = [...currentMenu, { id: Date.now().toString(), label: 'Novo Link', path: '/' }];
     updateConfig({ [menuType]: newMenu });
   };
 
   const removeMenuItem = (menuType: 'mainMenu' | 'footerMenu', index: number) => {
-    const newMenu = config[menuType].filter((_, i) => i !== index);
+    const currentMenu = config[menuType] || [];
+    const newMenu = currentMenu.filter((_, i) => i !== index);
     updateConfig({ [menuType]: newMenu });
+    addAuditLog('Remover Link Menu', `Menu: ${menuType}, Posição: ${index}`);
   };
 
   const togglePayment = (id: string) => {
-    const newPayments = config.paymentMethods.map(p => 
+    const currentPayments = config.paymentMethods || [];
+    const newPayments = currentPayments.map(p => 
         p.id === id ? { ...p, enabled: !p.enabled } : p
     );
     updateConfig({ paymentMethods: newPayments });
   };
 
   const handleAddPaymentMethod = () => {
+    const currentPayments = config.paymentMethods || [];
     const newMethod: PaymentMethod = {
       id: `pm_${Date.now()}`,
       name: 'Novo Método',
@@ -48,18 +56,20 @@ const StoreSettings: React.FC = () => {
       provider: 'manual',
       environment: 'sandbox'
     };
-    updateConfig({ paymentMethods: [...config.paymentMethods, newMethod] });
+    updateConfig({ paymentMethods: [...currentPayments, newMethod] });
     setEditingPaymentId(newMethod.id);
   };
 
   const updatePaymentMethod = (id: string, updates: Partial<PaymentMethod>) => {
-    const newPayments = config.paymentMethods.map(p => p.id === id ? { ...p, ...updates } : p);
+    const currentPayments = config.paymentMethods || [];
+    const newPayments = currentPayments.map(p => p.id === id ? { ...p, ...updates } : p);
     updateConfig({ paymentMethods: newPayments });
   };
 
   const removePaymentMethod = (id: string) => {
     if (window.confirm('Eliminar este método de pagamento permanentemente?')) {
-      const newPayments = config.paymentMethods.filter(p => p.id !== id);
+      const currentPayments = config.paymentMethods || [];
+      const newPayments = currentPayments.filter(p => p.id !== id);
       updateConfig({ paymentMethods: newPayments });
       addAuditLog('Remover Pagamento', `ID: ${id}`);
     }
@@ -274,7 +284,7 @@ const StoreSettings: React.FC = () => {
                     </div>
 
                     <div className="grid gap-6">
-                        {config.paymentMethods.map(method => (
+                        {(config.paymentMethods || []).map(method => (
                             <div key={method.id} className={`p-6 border rounded-2xl transition-all ${editingPaymentId === method.id ? 'border-indigo-600 ring-1 ring-indigo-600 bg-indigo-50/20' : 'border-slate-200 bg-white hover:border-slate-300'}`}>
                                 <div className="flex items-center justify-between mb-6">
                                     <div className="flex items-center gap-4">
@@ -313,7 +323,7 @@ const StoreSettings: React.FC = () => {
                                           />
                                           <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
                                       </label>
-                                      <button onClick={() => removePaymentMethod(method.id)} className="text-slate-300 hover:text-red-500 transition-colors ml-2">
+                                      <button onClick={() => removePaymentMethod(method.id)} className="text-slate-300 hover:text-red-500 transition-colors ml-2 p-2 hover:bg-red-50 rounded-full">
                                         <Trash2 className="h-5 w-5" />
                                       </button>
                                     </div>
@@ -431,8 +441,8 @@ const StoreSettings: React.FC = () => {
                             </button>
                         </div>
                         <div className="space-y-3">
-                            {config.mainMenu.map((item, idx) => (
-                                <div key={item.id} className="flex gap-4 items-center">
+                            {(config.mainMenu || []).map((item, idx) => (
+                                <div key={item.id} className="flex gap-4 items-center animate-fadeIn">
                                     <input 
                                         type="text" 
                                         value={item.label}
@@ -447,7 +457,7 @@ const StoreSettings: React.FC = () => {
                                         placeholder="/caminho"
                                         className="flex-1 px-3 py-2 border border-slate-300 rounded-md text-sm text-slate-500"
                                     />
-                                    <button onClick={() => removeMenuItem('mainMenu', idx)} className="text-red-500 hover:text-red-700 p-2">
+                                    <button onClick={() => removeMenuItem('mainMenu', idx)} className="text-red-500 hover:text-red-700 p-2 hover:bg-red-50 rounded-lg transition-colors">
                                         <Trash2 className="h-4 w-4" />
                                     </button>
                                 </div>
@@ -468,8 +478,8 @@ const StoreSettings: React.FC = () => {
                             </button>
                         </div>
                         <div className="space-y-3">
-                            {config.footerMenu.map((item, idx) => (
-                                <div key={item.id} className="flex gap-4 items-center">
+                            {(config.footerMenu || []).map((item, idx) => (
+                                <div key={item.id} className="flex gap-4 items-center animate-fadeIn">
                                     <input 
                                         type="text" 
                                         value={item.label}
@@ -484,7 +494,7 @@ const StoreSettings: React.FC = () => {
                                         placeholder="/caminho"
                                         className="flex-1 px-3 py-2 border border-slate-300 rounded-md text-sm text-slate-500"
                                     />
-                                    <button onClick={() => removeMenuItem('footerMenu', idx)} className="text-red-500 hover:text-red-700 p-2">
+                                    <button onClick={() => removeMenuItem('footerMenu', idx)} className="text-red-500 hover:text-red-700 p-2 hover:bg-red-50 rounded-lg transition-colors">
                                         <Trash2 className="h-4 w-4" />
                                     </button>
                                 </div>

@@ -1,9 +1,24 @@
-import React, { useState, useRef } from 'react';
-import { Upload, X, Loader2, Download, AlertCircle, ImageIcon, Wand2 } from 'lucide-react';
+
+import React, { useState, useRef, useEffect } from 'react';
+import { Upload, Loader2, Download, AlertCircle, ImageIcon, Wand2, Sparkles, Key, ExternalLink } from 'lucide-react';
 import { AppStatus } from '../types';
 import { restoreImage } from '../services/geminiService';
 import PaymentModal from '../components/PaymentModal';
 import { useConfig } from '../contexts/ConfigContext';
+
+// Define interface for AI Studio functions with a unique name to avoid naming collisions.
+interface AIStudioSDK {
+  hasSelectedApiKey(): Promise<boolean>;
+  openSelectKey(): Promise<void>;
+}
+
+// Declaração global para as funções da AI Studio. 
+declare global {
+  interface Window {
+    // Fixed: Added readonly modifier to match potential existing environment declarations and used unique interface name.
+    readonly aistudio: AIStudioSDK;
+  }
+}
 
 const Restore: React.FC = () => {
   const [status, setStatus] = useState<AppStatus>(AppStatus.IDLE);
@@ -12,9 +27,28 @@ const Restore: React.FC = () => {
   const [restoredUrl, setRestoredUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showPayment, setShowPayment] = useState(false);
-  const { addOrder } = useConfig();
+  const [hasKey, setHasKey] = useState<boolean>(false);
   
+  const { addOrder, currentCustomer } = useConfig();
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const checkKey = async () => {
+      if (window.aistudio) {
+        const selected = await window.aistudio.hasSelectedApiKey();
+        setHasKey(selected);
+      }
+    };
+    checkKey();
+  }, []);
+
+  const handleOpenKeySelector = async () => {
+    if (window.aistudio) {
+      await window.aistudio.openSelectKey();
+      // Assume the key selection was successful as per guidelines to avoid race conditions.
+      setHasKey(true);
+    }
+  };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -23,11 +57,6 @@ const Restore: React.FC = () => {
         setError("O ficheiro é demasiado grande. Máximo 5MB.");
         return;
       }
-      if (!file.type.startsWith('image/')) {
-        setError("Por favor selecione um ficheiro de imagem válido.");
-        return;
-      }
-
       setSelectedFile(file);
       setPreviewUrl(URL.createObjectURL(file));
       setRestoredUrl(null);
@@ -36,170 +65,174 @@ const Restore: React.FC = () => {
     }
   };
 
-  const handleRestore = async () => {
+  const startAI = async () => {
     if (!selectedFile) return;
+
+    if (!hasKey) {
+      setError("Para utilizar o restauro RetroColor AI de alta qualidade, é necessário selecionar a sua própria chave de API paga.");
+      return;
+    }
 
     setStatus(AppStatus.PROCESSING);
     setError(null);
 
     try {
-      const resultUrl = await restoreImage(selectedFile);
-      setRestoredUrl(resultUrl);
+      const result = await restoreImage(selectedFile);
+      setRestoredUrl(result);
       setStatus(AppStatus.COMPLETED);
     } catch (err: any) {
+      console.error(err);
       setStatus(AppStatus.ERROR);
-      setError(err.message || "Ocorreu um erro ao processar a imagem.");
+      
+      // If the request fails with "Requested entity was not found.", reset the key selection state as per guidelines.
+      if (err.message.includes("Requested entity was not found") || err.message.includes("chave de ligação ao motor RetroColor é inválida")) {
+        setHasKey(false);
+        setError("A sua chave de autenticação parece inválida. Por favor, selecione novamente para ligar ao RetroColor Engine.");
+      } else {
+        setError(err.message || "Ocorreu um erro no motor RetroColor AI. Verifique a sua quota.");
+      }
     }
-  };
-
-  const handleReset = () => {
-    setSelectedFile(null);
-    setPreviewUrl(null);
-    setRestoredUrl(null);
-    setStatus(AppStatus.IDLE);
-    setError(null);
-    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   const handleDownloadClick = () => {
     setShowPayment(true);
   };
 
-  const handlePaymentSuccess = (method: string, amount: number, itemDescription: string) => {
+  const handlePaymentSuccess = (method: string, amount: number, itemLabel: string) => {
     setShowPayment(false);
-    if (restoredUrl) {
-      // Register order in admin panel
-      addOrder({
-        id: `ORD-${Date.now().toString().slice(-6)}`,
-        customerName: 'Cliente Visitante',
-        date: new Date().toISOString(),
-        amount: amount,
-        status: 'completed',
-        imageUrl: restoredUrl,
-        paymentMethod: method,
-        items: itemDescription
-      });
+    
+    addOrder({
+      id: `ORD-${Date.now().toString().slice(-6)}`,
+      customerId: currentCustomer?.id,
+      customerName: currentCustomer ? `${currentCustomer.firstName} ${currentCustomer.lastName}` : 'Visitante',
+      customerEmail: currentCustomer?.email,
+      date: new Date().toISOString(),
+      amount,
+      status: 'completed',
+      imageUrl: restoredUrl || undefined,
+      paymentMethod: method,
+      items: itemLabel
+    });
 
-      // Create temporary link to download
-      const link = document.createElement('a');
-      link.href = restoredUrl;
-      link.download = `restored-retrocolor-${Date.now()}.png`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+    if (restoredUrl) {
+      const a = document.createElement('a');
+      a.href = restoredUrl;
+      a.download = `retrocolor-hd-${Date.now()}.png`;
+      a.click();
     }
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-slate-50 py-12 px-4">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-10">
-          <h1 className="text-3xl font-bold text-slate-900 sm:text-4xl">Estúdio de Restauração</h1>
-          <p className="mt-4 text-lg text-slate-600">
-            Carregue a sua foto e deixe a IA fazer a magia.
-          </p>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-600 text-[10px] font-black uppercase tracking-widest mb-4">
+            <Sparkles className="h-3 w-3" /> RetroColor AI Engine v3
+          </div>
+          <h1 className="text-3xl font-bold text-slate-900">Estúdio de Restauro</h1>
+          <p className="mt-2 text-slate-600">Alta definição e cores realistas com a tecnologia exclusiva RetroColor.</p>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-200">
+        {/* API Key Banner/Check */}
+        {!hasKey && (
+          <div className="mb-8 bg-amber-50 border border-amber-200 rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-4 animate-fadeIn">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-amber-100 text-amber-700 rounded-xl">
+                <Key className="h-6 w-6" />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-slate-900">Ligação ao Motor RetroColor AI</h3>
+                <p className="text-xs text-slate-600 max-w-md">
+                  Para garantir a máxima qualidade de restauro sem interrupções e com total privacidade, utilize a sua própria chave de ligação paga. 
+                </p>
+              </div>
+            </div>
+            <button 
+              onClick={handleOpenKeySelector}
+              className="bg-indigo-600 text-white px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-indigo-700 transition-all flex items-center gap-2 whitespace-nowrap"
+            >
+              Ligar ao Motor AI
+            </button>
+          </div>
+        )}
+
+        <div className="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
           <div className="p-8">
-            {/* Upload Area */}
             {!selectedFile ? (
               <div 
-                className="border-2 border-dashed border-slate-300 rounded-xl p-12 text-center hover:border-indigo-500 hover:bg-slate-50 transition-colors cursor-pointer"
+                className="border-2 border-dashed border-slate-300 rounded-xl p-20 text-center hover:border-indigo-400 hover:bg-indigo-50/30 transition-all cursor-pointer group"
                 onClick={() => fileInputRef.current?.click()}
               >
-                <div className="flex flex-col items-center justify-center">
-                  <div className="bg-indigo-100 p-4 rounded-full mb-4">
-                    <Upload className="h-8 w-8 text-indigo-600" />
-                  </div>
-                  <h3 className="text-lg font-medium text-slate-900">Clique para carregar foto</h3>
-                  <p className="text-sm text-slate-500 mt-2">JPG ou PNG até 5MB</p>
+                <div className="bg-indigo-100 text-indigo-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                  <Upload className="h-8 w-8" />
                 </div>
-                <input 
-                  type="file" 
-                  ref={fileInputRef} 
-                  className="hidden" 
-                  accept="image/*"
-                  onChange={handleFileSelect}
-                />
+                <h3 className="text-xl font-bold text-slate-900">Selecione ou arraste a sua foto</h3>
+                <p className="text-slate-500 mt-2">Processamento imediato via RetroColor Engine</p>
+                <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileSelect} />
               </div>
             ) : (
               <div className="space-y-8">
-                {/* Preview Area */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  <div className="space-y-2">
-                    <h3 className="text-sm font-medium text-slate-500 uppercase tracking-wider">Original</h3>
-                    <div className="relative aspect-[4/3] bg-slate-100 rounded-lg overflow-hidden border border-slate-200">
-                      <img src={previewUrl!} alt="Original" className="w-full h-full object-contain" />
-                    </div>
+                  {/* Original */}
+                  <div className="space-y-3">
+                     <div className="flex justify-between items-center">
+                        <h4 className="text-xs font-bold uppercase text-slate-400 tracking-widest">Foto Original</h4>
+                        <button onClick={() => setSelectedFile(null)} className="text-red-500 text-xs font-bold hover:underline">Trocar</button>
+                     </div>
+                     <div className="aspect-[4/3] bg-slate-100 rounded-lg overflow-hidden border border-slate-200">
+                        <img src={previewUrl!} className="w-full h-full object-cover" alt="Original" />
+                     </div>
                   </div>
 
-                  <div className="space-y-2">
-                    <h3 className="text-sm font-medium text-slate-500 uppercase tracking-wider">Resultado IA</h3>
-                    <div className="relative aspect-[4/3] bg-slate-100 rounded-lg overflow-hidden border border-slate-200 flex items-center justify-center">
-                      {status === AppStatus.PROCESSING ? (
-                        <div className="flex flex-col items-center">
-                          <Loader2 className="h-10 w-10 text-indigo-600 animate-spin mb-3" />
-                          <p className="text-indigo-600 font-medium">Restaurando e colorindo...</p>
-                          <p className="text-xs text-slate-400 mt-1">Isto pode demorar até 15 segundos</p>
-                        </div>
-                      ) : restoredUrl ? (
-                        <div className="relative w-full h-full group">
-                           <img src={restoredUrl} alt="Restaurada" className="w-full h-full object-contain" />
-                           {/* Overlay for watermark effect visually before payment */}
-                           <div className="absolute inset-0 pointer-events-none flex items-center justify-center opacity-30">
-                              <p className="text-4xl font-bold text-white transform -rotate-45">PREVIEW</p>
-                           </div>
-                        </div>
-                      ) : (
-                        <div className="text-center text-slate-400 p-6">
-                          <ImageIcon className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                          <p>O resultado aparecerá aqui</p>
-                        </div>
-                      )}
-                    </div>
+                  {/* Resultado */}
+                  <div className="space-y-3">
+                     <h4 className="text-xs font-bold uppercase text-slate-400 tracking-widest">Processado via RetroColor AI</h4>
+                     <div className="aspect-[4/3] bg-slate-100 rounded-lg overflow-hidden border border-slate-200 flex items-center justify-center relative">
+                        {status === AppStatus.PROCESSING ? (
+                          <div className="text-center px-4">
+                             <Loader2 className="h-10 w-10 text-indigo-600 animate-spin mx-auto mb-2" />
+                             <p className="text-sm font-black text-slate-900">Motor RetroColor em ação...</p>
+                             <p className="text-[10px] text-slate-500 mt-1">Isso pode levar até 20 segundos para cores perfeitas.</p>
+                          </div>
+                        ) : restoredUrl ? (
+                          <img src={restoredUrl} className="w-full h-full object-contain" alt="Restaurada" />
+                        ) : (
+                          <div className="text-center text-slate-400">
+                             <ImageIcon className="h-12 w-12 mx-auto mb-2 opacity-20" />
+                             <p className="text-xs">O resultado aparecerá aqui</p>
+                          </div>
+                        )}
+                     </div>
                   </div>
                 </div>
 
-                {/* Error Message */}
                 {error && (
-                  <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
-                    <AlertCircle className="h-5 w-5 text-red-500 mt-0.5" />
-                    <p className="text-sm text-red-700">{error}</p>
+                  <div className="p-4 bg-red-50 border border-red-100 rounded-xl text-red-600 text-sm flex items-center gap-3 animate-shake">
+                    <AlertCircle className="h-5 w-5 flex-shrink-0" /> {error}
                   </div>
                 )}
 
-                {/* Controls */}
-                <div className="flex flex-col sm:flex-row gap-4 justify-between items-center border-t border-slate-100 pt-8">
-                  <button
-                    onClick={handleReset}
-                    className="text-slate-600 hover:text-slate-900 font-medium text-sm flex items-center gap-2"
-                  >
-                    <X className="h-4 w-4" />
-                    Escolher outra foto
-                  </button>
-
-                  <div className="flex gap-4">
-                    {status === AppStatus.IDLE && (
-                      <button
-                        onClick={handleRestore}
-                        className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-medium shadow-lg hover:shadow-indigo-500/30 transition-all flex items-center gap-2"
-                      >
-                        <Wand2 className="h-5 w-5" />
-                        Restaurar & Colorir
-                      </button>
-                    )}
-
-                    {status === AppStatus.COMPLETED && (
-                      <button
-                        onClick={handleDownloadClick}
-                        className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium shadow-lg hover:shadow-green-500/30 transition-all flex items-center gap-2 animate-bounce"
-                      >
-                        <Download className="h-5 w-5" />
-                        Obter Imagem
-                      </button>
-                    )}
-                  </div>
+                <div className="flex justify-center pt-4">
+                  {status === AppStatus.IDLE && (
+                    <button 
+                      onClick={startAI} 
+                      className={`px-8 py-3 rounded-xl font-bold shadow-lg transition-all flex items-center gap-2 ${
+                        hasKey 
+                        ? 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-indigo-500/20' 
+                        : 'bg-slate-200 text-slate-400 cursor-not-allowed'
+                      }`}
+                    >
+                      <Wand2 className="h-5 w-5" /> Restaurar com RetroColor AI
+                    </button>
+                  )}
+                  {status === AppStatus.COMPLETED && (
+                    <button 
+                      onClick={handleDownloadClick}
+                      className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-xl font-bold shadow-lg shadow-green-500/20 transition-all flex items-center gap-2"
+                    >
+                      <Download className="h-5 w-5" /> Baixar em Alta Resolução
+                    </button>
+                  )}
                 </div>
               </div>
             )}

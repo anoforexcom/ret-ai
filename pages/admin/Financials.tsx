@@ -27,14 +27,15 @@ const Financials: React.FC = () => {
     description: ''
   });
 
+  const currentExpenses = config.expenses || [];
+
   // Cálculos de Receita
   const totalRevenue = orders.reduce((acc, order) => acc + (order.status === 'completed' ? order.amount : 0), 0);
   const totalOrders = orders.filter(o => o.status === 'completed').length;
   const aov = totalOrders > 0 ? totalRevenue / totalOrders : 0;
 
   // Cálculos de Despesas (Manuais + Automáticas se necessário)
-  const manualExpensesTotal = config.expenses.reduce((acc, exp) => acc + exp.amount, 0);
-  const totalExpenses = manualExpensesTotal;
+  const totalExpenses = currentExpenses.reduce((acc, exp) => acc + exp.amount, 0);
   
   // Lucro e Margem
   const netProfit = totalRevenue - totalExpenses;
@@ -42,10 +43,10 @@ const Financials: React.FC = () => {
 
   // Breakdown por Categoria
   const categories = {
-    api: config.expenses.filter(e => e.category === 'api').reduce((a, b) => a + b.amount, 0),
-    marketing: config.expenses.filter(e => e.category === 'marketing').reduce((a, b) => a + b.amount, 0),
-    infra: config.expenses.filter(e => e.category === 'infra').reduce((a, b) => a + b.amount, 0),
-    outro: config.expenses.filter(e => e.category === 'outro').reduce((a, b) => a + b.amount, 0),
+    api: currentExpenses.filter(e => e.category === 'api').reduce((a, b) => a + b.amount, 0),
+    marketing: currentExpenses.filter(e => e.category === 'marketing').reduce((a, b) => a + b.amount, 0),
+    infra: currentExpenses.filter(e => e.category === 'infra').reduce((a, b) => a + b.amount, 0),
+    outro: currentExpenses.filter(e => e.category === 'outro').reduce((a, b) => a + b.amount, 0),
   };
 
   const handleAddExpense = (e: React.FormEvent) => {
@@ -58,7 +59,7 @@ const Financials: React.FC = () => {
     };
 
     updateConfig({
-      expenses: [expense, ...config.expenses]
+      expenses: [expense, ...currentExpenses]
     });
     
     addAuditLog('Adicionar Despesa', `Despesa de ${expense.amount}€ em ${expense.category}`);
@@ -72,9 +73,9 @@ const Financials: React.FC = () => {
   };
 
   const removeExpense = (id: string) => {
-    if (window.confirm('Tem a certeza que deseja remover esta despesa?')) {
+    if (window.confirm('Tem a certeza que deseja remover esta despesa permanentemente do histórico?')) {
         updateConfig({
-            expenses: config.expenses.filter(e => e.id !== id)
+            expenses: currentExpenses.filter(e => e.id !== id)
         });
         addAuditLog('Remover Despesa', `ID: ${id}`);
     }
@@ -227,8 +228,8 @@ const Financials: React.FC = () => {
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-slate-100">
-                            {config.expenses.map((exp) => (
-                                <tr key={exp.id} className="hover:bg-slate-50 transition-colors">
+                            {currentExpenses.map((exp) => (
+                                <tr key={exp.id} className="hover:bg-slate-50 transition-colors animate-fadeIn">
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
                                         {new Date(exp.date).toLocaleDateString('pt-PT')}
                                     </td>
@@ -251,16 +252,17 @@ const Financials: React.FC = () => {
                                     <td className="px-6 py-4 whitespace-nowrap text-right">
                                         <button 
                                             onClick={() => removeExpense(exp.id)}
-                                            className="text-red-400 hover:text-red-600 p-1 hover:bg-red-50 rounded transition-colors"
+                                            className="text-slate-300 hover:text-red-500 p-2 hover:bg-red-50 rounded-full transition-all"
+                                            title="Eliminar Despesa"
                                         >
                                             <Trash2 className="h-4 w-4" />
                                         </button>
                                     </td>
                                 </tr>
                             ))}
-                            {config.expenses.length === 0 && (
+                            {currentExpenses.length === 0 && (
                                 <tr>
-                                    <td colSpan={5} className="px-6 py-12 text-center text-slate-400 italic">
+                                    <td colSpan={5} className="px-6 py-12 text-center text-slate-400 italic font-medium">
                                         Nenhuma despesa registada ainda.
                                     </td>
                                 </tr>

@@ -1,22 +1,55 @@
 
 import React, { useState } from 'react';
 import { useConfig } from '../../contexts/ConfigContext';
-import { Shield, Lock, FileText, Key, UserCheck, Users, UserPlus, Trash2, Mail, ShieldAlert, BadgeCheck, Clock } from 'lucide-react';
+import { 
+  Shield, 
+  Lock, 
+  FileText, 
+  Key, 
+  UserCheck, 
+  Users, 
+  UserPlus, 
+  Trash2, 
+  Mail, 
+  ShieldAlert, 
+  BadgeCheck, 
+  Clock,
+  Eye,
+  EyeOff,
+  Save,
+  CheckCircle
+} from 'lucide-react';
 import { StoreMember, MemberRole } from '../../types';
 
 const Security: React.FC = () => {
-  const { auditLogs, isAdmin, config, updateConfig, addAuditLog } = useConfig();
+  const { auditLogs, config, updateConfig, addAuditLog } = useConfig();
   const [showInviteModal, setShowInviteModal] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
+  const [passwordSuccess, setPasswordSuccess] = useState(false);
   const [inviteForm, setInviteForm] = useState<Omit<StoreMember, 'id' | 'status' | 'addedAt'>>({
     name: '',
     email: '',
     role: 'manager'
   });
 
+  const handleUpdatePassword = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newPassword || newPassword.length < 4) return;
+
+    updateConfig({ adminPassword: newPassword });
+    addAuditLog('Alteração de Senha', 'Senha mestra do painel administrativo atualizada pelo utilizador.');
+    
+    setPasswordSuccess(true);
+    setNewPassword('');
+    setTimeout(() => setPasswordSuccess(false), 3000);
+  };
+
   const handleInvite = (e: React.FormEvent) => {
     e.preventDefault();
     if (!inviteForm.name || !inviteForm.email) return;
 
+    const currentMembers = config.members || [];
     const newMember: StoreMember = {
       id: `m_${Date.now()}`,
       ...inviteForm,
@@ -25,7 +58,7 @@ const Security: React.FC = () => {
     };
 
     updateConfig({
-      members: [...(config.members || []), newMember]
+      members: [...currentMembers, newMember]
     });
 
     addAuditLog('Convidar Membro', `Utilizador ${newMember.email} convidado como ${newMember.role}`);
@@ -35,7 +68,8 @@ const Security: React.FC = () => {
 
   const removeMember = (id: string) => {
     if (window.confirm('Tem a certeza que deseja remover este membro da equipa?')) {
-      const updatedMembers = config.members.filter(m => m.id !== id);
+      const currentMembers = config.members || [];
+      const updatedMembers = currentMembers.filter(m => m.id !== id);
       updateConfig({ members: updatedMembers });
       addAuditLog('Remover Membro', `ID: ${id}`);
     }
@@ -74,15 +108,15 @@ const Security: React.FC = () => {
             </button>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
              <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 flex items-center gap-4">
                  <div className="p-3 bg-green-100 text-green-600 rounded-lg">
                      <Shield className="h-6 w-6" />
                  </div>
                  <div>
-                     <p className="text-sm font-bold text-slate-900">Estado do Sistema</p>
+                     <p className="text-sm font-bold text-slate-900">Estado</p>
                      <p className="text-xs text-green-600 font-medium flex items-center gap-1">
-                        <BadgeCheck className="h-3 w-3" /> Seguro & Monitorizado
+                        <BadgeCheck className="h-3 w-3" /> Monitorizado
                      </p>
                  </div>
              </div>
@@ -92,90 +126,143 @@ const Security: React.FC = () => {
                      <UserCheck className="h-6 w-6" />
                  </div>
                  <div>
-                     <p className="text-sm font-bold text-slate-900">Equipa Ativa</p>
-                     <p className="text-xs text-slate-500">{config.members?.length || 1} membros registados</p>
+                     <p className="text-sm font-bold text-slate-900">Equipa</p>
+                     <p className="text-xs text-slate-500">{(config.members || []).length} ativos</p>
                  </div>
              </div>
 
-             <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 flex items-center gap-4">
-                 <div className="p-3 bg-orange-100 text-orange-600 rounded-lg">
-                     <Key className="h-6 w-6" />
+             <div className="lg:col-span-2 bg-white p-6 rounded-xl shadow-sm border border-slate-200 flex flex-col md:flex-row items-center justify-between gap-4">
+                 <div className="flex items-center gap-4">
+                    <div className="p-3 bg-orange-100 text-orange-600 rounded-lg">
+                        <Key className="h-6 w-6" />
+                    </div>
+                    <div>
+                        <p className="text-sm font-bold text-slate-900">Segurança da Conta</p>
+                        <p className="text-xs text-slate-500">Última alteração: Recentemente</p>
+                    </div>
                  </div>
-                 <div>
-                     <p className="text-sm font-bold text-slate-900">Autenticação</p>
-                     <p className="text-xs text-slate-500">Senha Simples (Demo)</p>
+                 <div className="flex items-center gap-2 text-xs font-bold text-amber-600 bg-amber-50 px-3 py-1.5 rounded-lg border border-amber-100">
+                    <ShieldAlert className="h-4 w-4" /> 2FA Não Ativo
                  </div>
              </div>
         </div>
 
-        {/* Team Management Section */}
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-            <div className="p-6 border-b border-slate-200">
-                <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-                    <Users className="h-5 w-5 text-indigo-600" /> Gestão de Equipa
-                </h3>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Password Management */}
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden h-fit">
+                <div className="p-6 border-b border-slate-200">
+                    <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                        <Lock className="h-5 w-5 text-indigo-600" /> Alterar Senha
+                    </h3>
+                </div>
+                <form onSubmit={handleUpdatePassword} className="p-6 space-y-4">
+                    <p className="text-xs text-slate-500 leading-relaxed mb-4">
+                        Defina uma nova senha mestra para aceder a este painel administrativo. 
+                        Recomendamos o uso de pelo menos 8 caracteres.
+                    </p>
+                    <div>
+                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Nova Senha</label>
+                        <div className="relative">
+                            <input 
+                                type={showPassword ? "text" : "password"}
+                                value={newPassword}
+                                onChange={(e) => setNewPassword(e.target.value)}
+                                className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-bold"
+                                placeholder="Min. 4 caracteres"
+                            />
+                            <button 
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                            >
+                                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <button 
+                        type="submit"
+                        disabled={newPassword.length < 4}
+                        className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm transition-all ${
+                            newPassword.length >= 4 
+                            ? 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-lg shadow-indigo-500/20' 
+                            : 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                        }`}
+                    >
+                        <Save className="h-4 w-4" /> Atualizar Senha
+                    </button>
+
+                    {passwordSuccess && (
+                        <div className="flex items-center gap-2 text-green-600 font-bold text-xs bg-green-50 p-2 rounded-lg border border-green-100 animate-fadeIn">
+                            <CheckCircle className="h-4 w-4" /> Senha atualizada com sucesso!
+                        </div>
+                    )}
+                </form>
             </div>
-            <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-slate-100">
-                    <thead className="bg-slate-50">
-                        <tr>
-                            <th className="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Membro</th>
-                            <th className="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Cargo / Função</th>
-                            <th className="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Estado</th>
-                            <th className="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Adicionado em</th>
-                            <th className="px-6 py-3 text-right text-xs font-bold text-slate-500 uppercase tracking-wider">Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-slate-100">
-                        {config.members?.map((member) => (
-                            <tr key={member.id} className="hover:bg-slate-50 transition-colors">
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                    <div className="flex items-center gap-3">
-                                        <div className="h-8 w-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center font-bold text-xs">
-                                            {member.name.charAt(0)}
-                                        </div>
-                                        <div>
-                                            <p className="text-sm font-bold text-slate-900">{member.name}</p>
-                                            <p className="text-[11px] text-slate-400 font-medium">{member.email}</p>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                    <div className="flex flex-col gap-1">
-                                        {getRoleBadge(member.role)}
-                                        <span className="text-[9px] text-slate-400 max-w-[150px] leading-tight">
-                                            {getRolePermissions(member.role)}
-                                        </span>
-                                    </div>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                    {member.status === 'active' ? (
-                                        <span className="text-[10px] font-bold text-green-600 flex items-center gap-1">
-                                            <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div> Ativo
-                                        </span>
-                                    ) : (
-                                        <span className="text-[10px] font-bold text-orange-500 flex items-center gap-1">
-                                            <Clock className="h-3 w-3" /> Convidado
-                                        </span>
-                                    )}
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-xs text-slate-400">
-                                    {new Date(member.addedAt).toLocaleDateString('pt-PT')}
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-right">
-                                    {member.role !== 'owner' && (
-                                        <button 
-                                            onClick={() => removeMember(member.id)}
-                                            className="text-slate-300 hover:text-red-500 p-1 hover:bg-red-50 rounded transition-colors"
-                                        >
-                                            <Trash2 className="h-4 w-4" />
-                                        </button>
-                                    )}
-                                </td>
+
+            {/* Team Management Section */}
+            <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <div className="p-6 border-b border-slate-200">
+                    <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                        <Users className="h-5 w-5 text-indigo-600" /> Gestão de Equipa
+                    </h3>
+                </div>
+                <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-slate-100">
+                        <thead className="bg-slate-50">
+                            <tr>
+                                <th className="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Membro</th>
+                                <th className="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Cargo</th>
+                                <th className="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Estado</th>
+                                <th className="px-6 py-3 text-right text-xs font-bold text-slate-500 uppercase tracking-wider">Ações</th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-slate-100">
+                            {(config.members || []).map((member) => (
+                                <tr key={member.id} className="hover:bg-slate-50 transition-colors animate-fadeIn">
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                        <div className="flex items-center gap-3">
+                                            <div className="h-8 w-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center font-bold text-xs">
+                                                {member.name.charAt(0)}
+                                            </div>
+                                            <div>
+                                                <p className="text-sm font-bold text-slate-900">{member.name}</p>
+                                                <p className="text-[11px] text-slate-400 font-medium">{member.email}</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                        <div className="flex flex-col gap-1">
+                                            {getRoleBadge(member.role)}
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                        {member.status === 'active' ? (
+                                            <span className="text-[10px] font-bold text-green-600 flex items-center gap-1">
+                                                <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div> Ativo
+                                            </span>
+                                        ) : (
+                                            <span className="text-[10px] font-bold text-orange-500 flex items-center gap-1">
+                                                <Clock className="h-3 w-3" /> Convidado
+                                            </span>
+                                        )}
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-right">
+                                        {member.role !== 'owner' && (
+                                            <button 
+                                                onClick={() => removeMember(member.id)}
+                                                className="text-slate-300 hover:text-red-500 p-2 hover:bg-red-50 rounded-full transition-all"
+                                                title="Remover Membro"
+                                            >
+                                                <Trash2 className="h-4 w-4" />
+                                            </button>
+                                        )}
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
@@ -200,7 +287,7 @@ const Security: React.FC = () => {
                     </thead>
                     <tbody className="bg-white divide-y divide-slate-100">
                         {auditLogs.map((log) => (
-                            <tr key={log.id} className="hover:bg-slate-50 transition-colors">
+                            <tr key={log.id} className="hover:bg-slate-50 transition-colors animate-fadeIn">
                                 <td className="px-6 py-4 whitespace-nowrap text-xs text-slate-400">
                                     {new Date(log.date).toLocaleString('pt-PT')}
                                 </td>
@@ -219,7 +306,7 @@ const Security: React.FC = () => {
                         ))}
                         {auditLogs.length === 0 && (
                              <tr>
-                                <td colSpan={4} className="px-6 py-12 text-center text-slate-400 italic">
+                                <td colSpan={4} className="px-6 py-12 text-center text-slate-400 italic font-medium">
                                     Aguardando atividade do sistema...
                                 </td>
                             </tr>
@@ -283,7 +370,7 @@ const Security: React.FC = () => {
                                     <option value="viewer">Visualizador (Leitura)</option>
                                 </select>
                             </div>
-                            <p className="text-[10px] text-slate-400 mt-2 italic">
+                            <p className="text-[10px] text-slate-400 mt-2 italic font-medium">
                                 {getRolePermissions(inviteForm.role as MemberRole)}
                             </p>
                         </div>
@@ -298,7 +385,7 @@ const Security: React.FC = () => {
                             </button>
                             <button 
                                 type="submit"
-                                className="flex-2 px-8 py-3 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 shadow-lg shadow-indigo-500/30 transition-all"
+                                className="flex-2 px-8 py-3 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 shadow-lg shadow-indigo-500/20 transition-all"
                             >
                                 Enviar Convite
                             </button>

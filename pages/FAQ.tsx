@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { FaqItem } from '../types';
 import { Plus, Minus } from 'lucide-react';
@@ -8,7 +9,7 @@ const FAQ: React.FC = () => {
   const faqs: FaqItem[] = [
     {
       question: "Como funciona a tecnologia de recolorização?",
-      answer: "Utilizamos modelos de Inteligência Artificial de última geração (Gemini Vision) treinados em milhões de fotos históricas e modernas. A IA analisa as formas, texturas e contexto da sua imagem a preto e branco para prever as cores mais prováveis para cada elemento, como pele, roupas, vegetação e céu."
+      answer: "Utilizamos o motor de Inteligência Artificial RetroColor AI, desenvolvido por nós e treinado em milhões de fotos históricas e modernas. A nossa tecnologia analisa as formas, texturas e contexto da sua imagem para prever as cores mais prováveis para cada elemento, como pele, roupas e paisagens."
     },
     {
       question: "O pagamento é seguro?",
@@ -16,15 +17,15 @@ const FAQ: React.FC = () => {
     },
     {
       question: "O que acontece às minhas fotos?",
-      answer: "A sua privacidade é a nossa prioridade. As fotos são enviadas para processamento seguro e são eliminadas automaticamente dos nossos servidores após um curto período (geralmente 24 horas) para garantir que pode fazer o download. Nunca partilhamos ou vendemos as suas imagens."
+      answer: "A sua privacidade é a nossa prioridade. As fotos são processadas localmente pelo motor RetroColor AI e são eliminadas automaticamente dos nossos servidores após 24 horas. Nunca usamos as suas fotos para treinar os nossos modelos sem o seu consentimento."
     },
     {
       question: "Posso restaurar fotos muito danificadas?",
-      answer: "A nossa IA é excelente a remover riscos, ruído e manchas. No entanto, se partes faciais críticas estiverem completamente em falta (ex: metade do rosto rasgado), a IA tentará reconstruir com base na simetria, mas o resultado pode variar. Recomendamos fotos onde os rostos sejam visíveis."
+      answer: "A RetroColor AI é excelente a remover riscos, ruído e manchas. No entanto, se partes faciais críticas estiverem completamente em falta, o motor tentará reconstruir com base na simetria e padrões anatómicos conhecidos."
     },
     {
       question: "Qual o tamanho máximo do ficheiro?",
-      answer: "Atualmente suportamos ficheiros JPG e PNG até 5MB. Para ficheiros maiores, recomendamos redimensionar ligeiramente antes de enviar."
+      answer: "Atualmente o RetroColor Engine suporta ficheiros JPG e PNG até 5MB. Para ficheiros maiores, o motor pode demorar mais tempo a processar."
     }
   ];
 

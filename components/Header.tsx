@@ -1,12 +1,13 @@
+
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Wand2, Lock } from 'lucide-react';
+import { Menu, X, Wand2, Lock, User, LogOut, Settings } from 'lucide-react';
 import { useConfig } from '../contexts/ConfigContext';
 
 const Header: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
-  const { config } = useConfig();
+  const { config, currentCustomer, customerLogout, isAdmin } = useConfig();
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -21,7 +22,7 @@ const Header: React.FC = () => {
             </Link>
           </div>
           
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="hidden md:flex items-center space-x-6">
             {config.mainMenu.map((link) => (
               <Link
                 key={link.id}
@@ -36,13 +37,31 @@ const Header: React.FC = () => {
               </Link>
             ))}
             
+            <div className="h-6 w-px bg-slate-200"></div>
+
+            {/* Admin Quick Link */}
             <Link 
               to="/admin" 
-              className="text-slate-400 hover:text-indigo-600 transition-colors p-2 rounded-full hover:bg-slate-100"
-              title="Área de Administração"
+              className="flex items-center gap-1.5 text-slate-400 hover:text-indigo-600 transition-colors text-sm font-medium"
+              title="Painel Administrativo"
             >
-              <Lock className="h-4 w-4" />
+              <Lock className="h-4 w-4" /> Admin
             </Link>
+
+            {currentCustomer ? (
+              <div className="flex items-center gap-4">
+                <Link to="/customer" className="flex items-center gap-2 px-3 py-1.5 bg-indigo-50 text-indigo-700 rounded-lg text-sm font-bold hover:bg-indigo-100 transition-colors">
+                  <User className="h-4 w-4" /> Dashboard
+                </Link>
+                <button onClick={customerLogout} className="text-slate-400 hover:text-red-500 transition-colors" title="Sair">
+                  <LogOut className="h-4 w-4" />
+                </button>
+              </div>
+            ) : (
+              <Link to="/customer" className="text-slate-500 hover:text-indigo-600 text-sm font-medium flex items-center gap-2">
+                <User className="h-4 w-4" /> Entrar
+              </Link>
+            )}
 
             <Link
               to="/restore"
@@ -82,11 +101,10 @@ const Header: React.FC = () => {
               </Link>
             ))}
             <div className="pt-4 pb-2 border-t border-gray-100 mt-2">
-                 <Link
-                    to="/admin"
-                    onClick={() => setIsOpen(false)}
-                    className="flex items-center gap-2 pl-3 pr-4 py-2 text-sm font-medium text-gray-400 hover:text-gray-500"
-                  >
+                 <Link to="/customer" onClick={() => setIsOpen(false)} className="flex items-center gap-2 pl-3 pr-4 py-2 text-base font-medium text-gray-600">
+                    <User className="h-4 w-4" /> Minha Conta
+                 </Link>
+                 <Link to="/admin" onClick={() => setIsOpen(false)} className="flex items-center gap-2 pl-3 pr-4 py-2 text-base font-medium text-indigo-600">
                     <Lock className="h-4 w-4" /> Área Admin
                   </Link>
             </div>

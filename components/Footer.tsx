@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Wand2 } from 'lucide-react';
+import { Wand2, Lock } from 'lucide-react';
 import { useConfig } from '../contexts/ConfigContext';
 
 const Footer: React.FC = () => {
@@ -27,6 +27,7 @@ const Footer: React.FC = () => {
               <li><Link to="/restore" className="text-sm hover:text-white transition-colors">Restaurar Foto</Link></li>
               <li><Link to="/pricing" className="text-sm hover:text-white transition-colors">Preços</Link></li>
               <li><Link to="/faq" className="text-sm hover:text-white transition-colors">Perguntas Frequentes</Link></li>
+              <li><Link to="/testimonials" className="text-sm hover:text-white transition-colors">Testemunhos</Link></li>
             </ul>
           </div>
 
@@ -47,6 +48,11 @@ const Footer: React.FC = () => {
             <h3 className="text-sm font-semibold text-white tracking-wider uppercase mb-4">Suporte</h3>
             <ul className="space-y-3">
               <li><Link to="/contact" className="text-sm hover:text-white transition-colors">Contactar Suporte</Link></li>
+              <li>
+                <Link to="/admin" className="text-xs flex items-center gap-1.5 text-slate-500 hover:text-indigo-400 transition-colors pt-4">
+                  <Lock className="h-3 w-3" /> Acesso Administrativo
+                </Link>
+              </li>
             </ul>
             <div className="mt-6">
                 <p className="text-sm text-slate-400 mb-2">
@@ -67,7 +73,9 @@ const Footer: React.FC = () => {
           <p className="text-sm text-slate-500">
             &copy; {new Date().getFullYear()} {config.storeName}. Todos os direitos reservados.
           </p>
-          <Link to="/admin" className="text-xs text-slate-700 hover:text-slate-500">Admin</Link>
+          <div className="flex gap-4">
+            <Link to="/admin" className="text-xs text-slate-600 hover:text-indigo-500">Admin</Link>
+          </div>
         </div>
       </div>
     </footer>

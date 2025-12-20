@@ -6,11 +6,10 @@ import 'firebase/compat/auth';
 
 /**
  * CONFIGURAÇÃO DO FIREBASE
- * 1. Vá ao Console do Firebase > Configurações do Projeto
- * 2. Copie o objeto 'firebaseConfig' e substitua os valores abaixo:
+ * A chave de API abaixo foi atualizada com o valor fornecido: AIzaSyB8wmI7PLcaGowJ0r-ioJtT-avoUbkFkt4
  */
 const firebaseConfig = {
-  apiKey: "AIzaSyDHiLNvs1alz2kST7eNOJHMA-9N1OezzKI",
+  apiKey: "AIzaSyB8wmI7PLcaGowJ0r-ioJtT-avoUbkFkt4",
   authDomain: "project-44f7e7f5-4bf3-4b-5b516.firebaseapp.com",
   projectId: "project-44f7e7f5-4bf3-4b-5b516",
   storageBucket: "project-44f7e7f5-4bf3-4b-5b516.firebasestorage.ap",
@@ -21,24 +20,22 @@ const firebaseConfig = {
 let db: any = null;
 let auth: any = null;
 
-// Verifica se as chaves foram preenchidas (evita erro se estiverem vazias)
+// Verifica se as chaves foram preenchidas
 const isConfigured = firebaseConfig.apiKey && 
-                     firebaseConfig.apiKey !== "AIzaSyDHiLNvs1alz2kST7eNOJHMA-9N1OezzKI" &&
-                     firebaseConfig.projectId !== "project-44f7e7f5-4bf3-4b-5b516";
+                     firebaseConfig.apiKey !== "" &&
+                     firebaseConfig.projectId !== "";
 
 if (isConfigured) {
   try {
     const app = firebase.apps.length === 0 ? firebase.initializeApp(firebaseConfig) : firebase.app();
     db = app.firestore();
     auth = app.auth();
-    console.log("✅ RetroColor Engine: Ligado ao Firebase com sucesso.");
+    console.log("✅ RetroColor Engine: Ligado aos serviços de dados com a nova chave.");
   } catch (e) {
-    console.error("❌ Erro ao ligar ao Firebase. O site funcionará apenas em modo local (demo):", e);
+    console.error("❌ Erro ao ligar ao Firebase:", e);
     db = null;
     auth = null;
   }
-} else {
-  console.warn("⚠️ Firebase não configurado. As contas de clientes e saldo serão perdidos ao atualizar a página.");
 }
 
 export { db, auth };

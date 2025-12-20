@@ -2,48 +2,30 @@
 import { GoogleGenAI } from "@google/genai";
 
 /**
- * Converte um blob/ficheiro para base64 com tratamento de erro robusto.
+ * Converte um blob/ficheiro para base64.
  */
 export const blobToBase64 = (blob: Blob): Promise<string> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    
     reader.onload = () => {
-      const result = reader.result;
-      if (typeof result === 'string') {
-        const base64String = result.split(',')[1];
-        if (base64String) {
-          resolve(base64String);
-        } else {
-          reject(new Error("Falha ao extrair dados Base64 da imagem. O ficheiro pode estar corrompido."));
-        }
-      } else {
-        reject(new Error("O resultado da leitura do ficheiro é inválido."));
-      }
+      const result = reader.result as string;
+      resolve(result.split(',')[1]);
     };
-
-    reader.onerror = () => {
-      const errorMsg = reader.error?.message || "Erro desconhecido no FileReader.";
-      reject(new Error(`Erro ao ler o ficheiro: ${errorMsg}`));
-    };
-
-    try {
-      reader.readAsDataURL(blob);
-    } catch (err) {
-      reject(new Error("Não foi possível iniciar a leitura do ficheiro. Verifique as permissões do navegador."));
-    }
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
   });
 };
 
 /**
- * Restaura e colore a imagem usando o motor RetroColor AI (Gemini 2.5 Flash Engine).
+ * Restaura e colore a imagem usando o modelo Gemini 2.5 Flash.
+ * A chave de API é obtida automaticamente de process.env.API_KEY.
  */
 export const restoreImage = async (file: File | string): Promise<string> => {
   try {
-    // Inicializa o cliente com a chave mais recente disponível no ambiente
+    // IMPORTANTE: Criamos a instância aqui para garantir que usa a chave mais atual do sistema
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    
     let base64Data: string;
-
     if (file instanceof File) {
       base64Data = await blobToBase64(file);
     } else if (typeof file === 'string' && file.startsWith('data:')) {
@@ -63,19 +45,14 @@ export const restoreImage = async (file: File | string): Promise<string> => {
             },
           },
           {
-            text: 'Restore this old photo using your highest quality capabilities. Remove all scratches, noise, dust, and physical damage. Colorize it with extremely natural, vibrant, and historically accurate colors. Enhance the clarity of faces and textures. Return ONLY the restored image as data.',
+            text: 'Restore this old photo. Remove scratches and dust. Colorize it with natural and vibrant colors. Enhance faces. Return ONLY the restored image.',
           },
         ],
       },
-      config: {
-        imageConfig: {
-          aspectRatio: "1:1"
-        }
-      }
     });
 
     let restoredUrl: string | null = null;
-    if (response.candidates && response.candidates[0].content) {
+    if (response.candidates?.[0]?.content?.parts) {
       for (const part of response.candidates[0].content.parts) {
         if (part.inlineData) {
           restoredUrl = `data:image/png;base64,${part.inlineData.data}`;
@@ -85,22 +62,15 @@ export const restoreImage = async (file: File | string): Promise<string> => {
     }
 
     if (!restoredUrl) {
-      const textResponse = response.text || "";
-      if (textResponse.includes("quota") || textResponse.includes("limit") || textResponse.includes("exhausted")) {
-        throw new Error("Quota do motor RetroColor AI excedida. Por favor, utilize a sua própria chave de autenticação paga.");
-      }
-      throw new Error("O motor RetroColor AI não conseguiu processar esta imagem. Tente uma foto com melhor foco.");
+      throw new Error("O motor de IA não devolveu uma imagem. Tente novamente.");
     }
     
     return restoredUrl;
   } catch (error: any) {
-    console.error("Erro no Serviço de Restauração RetroColor:", error);
-    
-    const errorMsg = error.message || "";
-    if (errorMsg.includes("Requested entity was not found") || errorMsg.includes("429") || errorMsg.includes("RESOURCE_EXHAUSTED")) {
-      throw new Error("Limite de quota atingido ou chave inválida. Por favor, selecione uma chave de API paga para continuar sem restrições.");
+    console.error("Erro no Gemini Service:", error);
+    if (error.message?.includes("429") || error.message?.includes("QUOTA")) {
+      throw new Error("Limite de quota atingido. Por favor, clique no botão 'Ligar ao Motor AI' para usar a sua chave pessoal.");
     }
-    
-    throw new Error(error.message || "Erro inesperado no motor RetroColor AI.");
+    throw error;
   }
 };

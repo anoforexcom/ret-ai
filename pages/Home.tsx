@@ -138,7 +138,7 @@ const Home: React.FC = () => {
         </div>
       </section>
 
-      {/* Advantages Section - NEW */}
+      {/* Advantages Section */}
       <section className="py-24 bg-slate-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
@@ -232,7 +232,7 @@ const Home: React.FC = () => {
         </div>
       </section>
 
-      {/* Second Comparison Section - NEW */}
+      {/* Second Comparison Section */}
       <section className="py-24 bg-white overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="lg:grid lg:grid-cols-2 lg:gap-16 items-center">
@@ -240,8 +240,8 @@ const Home: React.FC = () => {
               <div className="absolute -inset-4 bg-cyan-500/10 blur-3xl rounded-full"></div>
               <div className="relative bg-slate-50 p-2 rounded-[2.5rem] shadow-xl border border-slate-100 overflow-hidden transform hover:scale-[1.01] transition-transform duration-500">
                 <BeforeAfterSlider 
-                  beforeImage="https://images.unsplash.com/photo-1550948537-130a1ce83314?q=80&w=800&auto=format&fit=crop&sat=-100"
-                  afterImage="https://images.unsplash.com/photo-1550948537-130a1ce83314?q=80&w=800&auto=format&fit=crop"
+                  beforeImage={config.comparisonBeforeImage || "https://images.unsplash.com/photo-1550948537-130a1ce83314?q=80&w=800&auto=format&fit=crop&sat=-100"}
+                  afterImage={config.comparisonAfterImage || "https://images.unsplash.com/photo-1550948537-130a1ce83314?q=80&w=800&auto=format&fit=crop"}
                   className="rounded-[2rem] aspect-[4/3]"
                 />
               </div>
@@ -276,7 +276,7 @@ const Home: React.FC = () => {
         </div>
       </section>
 
-      {/* Testimonials with Horizontal Scroll (Moved before FAQ) */}
+      {/* Testimonials with Horizontal Scroll */}
       <section className="py-24 bg-slate-50 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">

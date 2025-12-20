@@ -90,6 +90,8 @@ const defaultStats: StoreConfig = {
   heroSubtitle: 'Restaure fotos antigas e colorize imagens a preto e branco em segundos com a nossa tecnologia proprietária RetroColor AI.',
   heroBeforeImage: 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?q=80&w=1200&sat=-100',
   heroAfterImage: 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?q=80&w=1200',
+  comparisonBeforeImage: 'https://images.unsplash.com/photo-1550948537-130a1ce83314?q=80&w=800&auto=format&fit=crop&sat=-100',
+  comparisonAfterImage: 'https://images.unsplash.com/photo-1550948537-130a1ce83314?q=80&w=800&auto=format&fit=crop',
   footerText: 'Recupere o passado com cores vibrantes. Especialistas em restauração digital por RetroColor AI Engine.',
   mainMenu: [
     { id: '1', label: 'Início', path: '/' },

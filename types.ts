@@ -118,6 +118,8 @@ export interface StoreConfig {
   heroSubtitle: string;
   heroBeforeImage?: string;
   heroAfterImage?: string;
+  comparisonBeforeImage?: string;
+  comparisonAfterImage?: string;
   footerText: string;
   mainMenu: NavigationLink[];
   footerMenu: NavigationLink[];

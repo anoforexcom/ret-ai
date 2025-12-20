@@ -12,6 +12,8 @@ const StoreSettings: React.FC = () => {
   
   const beforeInputRef = useRef<HTMLInputElement>(null);
   const afterInputRef = useRef<HTMLInputElement>(null);
+  const compBeforeInputRef = useRef<HTMLInputElement>(null);
+  const compAfterInputRef = useRef<HTMLInputElement>(null);
 
   const handleSave = () => {
     setSaved(true);
@@ -19,7 +21,7 @@ const StoreSettings: React.FC = () => {
     setTimeout(() => setSaved(false), 2000);
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'before' | 'after') => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'before' | 'after' | 'comp_before' | 'comp_after') => {
     const file = e.target.files?.[0];
     if (file) {
       if (file.size > 2 * 1024 * 1024) {
@@ -31,8 +33,12 @@ const StoreSettings: React.FC = () => {
         const base64String = reader.result as string;
         if (type === 'before') {
           updateConfig({ heroBeforeImage: base64String });
-        } else {
+        } else if (type === 'after') {
           updateConfig({ heroAfterImage: base64String });
+        } else if (type === 'comp_before') {
+          updateConfig({ comparisonBeforeImage: base64String });
+        } else if (type === 'comp_after') {
+          updateConfig({ comparisonAfterImage: base64String });
         }
       };
       reader.readAsDataURL(file);
@@ -122,7 +128,7 @@ const StoreSettings: React.FC = () => {
                 onClick={() => setActiveTab('general')}
                 className={`flex-1 min-w-[120px] py-4 text-sm font-medium text-center ${activeTab === 'general' ? 'bg-indigo-50 text-indigo-600 border-b-2 border-indigo-600' : 'text-slate-500 hover:text-slate-700'}`}
             >
-                Geral & Hero
+                Geral & Conteúdo
             </button>
             <button 
                 onClick={() => setActiveTab('design')}
@@ -171,11 +177,11 @@ const StoreSettings: React.FC = () => {
 
                     <div className="pt-6 border-t border-slate-100">
                         <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
-                            <ImageIcon className="h-5 w-5 text-indigo-600" /> Imagens do Hero (Upload)
+                            <ImageIcon className="h-5 w-5 text-indigo-600" /> Imagens do Hero (Comparação 1)
                         </h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">Imagem "Antes" (Ficheiro)</label>
+                                <label className="block text-sm font-medium text-slate-700 mb-1">Imagem "Antes"</label>
                                 <div 
                                   onClick={() => beforeInputRef.current?.click()}
                                   className="mt-2 h-40 w-full rounded-xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center cursor-pointer hover:border-indigo-400 hover:bg-indigo-50/30 transition-all group overflow-hidden"
@@ -198,7 +204,7 @@ const StoreSettings: React.FC = () => {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">Imagem "Depois" (Ficheiro)</label>
+                                <label className="block text-sm font-medium text-slate-700 mb-1">Imagem "Depois"</label>
                                 <div 
                                   onClick={() => afterInputRef.current?.click()}
                                   className="mt-2 h-40 w-full rounded-xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center cursor-pointer hover:border-indigo-400 hover:bg-indigo-50/30 transition-all group overflow-hidden"
@@ -221,7 +227,60 @@ const StoreSettings: React.FC = () => {
                                 />
                             </div>
                         </div>
-                        <p className="mt-3 text-[10px] text-slate-400 italic">Recomendamos imagens com rácio 4:3 ou 16:9 para melhores resultados visuais.</p>
+                    </div>
+
+                    <div className="pt-6 border-t border-slate-100">
+                        <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+                            <ImageIcon className="h-5 w-5 text-indigo-600" /> Segunda Comparação (Meio da Página)
+                        </h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label className="block text-sm font-medium text-slate-700 mb-1">Imagem "Antes"</label>
+                                <div 
+                                  onClick={() => compBeforeInputRef.current?.click()}
+                                  className="mt-2 h-40 w-full rounded-xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center cursor-pointer hover:border-indigo-400 hover:bg-indigo-50/30 transition-all group overflow-hidden"
+                                >
+                                    {config.comparisonBeforeImage ? (
+                                      <img src={config.comparisonBeforeImage} alt="Preview Comp Antes" className="w-full h-full object-cover" />
+                                    ) : (
+                                      <>
+                                        <Upload className="h-8 w-8 text-slate-300 group-hover:text-indigo-400 mb-2" />
+                                        <span className="text-xs text-slate-400 font-bold group-hover:text-indigo-600">CARREGAR ANTES</span>
+                                      </>
+                                    )}
+                                </div>
+                                <input 
+                                  type="file" 
+                                  ref={compBeforeInputRef} 
+                                  className="hidden" 
+                                  accept="image/*" 
+                                  onChange={(e) => handleFileChange(e, 'comp_before')} 
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-slate-700 mb-1">Imagem "Depois"</label>
+                                <div 
+                                  onClick={() => compAfterInputRef.current?.click()}
+                                  className="mt-2 h-40 w-full rounded-xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center cursor-pointer hover:border-indigo-400 hover:bg-indigo-50/30 transition-all group overflow-hidden"
+                                >
+                                    {config.comparisonAfterImage ? (
+                                      <img src={config.comparisonAfterImage} alt="Preview Comp Depois" className="w-full h-full object-cover" />
+                                    ) : (
+                                      <>
+                                        <Upload className="h-8 w-8 text-slate-300 group-hover:text-indigo-400 mb-2" />
+                                        <span className="text-xs text-slate-400 font-bold group-hover:text-indigo-600">CARREGAR DEPOIS</span>
+                                      </>
+                                    )}
+                                </div>
+                                <input 
+                                  type="file" 
+                                  ref={compAfterInputRef} 
+                                  className="hidden" 
+                                  accept="image/*" 
+                                  onChange={(e) => handleFileChange(e, 'comp_after')} 
+                                />
+                            </div>
+                        </div>
                     </div>
 
                     <div className="pt-6 border-t border-slate-100">

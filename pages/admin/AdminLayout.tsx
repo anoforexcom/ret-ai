@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Outlet, NavLink } from 'react-router-dom';
+import { Outlet, NavLink, Link } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   ShoppingCart, 
@@ -13,7 +13,8 @@ import {
   PieChart, 
   ShieldCheck,
   Menu,
-  X
+  X,
+  ArrowLeft
 } from 'lucide-react';
 import { useConfig } from '../../contexts/ConfigContext';
 
@@ -36,7 +37,13 @@ const AdminLayout: React.FC = () => {
 
   if (!isAdmin) {
     return (
-      <div className="min-h-screen bg-slate-100 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-slate-100 flex flex-col items-center justify-center p-4">
+        <Link 
+          to="/" 
+          className="flex items-center gap-2 text-slate-500 hover:text-indigo-600 mb-6 transition-colors font-medium"
+        >
+          <ArrowLeft className="h-4 w-4" /> Voltar ao site
+        </Link>
         <div className="max-w-md w-full bg-white rounded-xl shadow-lg p-8">
           <div className="flex justify-center mb-6">
             <div className="h-12 w-12 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600">
@@ -52,7 +59,7 @@ const AdminLayout: React.FC = () => {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                className="w-full px-4 py-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
                 placeholder="Senha"
               />
             </div>

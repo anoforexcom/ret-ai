@@ -1,7 +1,7 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useConfig } from '../../contexts/ConfigContext';
-import { Save, Plus, Trash2, CreditCard, Layout, Smartphone, Wallet, Palette, Type, Box, Settings2, Globe, ShieldCheck } from 'lucide-react';
+import { Save, Plus, Trash2, CreditCard, Layout, Smartphone, Wallet, Palette, Type, Box, Settings2, Globe, ShieldCheck, Image as ImageIcon, Upload } from 'lucide-react';
 import { PaymentMethod } from '../../types';
 
 const StoreSettings: React.FC = () => {
@@ -9,11 +9,34 @@ const StoreSettings: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'general' | 'payments' | 'menus' | 'design'>('general');
   const [saved, setSaved] = useState(false);
   const [editingPaymentId, setEditingPaymentId] = useState<string | null>(null);
+  
+  const beforeInputRef = useRef<HTMLInputElement>(null);
+  const afterInputRef = useRef<HTMLInputElement>(null);
 
   const handleSave = () => {
     setSaved(true);
     addAuditLog('Configurações Atualizadas', `Separador: ${activeTab}`);
     setTimeout(() => setSaved(false), 2000);
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'before' | 'after') => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 2 * 1024 * 1024) {
+        alert("O ficheiro é demasiado grande. Máximo 2MB para otimização do site.");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64String = reader.result as string;
+        if (type === 'before') {
+          updateConfig({ heroBeforeImage: base64String });
+        } else {
+          updateConfig({ heroAfterImage: base64String });
+        }
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleMenuChange = (menuType: 'mainMenu' | 'footerMenu', index: number, field: 'label' | 'path', value: string) => {
@@ -99,7 +122,7 @@ const StoreSettings: React.FC = () => {
                 onClick={() => setActiveTab('general')}
                 className={`flex-1 min-w-[120px] py-4 text-sm font-medium text-center ${activeTab === 'general' ? 'bg-indigo-50 text-indigo-600 border-b-2 border-indigo-600' : 'text-slate-500 hover:text-slate-700'}`}
             >
-                Geral & Rodapé
+                Geral & Hero
             </button>
             <button 
                 onClick={() => setActiveTab('design')}
@@ -124,6 +147,9 @@ const StoreSettings: React.FC = () => {
         <div className="p-6">
             {activeTab === 'general' && (
                 <div className="space-y-6 max-w-2xl">
+                    <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+                        <Settings2 className="h-5 w-5 text-indigo-600" /> Informações Básicas
+                    </h3>
                     <div>
                         <label className="block text-sm font-medium text-slate-700 mb-1">Nome da Loja</label>
                         <input 
@@ -142,16 +168,63 @@ const StoreSettings: React.FC = () => {
                             className="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
                         />
                     </div>
-                    <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-1">Subtítulo Hero</label>
-                        <textarea 
-                            value={config.heroSubtitle}
-                            onChange={(e) => updateConfig({ heroSubtitle: e.target.value })}
-                            rows={3}
-                            className="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-                        />
+
+                    <div className="pt-6 border-t border-slate-100">
+                        <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+                            <ImageIcon className="h-5 w-5 text-indigo-600" /> Imagens do Hero (Upload)
+                        </h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label className="block text-sm font-medium text-slate-700 mb-1">Imagem "Antes" (Ficheiro)</label>
+                                <div 
+                                  onClick={() => beforeInputRef.current?.click()}
+                                  className="mt-2 h-40 w-full rounded-xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center cursor-pointer hover:border-indigo-400 hover:bg-indigo-50/30 transition-all group overflow-hidden"
+                                >
+                                    {config.heroBeforeImage ? (
+                                      <img src={config.heroBeforeImage} alt="Preview Antes" className="w-full h-full object-cover" />
+                                    ) : (
+                                      <>
+                                        <Upload className="h-8 w-8 text-slate-300 group-hover:text-indigo-400 mb-2" />
+                                        <span className="text-xs text-slate-400 font-bold group-hover:text-indigo-600">CARREGAR ANTES</span>
+                                      </>
+                                    )}
+                                </div>
+                                <input 
+                                  type="file" 
+                                  ref={beforeInputRef} 
+                                  className="hidden" 
+                                  accept="image/*" 
+                                  onChange={(e) => handleFileChange(e, 'before')} 
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-slate-700 mb-1">Imagem "Depois" (Ficheiro)</label>
+                                <div 
+                                  onClick={() => afterInputRef.current?.click()}
+                                  className="mt-2 h-40 w-full rounded-xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center cursor-pointer hover:border-indigo-400 hover:bg-indigo-50/30 transition-all group overflow-hidden"
+                                >
+                                    {config.heroAfterImage ? (
+                                      <img src={config.heroAfterImage} alt="Preview Depois" className="w-full h-full object-cover" />
+                                    ) : (
+                                      <>
+                                        <Upload className="h-8 w-8 text-slate-300 group-hover:text-indigo-400 mb-2" />
+                                        <span className="text-xs text-slate-400 font-bold group-hover:text-indigo-600">CARREGAR DEPOIS</span>
+                                      </>
+                                    )}
+                                </div>
+                                <input 
+                                  type="file" 
+                                  ref={afterInputRef} 
+                                  className="hidden" 
+                                  accept="image/*" 
+                                  onChange={(e) => handleFileChange(e, 'after')} 
+                                />
+                            </div>
+                        </div>
+                        <p className="mt-3 text-[10px] text-slate-400 italic">Recomendamos imagens com rácio 4:3 ou 16:9 para melhores resultados visuais.</p>
                     </div>
-                    <div>
+
+                    <div className="pt-6 border-t border-slate-100">
                         <label className="block text-sm font-medium text-slate-700 mb-1">Texto do Rodapé</label>
                         <textarea 
                             value={config.footerText}
@@ -161,8 +234,8 @@ const StoreSettings: React.FC = () => {
                         />
                     </div>
                     <div className="pt-4">
-                        <button onClick={handleSave} className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors">
-                            <Save className="h-4 w-4" /> Guardar Alterações
+                        <button onClick={handleSave} className="flex items-center gap-2 bg-indigo-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-500/20">
+                            <Save className="h-4 w-4" /> Guardar Configurações
                         </button>
                     </div>
                 </div>

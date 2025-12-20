@@ -116,6 +116,8 @@ export interface StoreConfig {
   adminPassword?: string;
   heroTitle: string;
   heroSubtitle: string;
+  heroBeforeImage?: string;
+  heroAfterImage?: string;
   footerText: string;
   mainMenu: NavigationLink[];
   footerMenu: NavigationLink[];

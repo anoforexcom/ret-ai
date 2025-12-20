@@ -36,10 +36,11 @@ export const blobToBase64 = (blob: Blob): Promise<string> => {
 };
 
 /**
- * Restaura e colore a imagem usando o motor RetroColor AI (Gemini 3 Pro Engine).
+ * Restaura e colore a imagem usando o motor RetroColor AI (Gemini 2.5 Flash Engine).
  */
 export const restoreImage = async (file: File | string): Promise<string> => {
   try {
+    // Inicializa o cliente com a chave mais recente disponível no ambiente
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     let base64Data: string;
 
@@ -52,7 +53,7 @@ export const restoreImage = async (file: File | string): Promise<string> => {
     }
 
     const response = await ai.models.generateContent({
-      model: 'gemini-3-pro-image-preview',
+      model: 'gemini-2.5-flash-image',
       contents: {
         parts: [
           {
@@ -68,8 +69,7 @@ export const restoreImage = async (file: File | string): Promise<string> => {
       },
       config: {
         imageConfig: {
-          aspectRatio: "1:1",
-          imageSize: "1K"
+          aspectRatio: "1:1"
         }
       }
     });
@@ -86,8 +86,8 @@ export const restoreImage = async (file: File | string): Promise<string> => {
 
     if (!restoredUrl) {
       const textResponse = response.text || "";
-      if (textResponse.includes("quota") || textResponse.includes("limit")) {
-        throw new Error("Quota do motor RetroColor AI excedida. Por favor, utilize a sua própria chave de autenticação.");
+      if (textResponse.includes("quota") || textResponse.includes("limit") || textResponse.includes("exhausted")) {
+        throw new Error("Quota do motor RetroColor AI excedida. Por favor, utilize a sua própria chave de autenticação paga.");
       }
       throw new Error("O motor RetroColor AI não conseguiu processar esta imagem. Tente uma foto com melhor foco.");
     }
@@ -96,8 +96,9 @@ export const restoreImage = async (file: File | string): Promise<string> => {
   } catch (error: any) {
     console.error("Erro no Serviço de Restauração RetroColor:", error);
     
-    if (error.message?.includes("Requested entity was not found")) {
-      throw new Error("A chave de ligação ao motor RetroColor é inválida ou expirou.");
+    const errorMsg = error.message || "";
+    if (errorMsg.includes("Requested entity was not found") || errorMsg.includes("429") || errorMsg.includes("RESOURCE_EXHAUSTED")) {
+      throw new Error("Limite de quota atingido ou chave inválida. Por favor, selecione uma chave de API paga para continuar sem restrições.");
     }
     
     throw new Error(error.message || "Erro inesperado no motor RetroColor AI.");

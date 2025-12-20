@@ -6,10 +6,6 @@ import { restoreImage } from '../services/geminiService';
 import PaymentModal from '../components/PaymentModal';
 import { useConfig } from '../contexts/ConfigContext';
 
-// Fix: Removed local AIStudio and Window interface declarations as they were causing collisions 
-// with the pre-configured environment definitions (Error on line 19).
-// The app now relies on the existing global environment definitions for window.aistudio.
-
 const Restore: React.FC = () => {
   const [status, setStatus] = useState<AppStatus>(AppStatus.IDLE);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -24,8 +20,6 @@ const Restore: React.FC = () => {
 
   useEffect(() => {
     const checkKey = async () => {
-      // Fix: Accessing aistudio via window object safely. 
-      // This is assumed to be pre-configured and valid per guidelines.
       const aiStudio = (window as any).aistudio;
       if (aiStudio && typeof aiStudio.hasSelectedApiKey === 'function') {
         const selected = await aiStudio.hasSelectedApiKey();
@@ -36,12 +30,12 @@ const Restore: React.FC = () => {
   }, []);
 
   const handleOpenKeySelector = async () => {
-    // Fix: Accessing aistudio via window object safely.
     const aiStudio = (window as any).aistudio;
     if (aiStudio && typeof aiStudio.openSelectKey === 'function') {
       await aiStudio.openSelectKey();
-      // Assume the key selection was successful as per guidelines to avoid race conditions.
+      // Assume a seleção foi bem-sucedida para evitar condições de corrida
       setHasKey(true);
+      setError(null);
     }
   };
 
@@ -63,11 +57,6 @@ const Restore: React.FC = () => {
   const startAI = async () => {
     if (!selectedFile) return;
 
-    if (!hasKey) {
-      setError("Para utilizar o restauro RetroColor AI de alta qualidade, é necessário selecionar a sua própria chave de API paga.");
-      return;
-    }
-
     setStatus(AppStatus.PROCESSING);
     setError(null);
 
@@ -79,12 +68,19 @@ const Restore: React.FC = () => {
       console.error(err);
       setStatus(AppStatus.ERROR);
       
-      // If the request fails with an error message containing "Requested entity was not found.", reset the key selection state and prompt the user to select a key again as per guidelines.
-      if (err.message && (err.message.includes("Requested entity was not found") || err.message.includes("chave de ligação ao motor RetroColor é inválida"))) {
+      const errorMsg = err.message || "";
+      // Deteta erros de quota (429/RESOURCE_EXHAUSTED) ou chave não encontrada
+      if (
+        errorMsg.includes("Requested entity was not found") || 
+        errorMsg.includes("RESOURCE_EXHAUSTED") || 
+        errorMsg.includes("quota") || 
+        errorMsg.includes("limit") ||
+        errorMsg.includes("429")
+      ) {
         setHasKey(false);
-        setError("A sua chave de autenticação parece inválida. Por favor, selecione novamente para ligar ao RetroColor Engine.");
+        setError("A quota do motor RetroColor AI foi atingida para esta chave. Por favor, utilize o botão abaixo para ligar uma chave de API paga do Google Cloud.");
       } else {
-        setError(err.message || "Ocorreu um erro no motor RetroColor AI. Verifique a sua quota.");
+        setError(errorMsg || "Ocorreu um erro inesperado no motor RetroColor AI.");
       }
     }
   };
@@ -129,28 +125,29 @@ const Restore: React.FC = () => {
         </div>
 
         {/* API Key Banner/Check */}
-        {!hasKey && (
-          <div className="mb-8 bg-amber-50 border border-amber-200 rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-4 animate-fadeIn">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-amber-100 text-amber-700 rounded-xl">
-                <Key className="h-6 w-6" />
-              </div>
-              <div>
-                <h3 className="text-sm font-bold text-slate-900">Ligação ao Motor RetroColor AI</h3>
-                <p className="text-xs text-slate-600 max-w-md">
-                  Para garantir a máxima qualidade de restauro sem interrupções e com total privacidade, utilize a sua própria chave de ligação paga. 
-                  Consulte a <a href="https://ai.google.dev/gemini-api/docs/billing" target="_blank" rel="noopener noreferrer" className="text-indigo-600 underline font-bold">documentação de faturação</a> para detalhes.
-                </p>
-              </div>
+        <div className={`mb-8 p-6 rounded-2xl border flex flex-col md:flex-row items-center justify-between gap-4 transition-all ${hasKey ? 'bg-green-50 border-green-100' : 'bg-amber-50 border-amber-200 animate-pulse'}`}>
+          <div className="flex items-center gap-4">
+            <div className={`p-3 rounded-xl ${hasKey ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
+              <Key className="h-6 w-6" />
             </div>
-            <button 
-              onClick={handleOpenKeySelector}
-              className="bg-indigo-600 text-white px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-indigo-700 transition-all flex items-center gap-2 whitespace-nowrap"
-            >
-              Ligar ao Motor AI
-            </button>
+            <div>
+              <h3 className="text-sm font-bold text-slate-900">
+                {hasKey ? 'Motor RetroColor AI Conectado' : 'Ligação ao Motor RetroColor AI Necessária'}
+              </h3>
+              <p className="text-xs text-slate-600 max-w-md">
+                {hasKey 
+                  ? 'A sua chave privada está a ser utilizada para garantir restauros sem limites.' 
+                  : 'Para garantir a máxima qualidade e evitar erros de quota, utilize a sua própria chave de API paga.'}
+              </p>
+            </div>
           </div>
-        )}
+          <button 
+            onClick={handleOpenKeySelector}
+            className={`${hasKey ? 'bg-white text-slate-600 border border-slate-200' : 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20'} px-6 py-2.5 rounded-xl font-bold text-sm hover:opacity-90 transition-all flex items-center gap-2 whitespace-nowrap`}
+          >
+            {hasKey ? 'Alterar Chave' : 'Ligar ao Motor AI'}
+          </button>
+        </div>
 
         <div className="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
           <div className="p-8">
@@ -163,7 +160,7 @@ const Restore: React.FC = () => {
                   <Upload className="h-8 w-8" />
                 </div>
                 <h3 className="text-xl font-bold text-slate-900">Selecione ou arraste a sua foto</h3>
-                <p className="text-slate-500 mt-2">Processamento imediato via RetroColor Engine</p>
+                <p className="text-slate-500 mt-2">Processamento via RetroColor Engine</p>
                 <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileSelect} />
               </div>
             ) : (
@@ -188,7 +185,7 @@ const Restore: React.FC = () => {
                           <div className="text-center px-4">
                              <Loader2 className="h-10 w-10 text-indigo-600 animate-spin mx-auto mb-2" />
                              <p className="text-sm font-black text-slate-900">Motor RetroColor em ação...</p>
-                             <p className="text-[10px] text-slate-500 mt-1">Isso pode levar até 20 segundos para cores perfeitas.</p>
+                             <p className="text-[10px] text-slate-500 mt-1">Otimizando cores e texturas (15-30s).</p>
                           </div>
                         ) : restoredUrl ? (
                           <img src={restoredUrl} className="w-full h-full object-contain" alt="Restaurada" />
@@ -204,19 +201,16 @@ const Restore: React.FC = () => {
 
                 {error && (
                   <div className="p-4 bg-red-50 border border-red-100 rounded-xl text-red-600 text-sm flex items-center gap-3 animate-shake">
-                    <AlertCircle className="h-5 w-5 flex-shrink-0" /> {error}
+                    <AlertCircle className="h-5 w-5 flex-shrink-0" /> 
+                    <div className="flex-1">{error}</div>
                   </div>
                 )}
 
                 <div className="flex justify-center pt-4">
-                  {status === AppStatus.IDLE && (
+                  {(status === AppStatus.IDLE || status === AppStatus.ERROR) && (
                     <button 
                       onClick={startAI} 
-                      className={`px-8 py-3 rounded-xl font-bold shadow-lg transition-all flex items-center gap-2 ${
-                        hasKey 
-                        ? 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-indigo-500/20' 
-                        : 'bg-slate-200 text-slate-400 cursor-not-allowed'
-                      }`}
+                      className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-xl font-bold shadow-lg shadow-indigo-500/20 transition-all flex items-center gap-2"
                     >
                       <Wand2 className="h-5 w-5" /> Restaurar com RetroColor AI
                     </button>

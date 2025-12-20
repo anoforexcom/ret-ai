@@ -98,8 +98,8 @@ const Home: React.FC = () => {
                <div className="absolute inset-0 bg-indigo-500/20 blur-[100px] rounded-full scale-75 animate-pulse"></div>
                <div className="rounded-3xl overflow-hidden shadow-2xl border-[10px] border-white/5 relative z-10 h-[450px]">
                   <BeforeAfterSlider 
-                    beforeImage="https://images.unsplash.com/photo-1533038590840-1cde6e668a91?q=80&w=1200&sat=-100"
-                    afterImage="https://images.unsplash.com/photo-1533038590840-1cde6e668a91?q=80&w=1200"
+                    beforeImage="https://images.unsplash.com/photo-1507679799987-c73779587ccf?q=80&w=1200&sat=-100"
+                    afterImage="https://images.unsplash.com/photo-1507679799987-c73779587ccf?q=80&w=1200"
                     className="h-full"
                   />
                </div>

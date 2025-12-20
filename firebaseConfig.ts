@@ -6,12 +6,12 @@ import 'firebase/compat/auth';
 
 // SUBSTITUA COM A SUA CONFIGURAÇÃO DO FIREBASE CONSOLE
 const firebaseConfig = {
-  apiKey: "SUA_API_KEY_AQUI",
-  authDomain: "SEU_PROJETO.firebaseapp.com",
-  projectId: "SEU_PROJETO_ID",
-  storageBucket: "SEU_PROJETO.appspot.com",
-  messagingSenderId: "SEU_SENDER_ID",
-  appId: "SEU_APP_ID"
+  apiKey: "AIzaSyDHiLNvs1alz2kST7eNOJHMA-9N1OezzKI",
+  authDomain: "project-44f7e7f5-4bf3-4b-5b516.firebaseapp.com",
+  projectId: "project-44f7e7f5-4bf3-4b-5b516",
+  storageBucket: "project-44f7e7f5-4bf3-4b-5b516.firebasestorage.app",
+  messagingSenderId: "28453566330",
+  appId: "1:28453566330:web:792ed77487b239d27808c3"
 };
 
 let db: any = null;

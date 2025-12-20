@@ -6,19 +6,9 @@ import { restoreImage } from '../services/geminiService';
 import PaymentModal from '../components/PaymentModal';
 import { useConfig } from '../contexts/ConfigContext';
 
-// Define interface for AI Studio functions with a unique name to avoid naming collisions.
-interface AIStudioSDK {
-  hasSelectedApiKey(): Promise<boolean>;
-  openSelectKey(): Promise<void>;
-}
-
-// Declaração global para as funções da AI Studio. 
-declare global {
-  interface Window {
-    // Fixed: Added readonly modifier to match potential existing environment declarations and used unique interface name.
-    readonly aistudio: AIStudioSDK;
-  }
-}
+// Fix: Removed local AIStudio and Window interface declarations as they were causing collisions 
+// with the pre-configured environment definitions (Error on line 19).
+// The app now relies on the existing global environment definitions for window.aistudio.
 
 const Restore: React.FC = () => {
   const [status, setStatus] = useState<AppStatus>(AppStatus.IDLE);
@@ -34,8 +24,11 @@ const Restore: React.FC = () => {
 
   useEffect(() => {
     const checkKey = async () => {
-      if (window.aistudio) {
-        const selected = await window.aistudio.hasSelectedApiKey();
+      // Fix: Accessing aistudio via window object safely. 
+      // This is assumed to be pre-configured and valid per guidelines.
+      const aiStudio = (window as any).aistudio;
+      if (aiStudio && typeof aiStudio.hasSelectedApiKey === 'function') {
+        const selected = await aiStudio.hasSelectedApiKey();
         setHasKey(selected);
       }
     };
@@ -43,8 +36,10 @@ const Restore: React.FC = () => {
   }, []);
 
   const handleOpenKeySelector = async () => {
-    if (window.aistudio) {
-      await window.aistudio.openSelectKey();
+    // Fix: Accessing aistudio via window object safely.
+    const aiStudio = (window as any).aistudio;
+    if (aiStudio && typeof aiStudio.openSelectKey === 'function') {
+      await aiStudio.openSelectKey();
       // Assume the key selection was successful as per guidelines to avoid race conditions.
       setHasKey(true);
     }
@@ -84,8 +79,8 @@ const Restore: React.FC = () => {
       console.error(err);
       setStatus(AppStatus.ERROR);
       
-      // If the request fails with "Requested entity was not found.", reset the key selection state as per guidelines.
-      if (err.message.includes("Requested entity was not found") || err.message.includes("chave de ligação ao motor RetroColor é inválida")) {
+      // If the request fails with an error message containing "Requested entity was not found.", reset the key selection state and prompt the user to select a key again as per guidelines.
+      if (err.message && (err.message.includes("Requested entity was not found") || err.message.includes("chave de ligação ao motor RetroColor é inválida"))) {
         setHasKey(false);
         setError("A sua chave de autenticação parece inválida. Por favor, selecione novamente para ligar ao RetroColor Engine.");
       } else {
@@ -144,6 +139,7 @@ const Restore: React.FC = () => {
                 <h3 className="text-sm font-bold text-slate-900">Ligação ao Motor RetroColor AI</h3>
                 <p className="text-xs text-slate-600 max-w-md">
                   Para garantir a máxima qualidade de restauro sem interrupções e com total privacidade, utilize a sua própria chave de ligação paga. 
+                  Consulte a <a href="https://ai.google.dev/gemini-api/docs/billing" target="_blank" rel="noopener noreferrer" className="text-indigo-600 underline font-bold">documentação de faturação</a> para detalhes.
                 </p>
               </div>
             </div>

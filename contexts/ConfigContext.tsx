@@ -1,72 +1,53 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { StoreConfig, Order, NavigationLink, ProductBundle, AuditLog, Testimonial, Expense, ThemeConfig, PaymentMethod, StoreMember, CustomerAccount } from '../types';
+import { db, auth, storage, isConfigured } from '../firebaseConfig';
+import { doc, getDoc, setDoc, collection, onSnapshot, addDoc, updateDoc, query, orderBy, limit } from 'firebase/firestore';
+import { ref, uploadString, getDownloadURL } from 'firebase/storage';
 
 interface ConfigContextType {
   config: StoreConfig;
   orders: Order[];
   auditLogs: AuditLog[];
   updateConfig: (newConfig: Partial<StoreConfig>) => void;
-  addOrder: (order: Order) => void;
+  addOrder: (order: Order) => Promise<void>;
   updateOrder: (id: string, status: Order['status']) => void;
   addAuditLog: (action: string, details: string) => void;
   isAdmin: boolean;
   login: () => void;
   logout: () => void;
   currentCustomer: CustomerAccount | null;
-  customerLogin: (email: string) => boolean;
+  customerLogin: (email: string, password?: string) => { success: boolean, message: string };
   customerLogout: () => void;
-  registerCustomer: (customer: Omit<CustomerAccount, 'id' | 'balance' | 'createdAt'>) => CustomerAccount;
+  registerCustomer: (customer: Omit<CustomerAccount, 'id' | 'balance' | 'createdAt'>) => Promise<CustomerAccount>;
   updateCustomerBalance: (customerId: string, amount: number) => void;
+  updateCustomerPassword: (customerId: string, newPassword: string) => void;
+  isCloudActive: boolean;
 }
 
 const ConfigContext = createContext<ConfigContextType | undefined>(undefined);
-
-const defaultBundles: ProductBundle[] = [
-  { id: 'recolor_1', photos: 1, price: 4, label: 'Colorização Individual', active: true },
-  { id: 'recolor_5', photos: 5, price: 15, label: 'Pack Familiar (5 Fotos)', savings: 'Poupe 5€', popular: true, active: true },
-  { id: 'recolor_10', photos: 10, price: 25, label: 'Pack Arquivo (10 Fotos)', savings: 'Poupe 15€', active: true },
-];
-
-const defaultTestimonials: Testimonial[] = [
-  { id: 't1', name: 'António Ferreira', location: 'Porto, PT', text: 'Restaurei as fotos de casamento dos meus pais. O resultado foi emocionante, as cores parecem tão naturais!', rating: 5, date: '2024-03-15' },
-  { id: 't2', name: 'Marta Rodrigues', location: 'Lisboa, PT', text: 'Serviço rápido e de qualidade incrível. Recomendo vivamente para quem quer preservar memórias de família.', rating: 5, date: '2024-04-02' },
-  { id: 't3', name: 'João Pires', location: 'Coimbra, PT', text: 'A nitidez que a IA conseguiu recuperar numa foto de 1950 é simplesmente inexplicável. Nota 10!', rating: 5, date: '2024-04-10' },
-  { id: 't4', name: 'Beatriz Santos', location: 'Braga, PT', text: 'O processo é muito simples e o download é imediato. Vale cada cêntimo pela emoção de ver os meus avós a cores.', rating: 5, date: '2024-04-12' },
-  { id: 't5', name: 'Ricardo Costa', location: 'Faro, PT', text: 'Tentei outros sites mas este é o único que não deixa a pele com aspeto artificial. Muito bom.', rating: 4, date: '2024-04-15' },
-  { id: 't6', name: 'Sofia Oliveira', location: 'Funchal, PT', text: 'O apoio ao cliente foi impecável quando tive uma dúvida sobre o formato do ficheiro. Recomendo!', rating: 5, date: '2024-04-18' },
-  { id: 't7', name: 'Manuel Silva', location: 'Ponta Delgada, PT', text: 'Recuperei uma foto histórica da nossa freguesia. A comunidade ficou impressionada com o realismo.', rating: 5, date: '2024-04-20' },
-  { id: 't8', name: 'Helena Matos', location: 'Aveiro, PT', text: 'As cores da roupa na foto restaurada batem certo com o que a minha mãe se lembrava. Incrível!', rating: 5, date: '2024-04-22' },
-  { id: 't9', name: 'Vítor Pereira', location: 'Viseu, PT', text: 'Rápido, eficaz e muito profissional. O site é intuitivo e funciona bem no telemóvel.', rating: 5, date: '2024-04-25' },
-  { id: 't10', name: 'Luísa Gomes', location: 'Setúbal, PT', text: 'Um presente perfeito para o aniversário do meu pai. Ele chorou ao ver as fotos da sua juventude restauradas.', rating: 5, date: '2024-04-28' }
-];
 
 const defaultStats: StoreConfig = {
   storeName: 'RetroColor AI',
   adminPassword: 'admin',
   heroTitle: 'Dê cor às suas memórias mais queridas',
   heroSubtitle: 'Restaure fotos antigas e colorize imagens a preto e branco em segundos com a nossa tecnologia proprietária RetroColor AI.',
-  footerText: 'Recupere o passado com cores vibrantes. Especialistas em restauração digital por RetroColor AI Engine.',
+  footerText: 'Recupere o passado com cores vibrantes.',
   mainMenu: [
     { id: '1', label: 'Início', path: '/' },
     { id: '2', label: 'Restaurar', path: '/restore' },
-    { id: 'precos', label: 'Preços', path: '/pricing' },
-    { id: 'faq_nav', label: 'FAQ', path: '/faq' },
-    { id: 'contact_nav', label: 'Contacto', path: '/contact' },
+    { id: 'precos', label: 'Preços', path: '/pricing' }
   ],
-  footerMenu: [
-    { id: '1', label: 'Privacidade', path: '/privacy' },
-    { id: '2', label: 'Termos', path: '/terms' },
-    { id: 'faq_footer', label: 'Perguntas Frequentes', path: '/faq' },
-    { id: 'contact_footer', label: 'Suporte', path: '/contact' },
-  ],
+  footerMenu: [],
   paymentMethods: [
-    { id: 'cc_stripe', name: 'Cartão de Crédito', enabled: true, type: 'card', provider: 'stripe', environment: 'sandbox' },
-    { id: 'mbway_sibs', name: 'MB Way', enabled: true, type: 'mbway', provider: 'sibs', environment: 'sandbox' },
-    { id: 'internal_balance', name: 'Saldo da Conta', enabled: true, type: 'balance', provider: 'internal' },
+    { id: 'cc_stripe', name: 'Cartão de Crédito', enabled: true, type: 'card', provider: 'stripe' },
+    { id: 'internal_balance', name: 'Saldo da Conta', enabled: true, type: 'balance', provider: 'internal' }
   ],
-  bundles: defaultBundles,
-  testimonials: defaultTestimonials,
+  bundles: [
+    { id: 'recolor_1', photos: 1, price: 4, label: 'Individual', active: true },
+    { id: 'recolor_5', photos: 5, price: 15, label: 'Pack 5', popular: true, active: true }
+  ],
+  testimonials: [],
   expenses: [],
   members: [],
   customers: [],
@@ -80,45 +61,150 @@ const defaultStats: StoreConfig = {
 };
 
 export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [config, setConfig] = useState<StoreConfig>(() => {
-    const saved = localStorage.getItem('retro_v10_config');
-    return saved ? JSON.parse(saved) : defaultStats;
-  });
-
+  const [config, setConfig] = useState<StoreConfig>(defaultStats);
   const [orders, setOrders] = useState<Order[]>([]);
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
+  const [customers, setCustomers] = useState<CustomerAccount[]>([]);
   const [isAdmin, setIsAdmin] = useState(false);
   const [currentCustomer, setCurrentCustomer] = useState<CustomerAccount | null>(null);
 
-  useEffect(() => localStorage.setItem('retro_v10_config', JSON.stringify(config)), [config]);
+  // 1. Sincronização Global de Configurações
+  useEffect(() => {
+    if (!db) return;
+    const unsubscribe = onSnapshot(doc(db, 'settings', 'store_config'), (snap) => {
+      if (snap.exists()) setConfig(snap.data() as StoreConfig);
+    });
+    return () => unsubscribe();
+  }, []);
 
-  const updateConfig = (newConfig: Partial<StoreConfig>) => setConfig(prev => ({ ...prev, ...newConfig }));
-  const addOrder = (order: Order) => setOrders(prev => [order, ...prev]);
-  const updateOrder = (id: string, status: Order['status']) => setOrders(prev => prev.map(o => o.id === id ? { ...o, status } : o));
-  const addAuditLog = (action: string, details: string) => setAuditLogs(prev => [{ id: Date.now().toString(), action, details, date: new Date().toISOString(), user: 'Admin' }, ...prev]);
+  // 2. Sincronização de Encomendas (Fotos e Dados)
+  useEffect(() => {
+    if (!db) return;
+    const q = query(collection(db, 'orders'), orderBy('date', 'desc'), limit(100));
+    return onSnapshot(q, (snap) => {
+      setOrders(snap.docs.map(d => ({ ...d.data(), id: d.id } as Order)));
+    });
+  }, []);
+
+  // 3. Sincronização de Clientes (Saldo e Contas)
+  useEffect(() => {
+    if (!db) return;
+    const q = collection(db, 'customers');
+    return onSnapshot(q, (snap) => {
+      const list = snap.docs.map(d => ({ ...d.data(), id: d.id } as CustomerAccount));
+      setCustomers(list);
+      // Atualiza o objeto currentCustomer se houver mudanças no Firestore
+      if (currentCustomer) {
+        const updated = list.find(c => c.id === currentCustomer.id);
+        if (updated) setCurrentCustomer(updated);
+      }
+    });
+  }, [currentCustomer?.id]);
+
+  // 4. Sincronização de Logs
+  useEffect(() => {
+    if (!db) return;
+    const q = query(collection(db, 'logs'), orderBy('date', 'desc'), limit(50));
+    return onSnapshot(q, (snap) => {
+      setAuditLogs(snap.docs.map(d => ({ ...d.data(), id: d.id } as AuditLog)));
+    });
+  }, []);
+
+  const updateConfig = async (newConfig: Partial<StoreConfig>) => {
+    const updated = { ...config, ...newConfig };
+    setConfig(updated);
+    if (db) await setDoc(doc(db, 'settings', 'store_config'), updated);
+  };
+
+  const addOrder = async (order: Order) => {
+    let finalImageUrl = order.imageUrl;
+
+    // Se a imagem for base64 (vinda do Gemini), fazemos upload para o Storage
+    if (storage && order.imageUrl?.startsWith('data:image')) {
+      try {
+        const storageRef = ref(storage, `restorations/${order.id}_${Date.now()}.png`);
+        const snapshot = await uploadString(storageRef, order.imageUrl, 'data_url');
+        finalImageUrl = await getDownloadURL(snapshot.ref);
+      } catch (err) {
+        console.error("Erro ao fazer upload da foto para o Storage:", err);
+      }
+    }
+
+    const orderData = { ...order, imageUrl: finalImageUrl };
+
+    if (db) {
+      await addDoc(collection(db, 'orders'), orderData);
+    } else {
+      setOrders(prev => [orderData, ...prev]);
+    }
+    
+    addAuditLog('Nova Encomenda', `ID: ${order.id} - ${order.amount}€`);
+  };
+
+  const updateOrder = async (id: string, status: Order['status']) => {
+    if (db) await updateDoc(doc(db, 'orders', id), { status });
+  };
+
+  const addAuditLog = async (action: string, details: string) => {
+    const log = { action, details, date: new Date().toISOString(), user: isAdmin ? 'Admin' : 'Sistema' };
+    if (db) await addDoc(collection(db, 'logs'), log);
+  };
   
-  const customerLogin = (email: string) => {
-    const c = config.customers.find(x => x.email.toLowerCase() === email.toLowerCase());
-    if (c) { setCurrentCustomer(c); return true; }
-    return false;
+  const customerLogin = (email: string, password?: string) => {
+    const customer = customers.find(x => x.email.toLowerCase() === email.toLowerCase());
+    if (!customer) return { success: false, message: "Utilizador não encontrado." };
+    if (customer.password && customer.password !== password) return { success: false, message: "Senha incorreta." };
+    setCurrentCustomer(customer);
+    return { success: true, message: "Login efetuado." };
   };
-  const customerLogout = () => setCurrentCustomer(null);
-  const registerCustomer = (data: any) => {
-    const newC = { ...data, id: `C-${Date.now()}`, balance: 0, createdAt: new Date().toISOString() };
-    updateConfig({ customers: [...config.customers, newC] });
-    setCurrentCustomer(newC);
-    return newC;
+
+  // Add missing customerLogout implementation
+  const customerLogout = () => {
+    setCurrentCustomer(null);
   };
-  const updateCustomerBalance = (id: string, amount: number) => {
-    const updated = config.customers.map(c => c.id === id ? { ...c, balance: c.balance + amount } : c);
-    updateConfig({ customers: updated });
-    if (currentCustomer?.id === id) setCurrentCustomer(prev => prev ? { ...prev, balance: prev.balance + amount } : null);
+
+  const registerCustomer = async (data: any) => {
+    const newC = { 
+      ...data, 
+      balance: 0, 
+      createdAt: new Date().toISOString(),
+      password: data.password || '123456'
+    };
+    
+    let created;
+    if (db) {
+      const docRef = await addDoc(collection(db, 'customers'), newC);
+      created = { ...newC, id: docRef.id };
+    } else {
+      created = { ...newC, id: `C-${Date.now()}` };
+    }
+    
+    setCurrentCustomer(created);
+    addAuditLog('Novo Registo', `Cliente: ${created.email}`);
+    return created;
+  };
+
+  const updateCustomerBalance = async (id: string, amount: number) => {
+    const target = customers.find(c => c.id === id);
+    if (!target) return;
+    const newBalance = target.balance + amount;
+    if (db) {
+      await updateDoc(doc(db, 'customers', id), { balance: newBalance });
+    }
+  };
+
+  const updateCustomerPassword = async (id: string, newPassword: string) => {
+    if (db) {
+      await updateDoc(doc(db, 'customers', id), { password: newPassword });
+      addAuditLog('Alteração Segurança', `Senha alterada para Cliente ID: ${id}`);
+    }
   };
 
   return (
     <ConfigContext.Provider value={{ 
       config, orders, auditLogs, updateConfig, addOrder, updateOrder, addAuditLog, isAdmin, login: () => setIsAdmin(true), logout: () => setIsAdmin(false),
-      currentCustomer, customerLogin, customerLogout, registerCustomer, updateCustomerBalance
+      currentCustomer, customerLogin, customerLogout, registerCustomer, updateCustomerBalance, updateCustomerPassword,
+      isCloudActive: !!db
     }}>
       {children}
     </ConfigContext.Provider>

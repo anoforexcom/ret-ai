@@ -2,12 +2,14 @@
 import React, { useState } from 'react';
 import { Outlet, Navigate, Link, useLocation } from 'react-router-dom';
 import { useConfig } from '../../contexts/ConfigContext';
-import { LayoutDashboard, History, Wallet, User, LogOut, Wand2, ChevronRight, Mail, Key } from 'lucide-react';
+import { LayoutDashboard, History, Wallet, User, LogOut, Wand2, ChevronRight, Mail, Key, Eye, EyeOff, AlertCircle } from 'lucide-react';
 
 const CustomerLayout: React.FC = () => {
   const { currentCustomer, customerLogin, customerLogout, config } = useConfig();
   const [email, setEmail] = useState('');
-  const [isNewUser, setIsNewUser] = useState(false);
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState('');
   const location = useLocation();
 
   if (!currentCustomer) {
@@ -25,8 +27,11 @@ const CustomerLayout: React.FC = () => {
           <div className="p-8">
              <form onSubmit={(e) => {
                e.preventDefault();
-               if (!customerLogin(email)) {
-                 alert("Utilizador não encontrado. Se ainda não tem conta, faça o seu primeiro restauro para se registar!");
+               const result = customerLogin(email, password);
+               if (!result.success) {
+                 setError(result.message);
+               } else {
+                 setError('');
                }
              }} className="space-y-4">
                 <div>
@@ -43,6 +48,35 @@ const CustomerLayout: React.FC = () => {
                       />
                    </div>
                 </div>
+
+                <div>
+                   <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Palavra-passe</label>
+                   <div className="relative">
+                      <Key className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                      <input 
+                        type={showPassword ? "text" : "password"}
+                        value={password}
+                        onChange={e => setPassword(e.target.value)}
+                        placeholder="••••••••"
+                        required
+                        className="w-full pl-10 pr-12 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
+                      />
+                      <button 
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                      >
+                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
+                   </div>
+                </div>
+
+                {error && (
+                  <div className="flex items-center gap-2 p-3 bg-red-50 text-red-600 text-xs font-bold rounded-xl border border-red-100 animate-shake">
+                    <AlertCircle className="h-4 w-4" /> {error}
+                  </div>
+                )}
+
                 <button type="submit" className="w-full bg-indigo-600 text-white font-bold py-3 rounded-xl hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-500/20">
                    Entrar no Painel
                 </button>
@@ -126,6 +160,15 @@ const CustomerLayout: React.FC = () => {
              <Outlet />
           </main>
        </div>
+
+       <style>{`
+          @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-4px); }
+            75% { transform: translateX(4px); }
+          }
+          .animate-shake { animation: shake 0.2s ease-in-out 0s 2; }
+       `}</style>
     </div>
   );
 };

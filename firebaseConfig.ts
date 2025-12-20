@@ -13,7 +13,7 @@ const firebaseConfig = {
   apiKey: "AIzaSyDHiLNvs1alz2kST7eNOJHMA-9N1OezzKI",
   authDomain: "project-44f7e7f5-4bf3-4b-5b516.firebaseapp.com",
   projectId: "project-44f7e7f5-4bf3-4b-5b516",
-  storageBucket: "project-44f7e7f5-4bf3-4b-5b516.firebasestorage.app",
+  storageBucket: "project-44f7e7f5-4bf3-4b-5b516.firebasestorage.ap",
   messagingSenderId: "28453566330",
   appId: "1:28453566330:web:792ed77487b239d27808c3"
 };

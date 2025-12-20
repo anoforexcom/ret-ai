@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Outlet, NavLink, Link } from 'react-router-dom';
+import { Outlet, NavLink } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   ShoppingCart, 
@@ -13,8 +13,7 @@ import {
   PieChart, 
   ShieldCheck,
   Menu,
-  X,
-  ArrowLeft
+  X
 } from 'lucide-react';
 import { useConfig } from '../../contexts/ConfigContext';
 
@@ -53,7 +52,7 @@ const AdminLayout: React.FC = () => {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+                className="w-full px-4 py-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 placeholder="Senha"
               />
             </div>
@@ -65,16 +64,6 @@ const AdminLayout: React.FC = () => {
               Entrar
             </button>
           </form>
-          
-          <div className="mt-8 pt-6 border-t border-slate-100">
-            <Link 
-              to="/" 
-              className="flex items-center justify-center gap-2 text-slate-500 hover:text-indigo-600 transition-colors text-sm font-medium"
-            >
-              <ArrowLeft className="h-4 w-4" /> Voltar para a Loja
-            </Link>
-          </div>
-
           <p className="text-[10px] text-center text-slate-400 mt-6 uppercase tracking-widest">Acesso Restrito • RetroColor AI</p>
         </div>
       </div>

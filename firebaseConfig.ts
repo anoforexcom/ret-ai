@@ -9,21 +9,21 @@ import 'firebase/compat/auth';
  * A chave de API abaixo foi atualizada com o valor fornecido: AIzaSyB8wmI7PLcaGowJ0r-ioJtT-avoUbkFkt4
  */
 const firebaseConfig = {
-  apiKey: "AIzaSyB8wmI7PLcaGowJ0r-ioJtT-avoUbkFkt4",
-  authDomain: "project-44f7e7f5-4bf3-4b-5b516.firebaseapp.com",
-  projectId: "project-44f7e7f5-4bf3-4b-5b516",
-  storageBucket: "project-44f7e7f5-4bf3-4b-5b516.firebasestorage.ap",
-  messagingSenderId: "28453566330",
-  appId: "1:28453566330:web:792ed77487b239d27808c3"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
 let db: any = null;
 let auth: any = null;
 
 // Verifica se as chaves foram preenchidas
-const isConfigured = firebaseConfig.apiKey && 
-                     firebaseConfig.apiKey !== "" &&
-                     firebaseConfig.projectId !== "";
+const isConfigured = firebaseConfig.apiKey &&
+  firebaseConfig.apiKey !== "" &&
+  firebaseConfig.projectId !== "";
 
 if (isConfigured) {
   try {

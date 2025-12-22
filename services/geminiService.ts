@@ -22,13 +22,15 @@ export const blobToBase64 = (blob: Blob): Promise<string> => {
  */
 export const restoreImage = async (file: File | string): Promise<string> => {
   try {
-    // A chave process.env.API_KEY é fornecida automaticamente pelo ambiente de execução.
-    if (!process.env.API_KEY) {
-      throw new Error("Chave de API não configurada no ambiente.");
+    // A chave é obtida de import.meta.env.VITE_GOOGLE_GENAI_API_KEY
+    const apiKey = import.meta.env.VITE_GOOGLE_GENAI_API_KEY;
+
+    if (!apiKey) {
+      throw new Error("Chave de API não configurada. Verifique o ficheiro .env");
     }
 
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-    
+    const ai = new GoogleGenAI({ apiKey });
+
     let base64Data: string;
     if (file instanceof File) {
       base64Data = await blobToBase64(file);
@@ -61,7 +63,7 @@ export const restoreImage = async (file: File | string): Promise<string> => {
     });
 
     let restoredUrl: string | null = null;
-    
+
     if (response.candidates?.[0]?.content?.parts) {
       for (const part of response.candidates[0].content.parts) {
         if (part.inlineData) {
@@ -74,12 +76,12 @@ export const restoreImage = async (file: File | string): Promise<string> => {
     if (!restoredUrl) {
       throw new Error("O motor de IA não conseguiu gerar a imagem. Verifique se o conteúdo da foto é suportado.");
     }
-    
+
     return restoredUrl;
   } catch (error: any) {
     console.error("Erro no Processo de Restauro:", error);
-    if (error.message?.includes("API_KEY")) {
-      throw new Error("Erro de Configuração: A chave de API não foi detetada. Por favor, use o botão 'Ligar ao Motor AI' no topo da página.");
+    if (error.message?.includes("API_KEY") || error.message?.includes("Chave de API")) {
+      throw new Error("Erro de Configuração: A chave de API não foi detetada. Verifique a configuração no ficheiro .env");
     }
     throw error;
   }

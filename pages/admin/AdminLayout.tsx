@@ -1,25 +1,27 @@
 
 import React, { useState } from 'react';
 import { Outlet, NavLink, Link } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
-  ShoppingCart, 
-  Settings, 
-  LogOut, 
-  Wand2, 
-  Lock, 
-  Package, 
-  Users, 
-  PieChart, 
+import {
+  LayoutDashboard,
+  ShoppingCart,
+  Settings,
+  LogOut,
+  Wand2,
+  Lock,
+  Package,
+  Users,
+  PieChart,
   ShieldCheck,
   Menu,
   X,
   ArrowLeft
 } from 'lucide-react';
 import { useConfig } from '../../contexts/ConfigContext';
+import { useTranslation } from 'react-i18next';
 
 const AdminLayout: React.FC = () => {
   const { isAdmin, login, logout, config } = useConfig();
+  const { t } = useTranslation();
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -31,18 +33,18 @@ const AdminLayout: React.FC = () => {
       login();
       setError('');
     } else {
-      setError('Senha incorreta. Verifique as suas credenciais.');
+      setError(t('admin.login.error_password'));
     }
   };
 
   if (!isAdmin) {
     return (
       <div className="min-h-screen bg-slate-100 flex flex-col items-center justify-center p-4">
-        <Link 
-          to="/" 
+        <Link
+          to="/"
           className="flex items-center gap-2 text-slate-500 hover:text-indigo-600 mb-6 transition-colors font-medium"
         >
-          <ArrowLeft className="h-4 w-4" /> Voltar ao site
+          <ArrowLeft className="h-4 w-4" /> {t('admin.login.back_site')}
         </Link>
         <div className="max-w-md w-full bg-white rounded-xl shadow-lg p-8">
           <div className="flex justify-center mb-6">
@@ -50,9 +52,9 @@ const AdminLayout: React.FC = () => {
               <Lock className="h-6 w-6" />
             </div>
           </div>
-          <h2 className="text-2xl font-bold text-center text-slate-900 mb-2">Painel de Administração</h2>
-          <p className="text-center text-slate-500 mb-8">Introduza a senha de acesso</p>
-          
+          <h2 className="text-2xl font-bold text-center text-slate-900 mb-2">{t('admin.login.title')}</h2>
+          <p className="text-center text-slate-500 mb-8">{t('admin.login.subtitle')}</p>
+
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
               <input
@@ -60,7 +62,7 @@ const AdminLayout: React.FC = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full px-4 py-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
-                placeholder="Senha"
+                placeholder={t('admin.login.password_placeholder')}
               />
             </div>
             {error && <p className="text-red-500 text-sm text-center">{error}</p>}
@@ -68,16 +70,16 @@ const AdminLayout: React.FC = () => {
               type="submit"
               className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors shadow-lg shadow-indigo-500/20"
             >
-              Entrar
+              {t('admin.login.btn_enter')}
             </button>
           </form>
-          <p className="text-[10px] text-center text-slate-400 mt-6 uppercase tracking-widest">Acesso Restrito • RetroColor AI</p>
+          <p className="text-[10px] text-center text-slate-400 mt-6 uppercase tracking-widest">{t('admin.login.restricted_footer')}</p>
         </div>
       </div>
     );
   }
 
-  const navItemClass = ({ isActive }: { isActive: boolean }) => 
+  const navItemClass = ({ isActive }: { isActive: boolean }) =>
     `flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-sm font-medium ${isActive ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`;
 
   const handleNavLinkClick = () => {
@@ -86,14 +88,14 @@ const AdminLayout: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-slate-100 flex flex-col md:flex-row h-screen overflow-hidden">
-      
+
       {/* Mobile Top Bar */}
       <div className="md:hidden bg-slate-900 text-white p-4 flex items-center justify-between shadow-lg z-30">
         <div className="flex items-center gap-2">
           <Wand2 className="h-6 w-6 text-indigo-400" />
           <span className="font-bold text-base tracking-tight">{config.storeName}</span>
         </div>
-        <button 
+        <button
           onClick={() => setIsSidebarOpen(true)}
           className="p-2 hover:bg-slate-800 rounded-lg transition-colors"
           aria-label="Abrir Menu"
@@ -104,7 +106,7 @@ const AdminLayout: React.FC = () => {
 
       {/* Mobile Backdrop Overlay */}
       {isSidebarOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-40 md:hidden animate-fadeIn"
           onClick={() => setIsSidebarOpen(false)}
         />
@@ -122,7 +124,7 @@ const AdminLayout: React.FC = () => {
             <Wand2 className="h-6 w-6 text-indigo-400" />
             <span className="font-bold text-lg">{config.storeName}</span>
           </div>
-          <button 
+          <button
             onClick={() => setIsSidebarOpen(false)}
             className="md:hidden p-1 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white transition-colors"
             aria-label="Fechar Menu"
@@ -130,7 +132,7 @@ const AdminLayout: React.FC = () => {
             <X className="h-6 w-6" />
           </button>
         </div>
-        
+
         <nav className="flex-1 p-4 space-y-1 overflow-y-auto custom-scrollbar">
           <p className="px-4 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-2 mt-2">Visão Geral</p>
           <NavLink to="/admin" end className={navItemClass} onClick={handleNavLinkClick}>

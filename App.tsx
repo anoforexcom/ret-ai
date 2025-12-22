@@ -75,6 +75,10 @@ const StyleInjector: React.FC = () => {
   return null;
 };
 
+import './src/i18n'; // Import i18n configuration
+
+// ... (imports remain)
+
 function App() {
   return (
     <ConfigProvider>
@@ -95,9 +99,9 @@ function App() {
 
             {/* Customer Routes */}
             <Route path="/customer" element={<CustomerLayout />}>
-               <Route index element={<CustomerDashboard />} />
-               <Route path="history" element={<CustomerHistory />} />
-               <Route path="wallet" element={<Wallet />} />
+              <Route index element={<CustomerDashboard />} />
+              <Route path="history" element={<CustomerHistory />} />
+              <Route path="wallet" element={<Wallet />} />
             </Route>
 
             {/* Public Routes */}

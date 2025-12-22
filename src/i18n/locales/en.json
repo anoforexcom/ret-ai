@@ -1,0 +1,313 @@
+{
+    "menu": {
+        "home": "Home",
+        "restore": "Restore",
+        "pricing": "Pricing",
+        "faq": "FAQ",
+        "contact": "Contact",
+        "admin": "Admin",
+        "dashboard": "Dashboard",
+        "account": "My Account",
+        "login": "Login",
+        "logout": "Logout",
+        "admin_area": "Admin Area"
+    },
+    "admin": {
+        "dashboard": "Dashboard",
+        "overview": "Overview",
+        "dashboard_title": "Overview",
+        "dashboard_desc": "Real-time monitoring of RetroColor AI.",
+        "system_status": "System:",
+        "online": "Online",
+        "gross_revenue": "Gross Revenue",
+        "this_month": "this month",
+        "net_profit": "Net Profit",
+        "post_expenses": "post-expenses",
+        "orders_stat": "Orders",
+        "converted": "converted",
+        "unique_customers": "Unique Customers",
+        "registered": "registered",
+        "sales_performance": "Sales Performance",
+        "daily_revenue": "Daily gross revenue for the last 7 days",
+        "financial_report": "Financial Report",
+        "day": "Day",
+        "recent_orders": "Recent Orders",
+        "standard_restoration": "Standard Restoration",
+        "waiting_sales": "Waiting for first sales...",
+        "view_all_history": "View Full History",
+        "management": "Management",
+        "system": "System",
+        "orders": "Orders",
+        "products": "Products",
+        "customers": "Customers",
+        "settings": "Settings",
+        "security": "Security",
+        "financials": "Financials",
+        "logout": "Logout",
+        "panel_title": "Administration Panel",
+        "restricted_access": "Restricted Access"
+    },
+    "login": {
+        "title": "Administration Panel",
+        "subtitle": "Enter your access password",
+        "password_placeholder": "Password",
+        "btn_enter": "Login",
+        "back_site": "Back to site",
+        "error_password": "Incorrect password. Check your credentials.",
+        "restricted_footer": "Restricted Access • RetroColor AI"
+    },
+    "customer": {
+        "login": {
+            "title": "Access My Account",
+            "subtitle": "Manage photos, balance and orders.",
+            "email_label": "Registered Email",
+            "password_label": "Password",
+            "btn_enter": "Enter Dashboard",
+            "no_account": "Don't have an account yet?",
+            "create_account": "Restore Photo & Create Account",
+            "error_not_found": "User not found.",
+            "error_password": "Incorrect password."
+        },
+        "dashboard": {
+            "welcome": "Hello, {{name}}!",
+            "welcome_subtitle": "Welcome to your personal {{store}} studio",
+            "balance_label": "Available Balance",
+            "vip_title": "VIP Support",
+            "vip_desc": "As a registered user, you have priority in AI processing and specialized support.",
+            "menu": {
+                "home": "Home",
+                "history": "Orders",
+                "wallet": "Balance & Top-ups",
+                "logout": "Logout"
+            }
+        }
+    },
+    "footer": {
+        "rights_reserved": "All rights reserved.",
+        "text": "Recover the past with vibrant colors. Digital restoration specialists by RetroColor AI Engine.",
+        "product": "Product",
+        "restore": "Restore Photo",
+        "pricing": "Pricing",
+        "faq": "FAQ",
+        "testimonials": "Testimonials",
+        "legal": "Legal",
+        "privacy": "Privacy",
+        "terms": "Terms & Conditions",
+        "support": "Support",
+        "contact": "Contact Support",
+        "admin_access": "Admin Access",
+        "secure_payment": "Secure payment via:",
+        "ssl_secure": "SSL Secure"
+    },
+    "home": {
+        "hero": {
+            "title": "Give color to your most cherished memories",
+            "subtitle": "Restore old photos and colorize black and white images in seconds with our proprietary RetroColor AI technology.",
+            "engine": "RetroColor Engine v3",
+            "social_proof": "Over <1>12,000</1> memories restored",
+            "cta_restore": "Restore Now",
+            "cta_pricing": "View Pricing"
+        },
+        "features": {
+            "realistic_color": {
+                "title": "Realistic Colorization",
+                "desc": "Our AI applies natural tones based on the original photo's context."
+            },
+            "damage_removal": {
+                "title": "Damage Removal",
+                "desc": "Eliminate scratches, stains, and creases left by time on your memories."
+            },
+            "quality": {
+                "title": "Guaranteed Quality",
+                "desc": "We optimize sharpness for perfect high-resolution prints."
+            }
+        },
+        "advantages": {
+            "title": "RetroColor AI Advantages",
+            "subtitle": "Cutting-edge technology at the service of your family memories.",
+            "gen_ai": {
+                "title": "Advanced Generative AI",
+                "desc": "We use Google's latest models to reconstruct lost details with surgical precision."
+            },
+            "history": {
+                "title": "Historical Fidelity",
+                "desc": "Our colors are adjusted to match the tones and pigments of the era the photo was taken."
+            },
+            "resolution": {
+                "title": "Super Resolution",
+                "desc": "We don't just colorize; we increase resolution so you can print your photos in larger sizes."
+            },
+            "privacy": {
+                "title": "Total Privacy",
+                "desc": "Processing is done with security keys and images are automatically deleted after download."
+            }
+        },
+        "pricing": {
+            "title": "Restoration Packs",
+            "subtitle": "Choose the ideal package for your photos with satisfaction guarantee.",
+            "popular": "MOST POPULAR",
+            "select": "SELECT",
+            "features": {
+                "hd_photo": "HD Photo",
+                "hd_photos": "HD Photos",
+                "restore": "RetroColor AI Restoration",
+                "download": "Instant Download",
+                "resolution": "1K High Resolution"
+            }
+        },
+        "comparison": {
+            "title": "Results that Tell Stories",
+            "desc": "Notice how our IA not only adds color but reconstructs paper texture and cleans imperfections caused by decades of improper storage.",
+            "points": {
+                "clean": "Deep cleaning of stains and scratches",
+                "light": "Automatic light and contrast balance",
+                "sharpness": "Enhanced facial sharpness for portraits"
+            },
+            "cta": "Try with my photos"
+        },
+        "testimonials": {
+            "title": "What customers say",
+            "subtitle": "See reviews from {{count}} satisfied customers.",
+            "view_all": "View all"
+        },
+        "faq": {
+            "title": "Frequently Asked Questions",
+            "q1": "How long does restoration take?",
+            "a1": "Processing by our RetroColor AI technology is almost instant. After uploading the photo, restoration takes between 15 to 30 seconds, depending on image complexity.",
+            "q2": "Are the colors historically accurate?",
+            "a2": "Our proprietary RetroColor Vision technology analyzes context to apply the most realistic colors possible based on our vast historical database.",
+            "q3": "How do I receive my photo?",
+            "a3": "After restoration, you can view a free preview. To download in high definition and watermark-free, simply select a pack. Download is immediate after payment.",
+            "q4": "Can I print the restored photos?",
+            "a4": "Yes! Restoration via RetroColor Engine optimizes sharpness and resolution, making images ideal for printing in family albums or frames."
+        }
+    },
+    "restore": {
+        "title": "Restoration Studio",
+        "subtitle": "High definition and realistic colors with exclusive RetroColor technology.",
+        "select_drag": "Select or drag your photo",
+        "processing": "Processing via RetroColor Engine",
+        "original_photo": "Original Photo",
+        "change": "Change",
+        "processed_via": "Processed via RetroColor AI",
+        "engine_action": "RetroColor Engine in action...",
+        "optimizing": "Optimizing colors and textures (15-30s).",
+        "result_here": "The result will appear here",
+        "restore_btn": "Restore with RetroColor AI",
+        "download_btn": "Download in High Resolution",
+        "error_quota": "RetroColor AI engine quota exceeded for this key.",
+        "error_unexpected": "An unexpected error occurred in RetroColor AI engine.",
+        "connected": "RetroColor AI Engine Connected",
+        "not_connected": "RetroColor AI Engine Connection Required",
+        "using_private_key": "Your private key is being used to ensure unlimited restorations.",
+        "use_paid_key": "To ensure maximum quality and avoid quota errors, use your own paid API key.",
+        "change_key": "Change Key",
+        "connect_key": "Connect AI Engine"
+    },
+    "contact": {
+        "title": "Contact Us",
+        "subtitle": "Have questions or need help with a restoration? We are here to help.",
+        "form": {
+            "name": "Name",
+            "name_placeholder": "Your name",
+            "email": "Email",
+            "email_placeholder": "your.email@example.com",
+            "message": "Message",
+            "message_placeholder": "How can we help?",
+            "submit": "Send Message"
+        },
+        "success": {
+            "title": "Message Sent!",
+            "message": "Thank you for contacting us. Our team will respond as soon as possible (usually within 24h).",
+            "btn": "Send another message"
+        },
+        "info": {
+            "chat": "Chat",
+            "chat_desc": "Available Mon-Fri, 9am-6pm"
+        }
+    },
+    "pricing": {
+        "title": "Transparent Pricing",
+        "subtitle": "Choose the plan that best fits your restoration needs. No subscriptions, pay only for what you use.",
+        "popular_badge": "Most Popular",
+        "per_total": "/ total",
+        "features": {
+            "photos_one": "HD Photo",
+            "photos_many": "High Resolution Photos",
+            "scratches": "Scratch and stain removal",
+            "colorize": "Professional AI Colorization",
+            "watermark": "No watermarks",
+            "lifetime": "Lifetime file access"
+        },
+        "btn_choose": "Choose",
+        "props": {
+            "secure": {
+                "title": "Secure Payment",
+                "desc": "Encrypted transactions via PayPal and Stripe for your total security."
+            },
+            "download": {
+                "title": "Instant Download",
+                "desc": "Receive your restored photo in seconds after processing."
+            },
+            "guarantee": {
+                "title": "Satisfaction Guarantee",
+                "desc": "If you are not satisfied with the technical result, we refund your money."
+            }
+        }
+    },
+    "faq": {
+        "title": "Frequently Asked Questions",
+        "q1": "How does the colorization technology work?",
+        "a1": "We use the RetroColor AI engine, developed by us and trained on millions of historical and modern photos. Our technology analyzes shapes, textures, and context to predict the most likely colors for each element, such as skin, clothing, and landscapes.",
+        "q2": "Is payment secure?",
+        "a2": "Yes, absolutely. We use certified payment processors with banking-level SSL encryption. We do not store your credit card data on our servers.",
+        "q3": "What happens to my photos?",
+        "a3": "Your privacy is our priority. Photos are processed locally by the RetroColor AI engine and automatically deleted from our servers after 24 hours. We never use your photos to train our models without your consent.",
+        "q4": "Can I restore very damaged photos?",
+        "a4": "RetroColor AI is excellent at removing scratches, noise, and stains. However, if critical facial parts are completely missing, the engine will attempt to reconstruct based on symmetry and known anatomical patterns.",
+        "q5": "What is the maximum file size?",
+        "a5": "Currently, RetroColor Engine supports JPG and PNG files up to 5MB. For larger files, the engine may take longer to process."
+    },
+    "payment_modal": {
+        "title": "Checkout",
+        "user_data": "Your Details",
+        "form": {
+            "name_placeholder": "Name",
+            "surname_placeholder": "Surname",
+            "email_placeholder": "Your best email",
+            "create_account": "CREATE ACCOUNT FOR LATER ACCESS"
+        },
+        "selection": "Selection",
+        "total": "Total",
+        "payment_method": "Payment Method",
+        "balance_available": "{{amount}}€ avail.",
+        "internal_balance": {
+            "title": "Payment via Internal Balance",
+            "desc": "Upon confirmation, <1>{{amount}}€</1> will be deducted from your current balance.",
+            "processing": "DEDUCTING...",
+            "confirm": "CONFIRM AND PAY NOW",
+            "insufficient": "Insufficient balance. Top up your balance in your dashboard."
+        },
+        "mbway": {
+            "phone_placeholder": "MB Way Mobile No.",
+            "processing": "...",
+            "request_btn": "REQUEST {{amount}}€ ON MB WAY",
+            "confirm_title": "Confirm on your phone",
+            "confirmed_btn": "I HAVE CONFIRMED"
+        },
+        "card": {
+            "number": "Card Number",
+            "date": "MM/YY",
+            "cvc": "CVC",
+            "processing": "PROCESSING...",
+            "pay_btn": "PAY {{amount}}€"
+        }
+    },
+    "common": {
+        "loading": "Loading...",
+        "error": "Error",
+        "success": "Success",
+        "save": "Save",
+        "cancel": "Cancel"
+    }
+}

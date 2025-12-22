@@ -1,15 +1,41 @@
-
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Wand2, Lock, User, LogOut, Settings } from 'lucide-react';
+import { Menu, X, Wand2, Lock, User, LogOut, Settings, Globe } from 'lucide-react';
 import { useConfig } from '../contexts/ConfigContext';
+import { useTranslation } from 'react-i18next';
 
 const Header: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
   const { config, currentCustomer, customerLogout, isAdmin } = useConfig();
+  const { t, i18n } = useTranslation();
 
   const isActive = (path: string) => location.pathname === path;
+
+  // Toggle Language
+  const toggleLanguage = () => {
+    const newLang = i18n.language === 'pt' ? 'en' : 'pt';
+    i18n.changeLanguage(newLang);
+  };
+
+  // Mapa para traduzir os itens do menu configurável (fallback)
+  const getTranslatedLabel = (label: string) => {
+    // Tenta encontrar uma chave correspondente no ficheiro de tradução
+    // Normaliza para lowercase para facilitar o match: "Início" -> "home"
+    const key = label.toLowerCase();
+
+    // Mapeamento manual para garantir compatibilidade com o config.mainMenu
+    const map: Record<string, string> = {
+      'início': 'home',
+      'restaurar': 'restore',
+      'preços': 'pricing',
+      'faq': 'faq',
+      'contactos': 'contact'
+    };
+
+    const translationKey = map[key] || key;
+    return t(`menu.${translationKey}`, label);
+  };
 
   return (
     <header className="bg-white shadow-sm sticky top-0 z-50">
@@ -21,45 +47,52 @@ const Header: React.FC = () => {
               <span className="font-bold text-xl text-slate-900 tracking-tight">{config.storeName}</span>
             </Link>
           </div>
-          
+
           <div className="hidden md:flex items-center space-x-6">
             {config.mainMenu.map((link) => (
               <Link
                 key={link.id}
                 to={link.path}
-                className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors duration-200 ${
-                  isActive(link.path)
+                className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors duration-200 ${isActive(link.path)
                     ? 'border-indigo-500 text-gray-900'
                     : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
-                }`}
+                  }`}
               >
-                {link.label}
+                {getTranslatedLabel(link.label)}
               </Link>
             ))}
-            
+
+            <button
+              onClick={toggleLanguage}
+              className="p-2 rounded-full text-slate-500 hover:bg-slate-100 transition-colors"
+              title={i18n.language === 'pt' ? "Switch to English" : "Mudar para Português"}
+            >
+              <Globe className="h-5 w-5" />
+            </button>
+
             <div className="h-6 w-px bg-slate-200"></div>
 
             {/* Admin Quick Link */}
-            <Link 
-              to="/admin" 
+            <Link
+              to="/admin"
               className="flex items-center gap-1.5 text-slate-400 hover:text-indigo-600 transition-colors text-sm font-medium"
-              title="Painel Administrativo"
+              title={t('menu.admin_area')}
             >
-              <Lock className="h-4 w-4" /> Admin
+              <Lock className="h-4 w-4" /> {t('menu.admin')}
             </Link>
 
             {currentCustomer ? (
               <div className="flex items-center gap-4">
                 <Link to="/customer" className="flex items-center gap-2 px-3 py-1.5 bg-indigo-50 text-indigo-700 rounded-lg text-sm font-bold hover:bg-indigo-100 transition-colors">
-                  <User className="h-4 w-4" /> Dashboard
+                  <User className="h-4 w-4" /> {t('menu.dashboard')}
                 </Link>
-                <button onClick={customerLogout} className="text-slate-400 hover:text-red-500 transition-colors" title="Sair">
+                <button onClick={customerLogout} className="text-slate-400 hover:text-red-500 transition-colors" title={t('menu.logout')}>
                   <LogOut className="h-4 w-4" />
                 </button>
               </div>
             ) : (
               <Link to="/customer" className="text-slate-500 hover:text-indigo-600 text-sm font-medium flex items-center gap-2">
-                <User className="h-4 w-4" /> Entrar
+                <User className="h-4 w-4" /> {t('menu.login')}
               </Link>
             )}
 
@@ -67,7 +100,7 @@ const Header: React.FC = () => {
               to="/restore"
               className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm"
             >
-              Começar
+              {t('menu.restore')}
             </Link>
           </div>
 
@@ -91,22 +124,21 @@ const Header: React.FC = () => {
                 key={link.id}
                 to={link.path}
                 onClick={() => setIsOpen(false)}
-                className={`block pl-3 pr-4 py-2 border-l-4 text-base font-medium ${
-                  isActive(link.path)
+                className={`block pl-3 pr-4 py-2 border-l-4 text-base font-medium ${isActive(link.path)
                     ? 'bg-indigo-50 border-indigo-500 text-indigo-700'
                     : 'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800'
-                }`}
+                  }`}
               >
-                {link.label}
+                {getTranslatedLabel(link.label)}
               </Link>
             ))}
             <div className="pt-4 pb-2 border-t border-gray-100 mt-2">
-                 <Link to="/customer" onClick={() => setIsOpen(false)} className="flex items-center gap-2 pl-3 pr-4 py-2 text-base font-medium text-gray-600">
-                    <User className="h-4 w-4" /> Minha Conta
-                 </Link>
-                 <Link to="/admin" onClick={() => setIsOpen(false)} className="flex items-center gap-2 pl-3 pr-4 py-2 text-base font-medium text-indigo-600">
-                    <Lock className="h-4 w-4" /> Área Admin
-                  </Link>
+              <Link to="/customer" onClick={() => setIsOpen(false)} className="flex items-center gap-2 pl-3 pr-4 py-2 text-base font-medium text-gray-600">
+                <User className="h-4 w-4" /> {t('menu.account')}
+              </Link>
+              <Link to="/admin" onClick={() => setIsOpen(false)} className="flex items-center gap-2 pl-3 pr-4 py-2 text-base font-medium text-indigo-600">
+                <Lock className="h-4 w-4" /> {t('menu.admin_area')}
+              </Link>
             </div>
           </div>
         </div>

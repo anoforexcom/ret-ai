@@ -1,0 +1,313 @@
+{
+  "menu": {
+    "home": "Início",
+    "restore": "Restaurar",
+    "pricing": "Preços",
+    "faq": "FAQ",
+    "contact": "Contactos",
+    "admin": "Admin",
+    "dashboard": "Dashboard",
+    "account": "Minha Conta",
+    "login": "Entrar",
+    "logout": "Sair",
+    "admin_area": "Área Admin"
+  },
+  "admin": {
+    "dashboard": "Dashboard",
+    "overview": "Visão Geral",
+    "dashboard_title": "Visão Geral",
+    "dashboard_desc": "Monitorização em tempo real da RetroColor AI.",
+    "system_status": "Sistema:",
+    "online": "Online",
+    "gross_revenue": "Faturação Bruta",
+    "this_month": "este mês",
+    "net_profit": "Lucro Líquido",
+    "post_expenses": "pós-despesas",
+    "orders_stat": "Encomendas",
+    "converted": "convertidas",
+    "unique_customers": "Clientes Únicos",
+    "registered": "registados",
+    "sales_performance": "Performance de Vendas",
+    "daily_revenue": "Receita bruta diária dos últimos 7 dias",
+    "financial_report": "Relatório Financeiro",
+    "day": "Dia",
+    "recent_orders": "Encomendas Recentes",
+    "standard_restoration": "Restauro Standard",
+    "waiting_sales": "Aguardando as primeiras vendas...",
+    "view_all_history": "Ver Todo o Histórico",
+    "management": "Gestão",
+    "system": "Sistema",
+    "orders": "Encomendas",
+    "products": "Produtos",
+    "customers": "Clientes",
+    "settings": "Configurações",
+    "security": "Segurança",
+    "financials": "Finanças",
+    "logout": "Terminar Sessão",
+    "panel_title": "Painel de Administração",
+    "restricted_access": "Acesso Restrito",
+    "login": {
+      "title": "Painel de Administração",
+      "subtitle": "Introduza a senha de acesso",
+      "password_placeholder": "Senha",
+      "btn_enter": "Entrar",
+      "back_site": "Voltar ao site",
+      "error_password": "Senha incorreta. Verifique as suas credenciais.",
+      "restricted_footer": "Acesso Restrito • RetroColor AI"
+    }
+  },
+  "customer": {
+    "login": {
+      "title": "Aceder à Minha Conta",
+      "subtitle": "Gerir fotos, saldo e encomendas.",
+      "email_label": "Email Registado",
+      "password_label": "Palavra-passe",
+      "btn_enter": "Entrar no Painel",
+      "no_account": "Ainda não tem conta?",
+      "create_account": "Restaurar Foto & Criar Conta",
+      "error_not_found": "Utilizador não encontrado.",
+      "error_password": "Palavra-passe incorreta."
+    },
+    "dashboard": {
+      "welcome": "Olá, {{name}}!",
+      "welcome_subtitle": "Bem-vindo ao seu estúdio pessoal da {{store}}",
+      "balance_label": "Saldo Disponível",
+      "vip_title": "Suporte VIP",
+      "vip_desc": "Como utilizador registado, tem prioridade no processamento IA e suporte especializado.",
+      "menu": {
+        "home": "Início",
+        "history": "Encomendas",
+        "wallet": "Saldo & Carregamentos",
+        "logout": "Sair da Conta"
+      }
+    }
+  },
+  "footer": {
+    "rights_reserved": "Todos os direitos reservados.",
+    "text": "Recupere o passado com cores vibrantes. Especialistas em restauração digital por RetroColor AI Engine.",
+    "product": "Produto",
+    "restore": "Restaurar Foto",
+    "pricing": "Preços",
+    "faq": "Perguntas Frequentes",
+    "testimonials": "Testemunhos",
+    "legal": "Legal",
+    "privacy": "Privacidade",
+    "terms": "Termos e Condições",
+    "support": "Suporte",
+    "contact": "Contactar Suporte",
+    "admin_access": "Acesso Administrativo",
+    "secure_payment": "Pagamento seguro via:",
+    "ssl_secure": "SSL Seguro"
+  },
+  "home": {
+    "hero": {
+      "title": "Dê cor às suas memórias mais queridas",
+      "subtitle": "Restaure fotos antigas e colorize imagens a preto e branco em segundos com a nossa tecnologia proprietária RetroColor AI.",
+      "engine": "Motor RetroColor v3",
+      "social_proof": "Mais de <1>12,000</1> memórias restauradas",
+      "cta_restore": "Restaurar Agora",
+      "cta_pricing": "Ver Preços"
+    },
+    "features": {
+      "realistic_color": {
+        "title": "Colorização Realista",
+        "desc": "A nossa IA aplica tons naturais baseados no contexto da foto original."
+      },
+      "damage_removal": {
+        "title": "Remoção de Danos",
+        "desc": "Elimine riscos, manchas e vincos que o tempo deixou nas suas memórias."
+      },
+      "quality": {
+        "title": "Qualidade Garantida",
+        "desc": "Otimizamos a nitidez para impressões perfeitas em alta resolução."
+      }
+    },
+    "advantages": {
+      "title": "Vantagens da RetroColor AI",
+      "subtitle": "Tecnologia de ponta ao serviço das suas recordações de família.",
+      "gen_ai": {
+        "title": "IA Generativa Avançada",
+        "desc": "Utilizamos os modelos mais recentes da Google para reconstruir detalhes perdidos com precisão cirúrgica."
+      },
+      "history": {
+        "title": "Fidelidade Histórica",
+        "desc": "As nossas cores são ajustadas para corresponder aos tons e pigmentos da época em que a foto foi tirada."
+      },
+      "resolution": {
+        "title": "Super Resolução",
+        "desc": "Não apenas colorimos; aumentamos a resolução para que possa imprimir as suas fotos em tamanhos maiores."
+      },
+      "privacy": {
+        "title": "Privacidade Total",
+        "desc": "O processamento é feito com chaves de segurança e as imagens são apagadas automaticamente após o download."
+      }
+    },
+    "pricing": {
+      "title": "Packs de Restauro",
+      "subtitle": "Escolha o pacote ideal para as suas fotografias com garantia de satisfação.",
+      "popular": "MAIS ESCOLHIDO",
+      "select": "SELECIONAR",
+      "features": {
+        "hd_photo": "Foto HD",
+        "hd_photos": "Fotos HD",
+        "restore": "Restauro RetroColor AI",
+        "download": "Download imediato",
+        "resolution": "Alta Resolução 1K"
+      }
+    },
+    "comparison": {
+      "title": "Resultados que Contam Histórias",
+      "desc": "Repare como a nossa IA não apenas adiciona cor, mas reconstrói a textura do papel e limpa as imperfeições causadas por décadas de armazenamento inadequado.",
+      "points": {
+        "clean": "Limpeza profunda de manchas e riscos",
+        "light": "Equilíbrio de luz e contraste automático",
+        "sharpness": "Nitidez facial aprimorada para retratos"
+      },
+      "cta": "Experimentar com as minhas fotos"
+    },
+    "testimonials": {
+      "title": "O que dizem os clientes",
+      "subtitle": "Veja as opiniões de {{count}} clientes satisfeitos.",
+      "view_all": "Ver todos"
+    },
+    "faq": {
+      "title": "Dúvidas Frequentes",
+      "q1": "Quanto tempo demora o restauro?",
+      "a1": "O processamento pela nossa tecnologia RetroColor AI é quase instantâneo. Após carregar a foto, o restauro demora entre 15 a 30 segundos, dependendo da complexidade da imagem.",
+      "q2": "As cores são historicamente precisas?",
+      "a2": "A nossa tecnologia proprietária RetroColor Vision analisa o contexto para aplicar as cores mais realistas possíveis baseadas no nosso vasto banco de dados histórico.",
+      "q3": "Como recebo a minha foto?",
+      "a3": "Após o restauro, pode visualizar uma pré-visualização gratuita. Para baixar em alta definição e sem marcas de água, basta selecionar um pack. O download é imediato após o pagamento.",
+      "q4": "Posso imprimir as fotos restauradas?",
+      "a4": "Sim! O restauro via RetroColor Engine otimiza a nitidez e resolução, tornando as imagens ideais para impressão em álbuns de família ou quadros."
+    }
+  },
+  "restore": {
+    "title": "Estúdio de Restauro",
+    "subtitle": "Alta definição e cores realistas com a tecnologia exclusiva RetroColor.",
+    "select_drag": "Selecione ou arraste a sua foto",
+    "processing": "Processamento via RetroColor Engine",
+    "original_photo": "Foto Original",
+    "change": "Trocar",
+    "processed_via": "Processado via RetroColor AI",
+    "engine_action": "Motor RetroColor em ação...",
+    "optimizing": "Otimizando cores e texturas (15-30s).",
+    "result_here": "O resultado aparecerá aqui",
+    "restore_btn": "Restaurar com RetroColor AI",
+    "download_btn": "Baixar em Alta Resolução",
+    "error_quota": "A quota do motor RetroColor AI foi atingida para esta chave.",
+    "error_unexpected": "Ocorreu um erro inesperado no motor RetroColor AI.",
+    "connected": "Motor RetroColor AI Conectado",
+    "not_connected": "Ligação ao Motor RetroColor AI Necessária",
+    "using_private_key": "A sua chave privada está a ser utilizada para garantir restauros sem limites.",
+    "use_paid_key": "Para garantir a máxima qualidade e evitar erros de quota, utilize a sua própria chave de API paga.",
+    "change_key": "Alterar Chave",
+    "connect_key": "Ligar ao Motor AI"
+  },
+  "contact": {
+    "title": "Entre em Contacto",
+    "subtitle": "Tem dúvidas ou precisa de ajuda com uma restauração? Estamos aqui para ajudar.",
+    "form": {
+      "name": "Nome",
+      "name_placeholder": "O seu nome",
+      "email": "Email",
+      "email_placeholder": "seu.email@exemplo.com",
+      "message": "Mensagem",
+      "message_placeholder": "Como podemos ajudar?",
+      "submit": "Enviar Mensagem"
+    },
+    "success": {
+      "title": "Mensagem Enviada!",
+      "message": "Obrigado pelo seu contacto. A nossa equipa responderá o mais breve possível (geralmente em 24h).",
+      "btn": "Enviar outra mensagem"
+    },
+    "info": {
+      "chat": "Chat",
+      "chat_desc": "Disponível seg-sex, 9h-18h"
+    }
+  },
+  "pricing": {
+    "title": "Preços Transparentes",
+    "subtitle": "Escolha o plano que melhor se adapta às suas necessidades de restauração. Sem subscrições, pague apenas pelo que usa.",
+    "popular_badge": "Mais Popular",
+    "per_total": "/ total",
+    "features": {
+      "photos_one": "Foto em Alta Resolução",
+      "photos_many": "Fotos em Alta Resolução",
+      "scratches": "Remoção de riscos e manchas",
+      "colorize": "Colorização profissional por IA",
+      "watermark": "Sem marcas d'água",
+      "lifetime": "Acesso vitalício aos ficheiros"
+    },
+    "btn_choose": "Escolher",
+    "props": {
+      "secure": {
+        "title": "Pagamento Seguro",
+        "desc": "Transações encriptadas via PayPal e Stripe para sua total segurança."
+      },
+      "download": {
+        "title": "Download Imediato",
+        "desc": "Receba a sua foto restaurada em segundos após o processamento."
+      },
+      "guarantee": {
+        "title": "Garantia de Satisfação",
+        "desc": "Se não ficar satisfeito com o resultado técnico, devolvemos o seu dinheiro."
+      }
+    }
+  },
+  "faq": {
+    "title": "Perguntas Frequentes",
+    "q1": "Como funciona a tecnologia de recolorização?",
+    "a1": "Utilizamos o motor de Inteligência Artificial RetroColor AI, desenvolvido por nós e treinado em milhões de fotos históricas e modernas. A nossa tecnologia analisa as formas, texturas e contexto da sua imagem para prever as cores mais prováveis para cada elemento, como pele, roupas e paisagens.",
+    "q2": "O pagamento é seguro?",
+    "a2": "Sim, absolutamente. Utilizamos processadores de pagamento certificados com encriptação SSL de nível bancário. Não armazenamos os dados do seu cartão de crédito nos nossos servidores.",
+    "q3": "O que acontece às minhas fotos?",
+    "a3": "A sua privacidade é a nossa prioridade. As fotos são processadas localmente pelo motor RetroColor AI e são eliminadas automaticamente dos nossos servidores após 24 horas. Nunca usamos as suas fotos para treinar os nossos modelos sem o seu consentimento.",
+    "q4": "Posso restaurar fotos muito danificadas?",
+    "a4": "A RetroColor AI é excelente a remover riscos, ruído e manchas. No entanto, se partes faciais críticas estiverem completamente em falta, o motor tentará reconstruir com base na simetria e padrões anatómicos conhecidos.",
+    "q5": "Qual o tamanho máximo do ficheiro?",
+    "a5": "Atualmente o RetroColor Engine suporta ficheiros JPG e PNG até 5MB. Para ficheiros maiores, o motor pode demorar mais tempo a processar."
+  },
+  "payment_modal": {
+    "title": "Finalizar Encomenda",
+    "user_data": "Seus Dados",
+    "form": {
+      "name_placeholder": "Nome",
+      "surname_placeholder": "Apelido",
+      "email_placeholder": "Seu melhor email",
+      "create_account": "CRIAR CONTA PARA ACEDER DEPOIS"
+    },
+    "selection": "Seleção",
+    "total": "Total",
+    "payment_method": "Forma de Pagamento",
+    "balance_available": "{{amount}}€ disp.",
+    "internal_balance": {
+      "title": "Pagamento via Saldo Interno",
+      "desc": "Ao confirmar, o valor de <1>{{amount}}€</1> será descontado do seu saldo atual.",
+      "processing": "A DESCONTAR...",
+      "confirm": "CONFIRMAR E PAGAR AGORA",
+      "insufficient": "Saldo insuficiente. Carregue saldo na sua dashboard."
+    },
+    "mbway": {
+      "phone_placeholder": "Nº Telemóvel MB Way",
+      "processing": "...",
+      "request_btn": "PEDIR {{amount}}€ NO MB WAY",
+      "confirm_title": "Confirme no seu telemóvel",
+      "confirmed_btn": "JÁ CONFIRMEI"
+    },
+    "card": {
+      "number": "Número do Cartão",
+      "date": "MM/AA",
+      "cvc": "CVC",
+      "processing": "PROCESSANDO...",
+      "pay_btn": "PAGAR {{amount}}€"
+    }
+  },
+  "common": {
+    "loading": "A carregar...",
+    "error": "Erro",
+    "success": "Sucesso",
+    "save": "Guardar",
+    "cancel": "Cancelar"
+  }
+}

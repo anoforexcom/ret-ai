@@ -125,33 +125,6 @@ const Restore: React.FC = () => {
           <p className="mt-2 text-slate-600">{t('restore.subtitle')}</p>
         </div>
 
-        {/* API Key Banner/Check - Só mostra se NÃO tiver chave configurada */}
-        {!hasKey && (
-          <div className={`mb-8 p-6 rounded-2xl border flex flex-col md:flex-row items-center justify-between gap-4 transition-all ${hasKey ? 'bg-green-50 border-green-100' : 'bg-amber-50 border-amber-200 animate-pulse'}`}>
-            <div className="flex items-center gap-4">
-              <div className={`p-3 rounded-xl ${hasKey ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
-                <Key className="h-6 w-6" />
-              </div>
-              <div>
-                <h3 className="text-sm font-bold text-slate-900">
-                  {hasKey ? t('restore.connected') : t('restore.not_connected')}
-                </h3>
-                <p className="text-xs text-slate-600 max-w-md">
-                  {hasKey
-                    ? t('restore.using_private_key')
-                    : t('restore.use_paid_key')}
-                </p>
-              </div>
-            </div>
-            <button
-              onClick={handleOpenKeySelector}
-              className={`${hasKey ? 'bg-white text-slate-600 border border-slate-200' : 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20'} px-6 py-2.5 rounded-xl font-bold text-sm hover:opacity-90 transition-all flex items-center gap-2 whitespace-nowrap`}
-            >
-              {hasKey ? t('restore.change_key') : t('restore.connect_key')}
-            </button>
-          </div>
-        )}
-
         <div className="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
           <div className="p-8">
             {!selectedFile ? (

@@ -13,22 +13,13 @@ const Restore: React.FC = () => {
   const [restoredUrl, setRestoredUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showPayment, setShowPayment] = useState(false);
-  const [hasKey, setHasKey] = useState<boolean>(!!import.meta.env.VITE_GOOGLE_GENAI_API_KEY);
+  const [hasKey, setHasKey] = useState<boolean>(true); // Sempre true, o backend controla a chave
 
   const { addOrder, currentCustomer } = useConfig();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { t } = useTranslation();
 
-  useEffect(() => {
-    const checkKey = async () => {
-      const aiStudio = (window as any).aistudio;
-      if (aiStudio && typeof aiStudio.hasSelectedApiKey === 'function') {
-        const selected = await aiStudio.hasSelectedApiKey();
-        setHasKey(selected || !!import.meta.env.VITE_GOOGLE_GENAI_API_KEY);
-      }
-    };
-    checkKey();
-  }, []);
+
 
   const handleOpenKeySelector = async () => {
     const aiStudio = (window as any).aistudio;

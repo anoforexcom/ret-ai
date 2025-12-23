@@ -1,12 +1,16 @@
-import { GoogleGenAI } from "@google/genai";
+import Replicate from "replicate";
 
 /**
- * Handler da API Route para restaurar imagens.
- * Recebe uma imagem em base64 e utiliza o Gemini 1.5 Flash para processar.
+ * Handler da API Route para restaurar imagens usando Replicate (GFPGAN).
+ * Mais especializado em restauro e colorização do que o Gemini.
  */
 export const config = {
-  maxDuration: 60, // Aumenta para 60 segundos na Vercel
+  maxDuration: 60,
 };
+
+const replicate = new Replicate({
+  auth: process.env.REPLICATE_API_TOKEN,
+});
 
 export default async function handler(req: Request) {
   if (req.method !== 'POST') {
@@ -23,48 +27,31 @@ export default async function handler(req: Request) {
       });
     }
 
-    // A instância é criada aqui para usar o segredo injetado no ambiente
-    const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
-
-    const response = await ai.models.generateContent({
-      model: 'gemini-1.5-flash',
-      contents: {
-        parts: [
-          {
-            inlineData: {
-              data: image,
-              mimeType: 'image/png',
-            },
-          },
-          {
-            text: 'Restore this photo: Colorize if B&W, remove scratches/dust, and enhance clarity. Return ONLY the processed image part.',
-          },
-        ],
-      },
-      config: {
-        imageConfig: {
-          aspectRatio: "1:1"
+    // Executa o modelo GFPGAN no Replicate
+    // Este modelo é especialista em restaurar rostos e melhorar qualidade
+    const output = await replicate.run(
+      "tencentarc/gfpgan:9283608cc6b7c309b5881f1d9fa9921997371881ad5d7aca371e12697c3ef221",
+      {
+        input: {
+          image: `data:image/png;base64,${image}`,
+          upscale: 2,
+          face_soften: 0.5
         }
       }
-    });
+    ) as string;
 
-    let restoredBase64: string | null = null;
-
-    if (response.candidates?.[0]?.content?.parts) {
-      for (const part of response.candidates[0].content.parts) {
-        if (part.inlineData) {
-          restoredBase64 = part.inlineData.data;
-          break;
-        }
-      }
-    }
-
-    if (!restoredBase64) {
-      return new Response(JSON.stringify({ error: 'Falha ao processar a imagem com IA.' }), {
+    if (!output) {
+      return new Response(JSON.stringify({ error: 'O Replicate não devolveu nenhum resultado.' }), {
         status: 500,
         headers: { 'Content-Type': 'application/json' }
       });
     }
+
+    // O Replicate devolve normalmente um URL direto para a imagem hospedada
+    // Vamos converter para base64 para o frontend lidar de forma consistente ou enviar o URL
+    const imageRes = await fetch(output);
+    const arrayBuffer = await imageRes.arrayBuffer();
+    const restoredBase64 = Buffer.from(arrayBuffer).toString('base64');
 
     return new Response(JSON.stringify({ restoredImage: restoredBase64 }), {
       status: 200,
@@ -72,7 +59,7 @@ export default async function handler(req: Request) {
     });
 
   } catch (error: any) {
-    console.error("Erro na API Route:", error);
+    console.error("Erro no Replicate:", error);
     return new Response(JSON.stringify({ error: error.message || 'Erro interno no servidor' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' }

@@ -16,7 +16,7 @@ export default async function handler(req: any, res: any) {
   console.log("--- INÍCIO DO PROCESSO REAL DE COLORIZAÇÃO ---");
 
   try {
-    const { imageBase64, modelName = "Stable", renderFactor = 35 } = req.body;
+    const { imageBase64, modelName = "Artistic", renderFactor = 28 } = req.body;
 
     if (!imageBase64) {
       console.log("Erro: Imagem não fornecida.");

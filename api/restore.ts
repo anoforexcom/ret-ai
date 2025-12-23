@@ -27,7 +27,7 @@ export default async function handler(req: any, res: any) {
 
     // Executa o modelo DeOldify
     const output = await replicate.run(
-      "arielreplicate/deoldify_image:376c74a2c9eb442a2ff9391b84dc5b949cd4e80b4dc0565115be0a19b7df0ae6",
+      "arielreplicate/deoldify_image:0da600fab0c45a66211339f1c16b71345d22f26ef5fea3dca1bb90bb5711e950",
       {
         input: {
           input_image: `data:image/jpeg;base64,${imageBase64}`,

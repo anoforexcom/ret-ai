@@ -89,6 +89,12 @@ export const restoreImage = async (file: File | string): Promise<string> => {
       throw new Error("O motor de IA não conseguiu gerar a imagem.");
     }
 
+    // Se a imagem já vier como URL (http/https), retornamos diretamente.
+    // Se vier como base64 puras, prefixamos com o data:mimetype.
+    if (typeof data.restoredImage === 'string' && data.restoredImage.startsWith('http')) {
+      return data.restoredImage;
+    }
+
     return `data:image/png;base64,${data.restoredImage}`;
   } catch (error: any) {
     console.error("Erro no Processo de Restauro:", error);

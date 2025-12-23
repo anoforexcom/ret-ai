@@ -9,13 +9,11 @@ const replicate = new Replicate({
 });
 
 export default async function handler(req: any, res: any) {
-  // Configuração de CORS se necessário (opcional para rotas internas na Vercel)
-
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Método não permitido' });
   }
 
-  console.log("Iniciando restauro com Replicate...");
+  console.log("Iniciando restauro com CodeFormer...");
 
   try {
     const { image } = req.body;
@@ -24,31 +22,31 @@ export default async function handler(req: any, res: any) {
       return res.status(400).json({ error: 'Nenhuma imagem fornecida.' });
     }
 
-    // Executa o modelo GFPGAN no Replicate
-    // tencentarc/gfpgan:9283608cc6b7c309b5881f1d9fa9921997371881ad5d7aca371e12697c3ef221
+    // Executa o modelo CodeFormer no Replicate
     const output = await replicate.run(
-      "tencentarc/gfpgan:9283608cc6b7c309b5881f1d9fa9921997371881ad5d7aca371e12697c3ef221",
+      "sczhou/codeformer:cc4956dd26fa5a7185d5660cc9100fab1b8070a1d1654a8bb5eb6d443b020bb2",
       {
         input: {
           image: `data:image/png;base64,${image}`,
           upscale: 2,
-          face_soften: 0.5
+          face_upsample: true,
+          background_enhance: true,
+          codeformer_fidelity: 0.7
         }
       }
     );
 
-    console.log("Replicate output:", output);
+    console.log("CodeFormer output:", output);
 
     if (!output) {
-      return res.status(500).json({ error: 'O Replicate não devolveu nenhum resultado.' });
+      return res.status(500).json({ error: 'O motor de IA não devolveu nenhum resultado.' });
     }
 
-    // Retorna o URL diretamente para o frontend. 
-    // Isso evita o download e reconversão pesada no servidor (que causa timeout).
+    // Retorna o URL diretamente para o frontend
     return res.status(200).json({ restoredImage: output });
 
   } catch (error: any) {
-    console.error("Erro no Replicate:", error);
+    console.error("Erro no CodeFormer:", error);
     return res.status(500).json({ error: error.message || 'Erro interno no servidor' });
   }
 }

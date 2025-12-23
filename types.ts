@@ -77,14 +77,14 @@ export interface CustomerAccount {
 export interface Order {
   id: string;
   customerId?: string;
-  customerName: string; 
-  customerEmail?: string; 
+  customerName: string;
+  customerEmail?: string;
   date: string;
   amount: number;
   status: 'completed' | 'pending' | 'refunded';
   imageUrl?: string;
   paymentMethod?: string;
-  items?: string; 
+  items?: string;
 }
 
 export interface PaymentMethod {
@@ -100,7 +100,7 @@ export interface PaymentMethod {
 
 export interface StoreApiKeys {
   paypalClientId?: string;
-  stripePublicKey?: string; 
+  stripePublicKey?: string;
 }
 
 export interface AuditLog {
@@ -124,11 +124,16 @@ export interface StoreConfig {
   mainMenu: NavigationLink[];
   footerMenu: NavigationLink[];
   paymentMethods: PaymentMethod[];
-  bundles: ProductBundle[]; 
+  bundles: ProductBundle[];
   testimonials: Testimonial[];
   expenses: Expense[];
   members: StoreMember[];
   customers: CustomerAccount[];
   apiKeys: StoreApiKeys;
+  socialLinks: {
+    facebook?: string;
+    instagram?: string;
+    tiktok?: string;
+  };
   theme: ThemeConfig;
 }

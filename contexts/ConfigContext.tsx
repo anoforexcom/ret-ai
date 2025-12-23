@@ -117,6 +117,11 @@ const defaultStats: StoreConfig = {
   members: [],
   customers: [],
   apiKeys: {},
+  socialLinks: {
+    facebook: '',
+    instagram: '',
+    tiktok: ''
+  },
   theme: {
     primaryColor: '#4f46e5',
     secondaryColor: '#06b6d4',
@@ -142,10 +147,10 @@ export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const addOrder = (order: Order) => setOrders(prev => [order, ...prev]);
   const updateOrder = (id: string, status: Order['status']) => setOrders(prev => prev.map(o => o.id === id ? { ...o, status } : o));
   const addAuditLog = (action: string, details: string) => setAuditLogs(prev => [{ id: Date.now().toString(), action, details, date: new Date().toISOString(), user: 'Admin' }, ...prev]);
-  
+
   const customerLogin = (email: string, password?: string) => {
     const customer = config.customers.find(x => x.email.toLowerCase() === email.toLowerCase());
-    
+
     if (!customer) {
       return { success: false, message: "Utilizador não encontrado." };
     }
@@ -161,10 +166,10 @@ export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const customerLogout = () => setCurrentCustomer(null);
 
   const registerCustomer = (data: any) => {
-    const newC: CustomerAccount = { 
-      ...data, 
-      id: `C-${Date.now()}`, 
-      balance: 0, 
+    const newC: CustomerAccount = {
+      ...data,
+      id: `C-${Date.now()}`,
+      balance: 0,
       createdAt: new Date().toISOString(),
       password: data.password || '123456'
     };
@@ -187,7 +192,7 @@ export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   };
 
   return (
-    <ConfigContext.Provider value={{ 
+    <ConfigContext.Provider value={{
       config, orders, auditLogs, updateConfig, addOrder, updateOrder, addAuditLog, isAdmin, login: () => setIsAdmin(true), logout: () => setIsAdmin(false),
       currentCustomer, customerLogin, customerLogout, registerCustomer, updateCustomerBalance, updateCustomerPassword
     }}>

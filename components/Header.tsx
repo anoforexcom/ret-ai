@@ -54,8 +54,8 @@ const Header: React.FC = () => {
                 key={link.id}
                 to={link.path}
                 className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors duration-200 ${isActive(link.path)
-                    ? 'border-indigo-500 text-gray-900'
-                    : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                  ? 'border-indigo-500 text-gray-900'
+                  : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
                   }`}
               >
                 {getTranslatedLabel(link.label)}
@@ -64,10 +64,32 @@ const Header: React.FC = () => {
 
             <button
               onClick={toggleLanguage}
-              className="p-2 rounded-full text-slate-500 hover:bg-slate-100 transition-colors"
+              className="p-1 rounded-lg hover:bg-slate-100 transition-all active:scale-95"
               title={i18n.language === 'pt' ? "Switch to English" : "Mudar para Português"}
             >
-              <Globe className="h-5 w-5" />
+              {i18n.language === 'pt' ? (
+                <div className="flex items-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" className="h-5 w-7 rounded-sm shadow-sm border border-slate-100">
+                    <rect width="600" height="400" fill="#000080" />
+                    <rect width="600" height="400" fill="#cf142b" clipPath="polygon(0 0, 600 0, 600 400, 0 400)" />
+                    <path d="M0 0 L600 400 M0 400 L600 0" stroke="#fff" strokeWidth="60" />
+                    <path d="M0 0 L600 400 M0 400 L600 0" stroke="#cf142b" strokeWidth="40" />
+                    <path d="M300 0 V400 M0 200 H600" stroke="#fff" strokeWidth="100" />
+                    <path d="M300 0 V400 M0 200 H600" stroke="#cf142b" strokeWidth="60" />
+                  </svg>
+                  <span className="text-xs font-bold text-slate-400">EN</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" className="h-5 w-7 rounded-sm shadow-sm border border-slate-100">
+                    <rect width="240" height="400" fill="#006600" />
+                    <rect x="240" width="360" height="400" fill="#ff0000" />
+                    <circle cx="240" cy="200" r="80" fill="#ffff00" />
+                    <circle cx="240" cy="200" r="70" fill="#ffffff" stroke="#000" strokeWidth="2" />
+                  </svg>
+                  <span className="text-xs font-bold text-slate-400">PT</span>
+                </div>
+              )}
             </button>
 
             <div className="h-6 w-px bg-slate-200"></div>
@@ -125,8 +147,8 @@ const Header: React.FC = () => {
                 to={link.path}
                 onClick={() => setIsOpen(false)}
                 className={`block pl-3 pr-4 py-2 border-l-4 text-base font-medium ${isActive(link.path)
-                    ? 'bg-indigo-50 border-indigo-500 text-indigo-700'
-                    : 'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800'
+                  ? 'bg-indigo-50 border-indigo-500 text-indigo-700'
+                  : 'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800'
                   }`}
               >
                 {getTranslatedLabel(link.label)}

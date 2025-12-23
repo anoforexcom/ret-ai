@@ -75,7 +75,11 @@ export const restoreImage = async (file: File | string): Promise<string> => {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ image: optimizedBase64 }),
+      body: JSON.stringify({
+        imageBase64: optimizedBase64,
+        modelName: "Stable",
+        renderFactor: 35
+      }),
     });
 
     if (!response.ok) {

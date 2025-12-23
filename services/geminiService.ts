@@ -94,12 +94,13 @@ export const restoreImage = async (file: File | string): Promise<string> => {
     }
 
     // Se a imagem já vier como URL (http/https), retornamos diretamente.
-    // Se vier como base64 puras, prefixamos com o data:mimetype.
     if (typeof data.restoredImage === 'string' && data.restoredImage.startsWith('http')) {
       return data.restoredImage;
     }
 
-    return `data:image/png;base64,${data.restoredImage}`;
+    // Usa o mimeType fornecido pelo backend ou assume jpeg (padrão do resizeImage)
+    const mime = data.mimeType || "image/jpeg";
+    return `data:${mime};base64,${data.restoredImage}`;
   } catch (error: any) {
     console.error("Erro no Processo de Restauro:", error);
     throw error;

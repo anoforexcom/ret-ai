@@ -2,6 +2,42 @@
 
 
 /**
+ * Redimensiona uma imagem para garantir que não ultrapasse um limite de pixels.
+ * Isso acelera o upload e o processamento da IA.
+ */
+export const resizeImage = (base64Str: string, maxDimension: number = 1600): Promise<string> => {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      let width = img.width;
+      let height = img.height;
+
+      if (width > height) {
+        if (width > maxDimension) {
+          height *= maxDimension / width;
+          width = maxDimension;
+        }
+      } else {
+        if (height > maxDimension) {
+          width *= maxDimension / height;
+          height = maxDimension;
+        }
+      }
+
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      ctx?.drawImage(img, 0, 0, width, height);
+
+      // Exporta como JPEG com qualidade 0.85 para reduzir drasticamente o tamanho do ficheiro
+      resolve(canvas.toDataURL('image/jpeg', 0.85).split(',')[1]);
+    };
+    img.src = `data:image/png;base64,${base64Str}`;
+  });
+};
+
+/**
  * Converte um blob/ficheiro para base64.
  */
 export const blobToBase64 = (blob: Blob): Promise<string> => {
@@ -30,13 +66,16 @@ export const restoreImage = async (file: File | string): Promise<string> => {
       base64Data = file;
     }
 
+    // Redimensiona no cliente para acelerar tráfego e processamento
+    const optimizedBase64 = await resizeImage(base64Data);
+
     // Chama a API Router interna (Backend)
     const response = await fetch('/api/restore', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ image: base64Data }),
+      body: JSON.stringify({ image: optimizedBase64 }),
     });
 
     if (!response.ok) {

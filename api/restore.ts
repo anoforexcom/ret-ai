@@ -38,7 +38,7 @@ export default async function handler(req: Request) {
             },
           },
           {
-            text: 'Perform a professional photo restoration. 1. Colorize naturally if B&W. 2. Remove all scratches and dust. 3. Enhance facial details. Return ONLY the restored image as a binary part.',
+            text: 'Restore this photo: Colorize if B&W, remove scratches/dust, and enhance clarity. Return ONLY the processed image part.',
           },
         ],
       },

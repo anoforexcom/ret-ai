@@ -3,8 +3,12 @@ import { GoogleGenAI } from "@google/genai";
 
 /**
  * Handler da API Route para restaurar imagens.
- * Recebe uma imagem em base64 e utiliza o Gemini 2.5 Flash Image para processar.
+ * Recebe uma imagem em base64 e utiliza o Gemini 1.5 Flash para processar.
  */
+export const config = {
+  maxDuration: 60, // Aumenta para 60 segundos na Vercel
+};
+
 export default async function handler(req: Request) {
   if (req.method !== 'POST') {
     return new Response('Método não permitido', { status: 405 });
@@ -24,7 +28,7 @@ export default async function handler(req: Request) {
     const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
 
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash-image',
+      model: 'gemini-1.5-flash',
       contents: {
         parts: [
           {

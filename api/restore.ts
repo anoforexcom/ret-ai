@@ -1,3 +1,81 @@
-export default function handler(req: any, res: any) {
-  res.status(200).json({ ok: true });
+import { GoogleGenAI } from "@google/genai";
+
+/**
+ * Handler da API Route para restaurar imagens.
+ * Recebe uma imagem em base64 e utiliza o Gemini 1.5 Flash para processar.
+ */
+export const config = {
+  maxDuration: 60, // Aumenta para 60 segundos na Vercel
+};
+
+export default async function handler(req: Request) {
+  if (req.method !== 'POST') {
+    return new Response('Método não permitido', { status: 405 });
+  }
+
+  try {
+    const { image } = await req.json();
+
+    if (!image) {
+      return new Response(JSON.stringify({ error: 'Nenhuma imagem fornecida.' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    // A instância é criada aqui para usar o segredo injetado no ambiente
+    const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
+
+    const response = await ai.models.generateContent({
+      model: 'gemini-1.5-flash',
+      contents: {
+        parts: [
+          {
+            inlineData: {
+              data: image,
+              mimeType: 'image/png',
+            },
+          },
+          {
+            text: 'Restore this photo: Colorize if B&W, remove scratches/dust, and enhance clarity. Return ONLY the processed image part.',
+          },
+        ],
+      },
+      config: {
+        imageConfig: {
+          aspectRatio: "1:1"
+        }
+      }
+    });
+
+    let restoredBase64: string | null = null;
+
+    if (response.candidates?.[0]?.content?.parts) {
+      for (const part of response.candidates[0].content.parts) {
+        if (part.inlineData) {
+          restoredBase64 = part.inlineData.data;
+          break;
+        }
+      }
+    }
+
+    if (!restoredBase64) {
+      return new Response(JSON.stringify({ error: 'Falha ao processar a imagem com IA.' }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    return new Response(JSON.stringify({ restoredImage: restoredBase64 }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+  } catch (error: any) {
+    console.error("Erro na API Route:", error);
+    return new Response(JSON.stringify({ error: error.message || 'Erro interno no servidor' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
 }

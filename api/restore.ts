@@ -24,7 +24,7 @@ export default async function handler(req: any, res: any) {
 
     // Executa o modelo CodeFormer no Replicate
     const output = await replicate.run(
-      "sczhou/codeformer:cc4956dd26fa5a7185d5660cc9100fab1b8070a1d1654a8bb5eb6d443b020bb2",
+      "sczhou/codeformer:0da600fab0c45a66211339f1c16b71345d22f26ef5fea3dca1bb90bb5711e950",
       {
         input: {
           image: `data:image/png;base64,${image}`,

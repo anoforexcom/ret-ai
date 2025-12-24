@@ -112,16 +112,17 @@ const Restore: React.FC = () => {
     });
 
     // Rastreio de Google Analytics (E-commerce Purchase)
-    if ((window as any).gtag) {
+    const analyticsAmount = Number(amount) || 0;
+    if (typeof (window as any).gtag === 'function') {
       (window as any).gtag('event', 'purchase', {
         transaction_id: orderId,
-        value: amount,
+        value: analyticsAmount,
         currency: 'EUR',
         items: [{
           item_id: itemLabel,
           item_name: itemLabel,
           quantity: 1,
-          price: amount
+          price: analyticsAmount
         }]
       });
     }

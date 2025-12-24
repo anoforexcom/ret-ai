@@ -36,7 +36,10 @@ const Customers: React.FC = () => {
     orders.forEach(order => {
         // Normalização do estado (muito permissivo para garantir que nada escapa)
         const status = (order.status || "").toLowerCase().trim();
-        const isPaid = status === 'completed' || status === 'pago' || status === 'paid' || status === 'success';
+        const isPaid = [
+            'completed', 'pago', 'paid', 'success', 'concluído', 'concluido',
+            'paga', 'sucesso', 'finalizado', 'aprovado', 'approved'
+        ].includes(status);
         if (!isPaid) return;
 
         const orderEmail = (order.customerEmail || "").trim().toLowerCase();

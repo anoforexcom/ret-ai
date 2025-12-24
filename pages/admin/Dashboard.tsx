@@ -8,17 +8,22 @@ const Dashboard: React.FC = () => {
   const { orders, config } = useConfig();
   const { t } = useTranslation();
 
-  // Função auxiliar para verificar se a encomenda está paga de forma permissiva
+  // Função auxiliar para verificar se a encomenda está paga de forma ultra-permissiva
   const isPaidOrder = (status: string) => {
     const s = (status || "").toLowerCase().trim();
-    return s === 'completed' || s === 'pago' || s === 'paid' || s === 'success';
+    // Aceita português (com/sem acento), inglês e estados de sucesso comuns
+    return [
+      'completed', 'pago', 'paid', 'success', 'concluído', 'concluido',
+      'paga', 'sucesso', 'finalizado', 'aprovado', 'approved'
+    ].includes(s);
   };
 
   // Função auxiliar para converter montante de forma robusta
   const parseAmount = (val: any) => {
     if (typeof val === 'number') return val;
     if (!val) return 0;
-    return parseFloat(val.toString().replace(',', '.').replace(/[^\d.]/g, '')) || 0;
+    const str = val.toString().replace(',', '.').replace(/[^\d.]/g, (m: string, i: number) => (m === '.' && val.toString().indexOf('.') === i) ? m : '');
+    return parseFloat(str) || 0;
   };
 
   // Métricas de Receita
@@ -37,7 +42,7 @@ const Dashboard: React.FC = () => {
     const dayStr = d.toISOString().split('T')[0];
 
     return orders
-      .filter(o => isPaidOrder(o.status) && o.date.startsWith(dayStr))
+      .filter(o => isPaidOrder(o.status) && (o.date || "").startsWith(dayStr))
       .reduce((sum, o) => sum + parseAmount(o.amount), 0);
   });
 

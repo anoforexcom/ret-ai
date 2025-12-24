@@ -30,13 +30,17 @@ const Financials: React.FC = () => {
     // Funções de utilidade para consistência de dados
     const isPaidOrder = (status: string) => {
         const s = (status || "").toLowerCase().trim();
-        return s === 'completed' || s === 'pago' || s === 'paid' || s === 'success';
+        return [
+            'completed', 'pago', 'paid', 'success', 'concluído', 'concluido',
+            'paga', 'sucesso', 'finalizado', 'aprovado', 'approved'
+        ].includes(s);
     };
 
     const parseAmount = (val: any) => {
         if (typeof val === 'number') return val;
         if (!val) return 0;
-        return parseFloat(val.toString().replace(',', '.').replace(/[^\d.]/g, '')) || 0;
+        const str = val.toString().replace(',', '.').replace(/[^\d.]/g, (m: string, i: number) => (m === '.' && val.toString().indexOf('.') === i) ? m : '');
+        return parseFloat(str) || 0;
     };
 
     const currentExpenses = config.expenses || [];

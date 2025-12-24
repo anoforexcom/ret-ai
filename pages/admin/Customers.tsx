@@ -7,10 +7,12 @@ const Customers: React.FC = () => {
     const { orders, config } = useConfig();
 
     // Processar dados de clientes a partir das encomendas E das contas registadas
-    const customerMap = new Map();
-    const emailToIdMap = new Map();
+    const registeredMap = new Map(); // Mapeia ID -> Customer
+    const emailToIdMap = new Map();  // Mapeia Email -> ID
+    const visitorMap = new Map();    // Mapeia Email ou Nome -> Visitor
+    const allFinalCustomers: any[] = [];
 
-    // Primeiro adicionamos todos os clientes registados
+    // 1. Inicializar com Clientes Registados
     (config.customers || []).forEach(c => {
         const normalizedEmail = c.email.trim().toLowerCase();
         const customerData = {
@@ -21,48 +23,63 @@ const Customers: React.FC = () => {
             orderCount: 0,
             lastOrder: c.createdAt,
             isRegistered: true,
-            balance: c.balance
+            balance: c.balance || 0
         };
-        customerMap.set(c.id, customerData);
-        emailToIdMap.set(normalizedEmail, c.id);
+        allFinalCustomers.push(customerData);
+        registeredMap.set(c.id, customerData);
+        if (normalizedEmail) {
+            emailToIdMap.set(normalizedEmail, c.id);
+        }
     });
 
-    // Depois processamos as encomendas para somar gastos
+    // 2. Processar Encomendas para somar gastos
     orders.forEach(order => {
-        // Ignorar encomendas não concluídas se quiser apenas gasto real
-        if (order.status !== 'completed') return;
+        // Normalização do estado (case-insensitive e remove espaços)
+        const status = (order.status || "").toLowerCase().trim();
+        if (status !== 'completed' && status !== 'pago') return;
 
-        const normalizedEmail = (order.customerEmail || "").trim().toLowerCase();
+        const orderEmail = (order.customerEmail || "").trim().toLowerCase();
+        const orderIdFromOrder = order.customerId;
+        const orderAmount = Number(order.amount) || 0;
 
-        // Tentar encontrar por ID primeiro, depois por Email
-        let customerId = order.customerId;
-        if (!customerId && normalizedEmail) {
-            customerId = emailToIdMap.get(normalizedEmail);
+        // Tentar encontrar o cliente registado correspondente
+        let targetCustomer: any = null;
+
+        // Prioridade 1: Match por ID
+        if (orderIdFromOrder) targetCustomer = registeredMap.get(orderIdFromOrder);
+
+        // Prioridade 2: Match por Email (se não encontrar por ID)
+        if (!targetCustomer && orderEmail) {
+            const mappedId = emailToIdMap.get(orderEmail);
+            if (mappedId) targetCustomer = registeredMap.get(mappedId);
         }
 
-        if (customerId && customerMap.has(customerId)) {
-            // Cliente registado (ou já mapeado por ID)
-            const customer = customerMap.get(customerId);
-            customer.totalSpent += order.amount;
-            customer.orderCount += 1;
-            if (new Date(order.date) > new Date(customer.lastOrder)) {
-                customer.lastOrder = order.date;
+        if (targetCustomer) {
+            targetCustomer.totalSpent += orderAmount;
+            targetCustomer.orderCount += 1;
+            if (new Date(order.date) > new Date(targetCustomer.lastOrder)) {
+                targetCustomer.lastOrder = order.date;
             }
-        } else if (normalizedEmail) {
-            // Cliente visitante novo (mapear por email para agrupar)
-            if (!customerMap.has(normalizedEmail)) {
-                customerMap.set(normalizedEmail, {
+        } else if (orderEmail || order.customerName) {
+            // É um visitante (não registado ou não encontrado nas contas)
+            const visitorKey = orderEmail || order.customerName || "unknown";
+
+            if (!visitorMap.has(visitorKey)) {
+                const guestData = {
                     name: order.customerName || 'Visitante',
-                    email: order.customerEmail,
+                    email: order.customerEmail || 'Vários',
                     totalSpent: 0,
                     orderCount: 0,
                     lastOrder: order.date,
                     isRegistered: false,
                     balance: 0
-                });
+                };
+                visitorMap.set(visitorKey, guestData);
+                allFinalCustomers.push(guestData);
             }
-            const guest = customerMap.get(normalizedEmail);
-            guest.totalSpent += order.amount;
+
+            const guest = visitorMap.get(visitorKey);
+            guest.totalSpent += orderAmount;
             guest.orderCount += 1;
             if (new Date(order.date) > new Date(guest.lastOrder)) {
                 guest.lastOrder = order.date;
@@ -70,7 +87,7 @@ const Customers: React.FC = () => {
         }
     });
 
-    const customers = Array.from(customerMap.values()).sort((a, b) => b.totalSpent - a.totalSpent);
+    const customers = allFinalCustomers.sort((a, b) => b.totalSpent - a.totalSpent);
 
     const totalSpentAll = customers.reduce((acc, c) => acc + c.totalSpent, 0);
     const avgClv = customers.length > 0 ? totalSpentAll / customers.length : 0;

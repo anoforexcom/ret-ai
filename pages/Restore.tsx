@@ -81,15 +81,28 @@ const Restore: React.FC = () => {
     setShowPayment(true);
   };
 
-  const handlePaymentSuccess = (method: string, amount: number, itemLabel: string) => {
+  const handlePaymentSuccess = (
+    method: string,
+    amount: number,
+    itemLabel: string,
+    customerDetails?: { firstName: string, lastName: string, email: string, id?: string }
+  ) => {
     setShowPayment(false);
 
     const orderId = `ORD-${Date.now().toString().slice(-6)}`;
+
+    // Prioridade para os detalhes enviados pelo modal (que podem incluir o novo cliente registado)
+    const finalCustomerId = customerDetails?.id || currentCustomer?.id;
+    const finalCustomerName = customerDetails
+      ? `${customerDetails.firstName} ${customerDetails.lastName}`.trim()
+      : (currentCustomer ? `${currentCustomer.firstName} ${currentCustomer.lastName}` : 'Visitante');
+    const finalCustomerEmail = customerDetails?.email || currentCustomer?.email;
+
     addOrder({
       id: orderId,
-      customerId: currentCustomer?.id,
-      customerName: currentCustomer ? `${currentCustomer.firstName} ${currentCustomer.lastName}` : 'Visitante',
-      customerEmail: currentCustomer?.email,
+      customerId: finalCustomerId,
+      customerName: finalCustomerName,
+      customerEmail: finalCustomerEmail,
       date: new Date().toISOString(),
       amount,
       status: 'completed',

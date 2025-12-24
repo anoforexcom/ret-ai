@@ -9,7 +9,7 @@ import { useTranslation, Trans } from 'react-i18next';
 interface PaymentModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSuccess: (method: string, amount: number, itemDescription: string) => void;
+  onSuccess: (method: string, amount: number, itemDescription: string, customerDetails?: { firstName: string, lastName: string, email: string, id?: string }) => void;
   defaultPrice?: number;
 }
 
@@ -76,13 +76,20 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onSuccess 
   if (!isOpen || !selectedTier) return null;
 
   const handleCheckoutSuccess = (methodName: string) => {
+    let finalCustomer = currentCustomer;
+
     if (activeMethod?.type === 'balance' && currentCustomer) {
       updateCustomerBalance(currentCustomer.id, -selectedTier.price);
     } else if (!currentCustomer && shouldRegister && email && firstName) {
-      registerCustomer({ firstName, lastName, email });
+      finalCustomer = registerCustomer({ firstName, lastName, email });
     }
 
-    onSuccess(methodName, selectedTier.price, selectedTier.label);
+    onSuccess(methodName, selectedTier.price, selectedTier.label, {
+      firstName: finalCustomer?.firstName || firstName || 'Visitante',
+      lastName: finalCustomer?.lastName || lastName || '',
+      email: finalCustomer?.email || email || '',
+      id: finalCustomer?.id
+    });
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -203,8 +210,8 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onSuccess 
                     key={tier.id}
                     onClick={() => setSelectedTierId(tier.id)}
                     className={`p-3 rounded-xl border-2 cursor-pointer transition-all ${selectedTierId === tier.id
-                        ? 'bg-white border-indigo-600 shadow-sm'
-                        : 'bg-transparent border-slate-200 hover:border-indigo-200'
+                      ? 'bg-white border-indigo-600 shadow-sm'
+                      : 'bg-transparent border-slate-200 hover:border-indigo-200'
                       }`}
                   >
                     <div className="flex justify-between items-center">
@@ -238,8 +245,8 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onSuccess 
                         setMbWaySent(false);
                       }}
                       className={`flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all ${selectedMethodId === method.id
-                          ? 'border-indigo-600 bg-indigo-50 text-indigo-700 shadow-sm ring-1 ring-indigo-600'
-                          : 'border-slate-100 hover:border-slate-300 text-slate-500'
+                        ? 'border-indigo-600 bg-indigo-50 text-indigo-700 shadow-sm ring-1 ring-indigo-600'
+                        : 'border-slate-100 hover:border-slate-300 text-slate-500'
                         }`}
                     >
                       {method.type === 'card' && <CreditCard className="h-5 w-5 mb-1" />}
@@ -267,7 +274,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onSuccess 
                       <h5 className="font-bold text-slate-900">{t('payment_modal.internal_balance.title')}</h5>
                       <p className="text-xs text-slate-500 mt-2 mb-6">
                         <Trans i18nKey="payment_modal.internal_balance.desc" values={{ amount: selectedTier.price.toFixed(2) }}>
-                          Ao confirmar, o valor de <b className="text-slate-900">{{ amount }}€</b> será descontado do seu saldo atual.
+                          Ao confirmar, o valor de <b className="text-slate-900">{selectedTier.price.toFixed(2)}€</b> será descontado do seu saldo atual.
                         </Trans>
                       </p>
 

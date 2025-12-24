@@ -11,14 +11,23 @@ const Dashboard: React.FC = () => {
   // Métricas de Receita
   const totalRevenue = orders.reduce((acc, order) => acc + (order.status === 'completed' ? order.amount : 0), 0);
   const totalOrders = orders.filter(o => o.status === 'completed').length;
-  const uniqueCustomers = new Set(orders.map(o => o.customerName)).size;
+  const uniqueCustomers = new Set(orders.map(o => o.customerEmail || o.customerId || o.customerName)).size;
 
   // Métricas de Despesa e Lucro Real
   const totalExpenses = config.expenses.reduce((acc, exp) => acc + exp.amount, 0);
   const netProfit = totalRevenue - totalExpenses;
 
-  // Dados Simulados para Gráfico (Inspirados na tendência real)
-  const chartData = [45, 20, 60, 35, 80, 55, totalRevenue > 0 ? (totalRevenue / 10) + 20 : 10];
+  // Agregação de Vendas para o Gráfico (Últimos 7 dias)
+  const chartData = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date();
+    d.setDate(d.getDate() - (6 - i));
+    const dayStr = d.toISOString().split('T')[0];
+
+    return orders
+      .filter(o => o.status === 'completed' && o.date.startsWith(dayStr))
+      .reduce((sum, o) => sum + o.amount, 0);
+  });
+
   const maxVal = Math.max(...chartData, 10);
 
   const StatCard = ({ title, value, subtext, icon: Icon, color, trend, trendValue }: any) => (
@@ -125,7 +134,13 @@ const Dashboard: React.FC = () => {
                     style={{ height: `${(val / maxVal) * 100}%` }}
                   ></div>
                 </div>
-                <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">{t('admin.day')} {i + 1}</span>
+                <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+                  {(() => {
+                    const d = new Date();
+                    d.setDate(d.getDate() - (6 - i));
+                    return d.toLocaleDateString('pt-PT', { day: '2-digit', month: '2-digit' });
+                  })()}
+                </span>
               </div>
             ))}
           </div>

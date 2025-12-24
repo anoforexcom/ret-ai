@@ -20,6 +20,7 @@ interface ConfigContextType {
   registerCustomer: (customer: Omit<CustomerAccount, 'id' | 'balance' | 'createdAt'>) => CustomerAccount;
   updateCustomerBalance: (customerId: string, amount: number) => void;
   updateCustomerPassword: (customerId: string, newPassword: string) => void;
+  syncStatus: 'connected' | 'disconnected' | 'error';
 }
 
 const ConfigContext = createContext<ConfigContextType | undefined>(undefined);
@@ -146,23 +147,55 @@ const cleanForFirestore = (obj: any): any => {
 export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [config, setConfig] = useState<StoreConfig>(() => {
     const saved = localStorage.getItem('retro_v10_config');
-    return saved ? JSON.parse(saved) : defaultStats;
+    let baseConfig = saved ? JSON.parse(saved) : defaultStats;
+
+    // Garantir que métodos de pagamento obrigatórios (especialmente os novos como MBWay manual)
+    // estão presentes mesmo que a config carregada seja antiga.
+    const defaultMethods = defaultStats.paymentMethods;
+    const currentMethods = baseConfig.paymentMethods || [];
+
+    const mergedMethods = [...currentMethods];
+    defaultMethods.forEach(dm => {
+      if (!mergedMethods.find(m => m.id === dm.id)) {
+        mergedMethods.push(dm);
+      }
+    });
+
+    return { ...baseConfig, paymentMethods: mergedMethods };
   });
 
   const [orders, setOrders] = useState<Order[]>([]);
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
   const [isAdmin, setIsAdmin] = useState(false);
   const [currentCustomer, setCurrentCustomer] = useState<CustomerAccount | null>(null);
+  const [syncStatus, setSyncStatus] = useState<'connected' | 'disconnected' | 'error'>('disconnected');
 
   // 1. Sync CONFIG (StoreConfig)
   useEffect(() => {
-    if (!db) return;
+    if (!db) {
+      setSyncStatus('error');
+      console.warn("⚠️ Firestore Sync desativado: Verifique as chaves do Firebase.");
+      return;
+    }
+
+    setSyncStatus('connected');
 
     const unsub = db.collection('settings').doc('global').onSnapshot((doc: any) => {
       if (doc.exists) {
         const data = doc.data() as StoreConfig;
-        setConfig(prev => ({ ...prev, ...data }));
-        localStorage.setItem('retro_v10_config', JSON.stringify(data));
+
+        // Merge para não perder novos métodos definidos no código
+        const merged = { ...data };
+        if (data.paymentMethods) {
+          defaultStats.paymentMethods.forEach(dm => {
+            if (!merged.paymentMethods.find((m: any) => m.id === dm.id)) {
+              merged.paymentMethods.push(dm);
+            }
+          });
+        }
+
+        setConfig(prev => ({ ...prev, ...merged }));
+        localStorage.setItem('retro_v10_config', JSON.stringify(merged));
       } else {
         // Se não existir no Firestore, faz upload da config local inicial
         db.collection('settings').doc('global').set(cleanForFirestore(config));
@@ -299,7 +332,7 @@ export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       config, orders, auditLogs, updateConfig, addOrder, updateOrder, addAuditLog, isAdmin,
       login: () => setIsAdmin(true), logout: () => setIsAdmin(false),
       currentCustomer, customerLogin, customerLogout, registerCustomer,
-      updateCustomerBalance, updateCustomerPassword
+      updateCustomerBalance, updateCustomerPassword, syncStatus
     }}>
       {children}
     </ConfigContext.Provider>

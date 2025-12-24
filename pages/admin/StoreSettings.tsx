@@ -1,11 +1,11 @@
 
 import React, { useState, useRef } from 'react';
 import { useConfig } from '../../contexts/ConfigContext';
-import { Save, Plus, Trash2, CreditCard, Layout, Smartphone, Wallet, Palette, Type, Box, Settings2, Globe, ShieldCheck, Image as ImageIcon, Upload } from 'lucide-react';
+import { Save, Plus, Trash2, CreditCard, Layout, Smartphone, Wallet, Palette, Type, Box, Settings2, Globe, ShieldCheck, Image as ImageIcon, Upload, AlertCircle } from 'lucide-react';
 import { PaymentMethod } from '../../types';
 
 const StoreSettings: React.FC = () => {
-  const { config, updateConfig, addAuditLog } = useConfig();
+  const { config, updateConfig, addAuditLog, syncStatus } = useConfig();
   const [activeTab, setActiveTab] = useState<'general' | 'payments' | 'menus' | 'design'>('general');
   const [saved, setSaved] = useState(false);
   const [editingPaymentId, setEditingPaymentId] = useState<string | null>(null);
@@ -152,7 +152,18 @@ const StoreSettings: React.FC = () => {
   return (
     <div>
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-2xl font-bold text-slate-900">Configurações da Loja</h1>
+        <div className="flex items-center gap-3">
+          <h1 className="text-2xl font-bold text-slate-900">Configurações da Loja</h1>
+          {syncStatus === 'connected' ? (
+            <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-green-50 border border-green-100 text-green-600 text-[10px] font-black uppercase tracking-wider">
+              <ShieldCheck className="h-3.5 w-3.5" /> Cloud Sync Ativo
+            </div>
+          ) : (
+            <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-red-50 border border-red-100 text-red-500 text-[10px] font-black uppercase tracking-wider">
+              <AlertCircle className="h-3.5 w-3.5" /> Cloud Sync Off (Local)
+            </div>
+          )}
+        </div>
         {saved && (
           <span className="text-green-600 bg-green-50 px-3 py-1 rounded-full text-sm font-medium animate-pulse">
             Alterações guardadas!

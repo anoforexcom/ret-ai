@@ -197,13 +197,19 @@ export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         setConfig(prev => ({ ...prev, ...merged }));
         localStorage.setItem('retro_v10_config', JSON.stringify(merged));
       } else {
-        // Se não existir no Firestore, faz upload da config local inicial
-        db.collection('settings').doc('global').set(cleanForFirestore(config));
+        // Se não existir no Firestore, tenta carregar a config local para a nuvem uma única vez
+        db.collection('settings').doc('global').get().then((snap: any) => {
+          if (!snap.exists) {
+            console.log("📤 Inicializando Firestore pela primeira vez com dados locais...");
+            db.collection('settings').doc('global').set(cleanForFirestore(config))
+              .catch((err: any) => console.error("❌ Erro no upload inicial:", err));
+          }
+        });
       }
     });
 
     return () => unsub();
-  }, []);
+  }, []); // Mantemos vazio para evitar loops com o config
 
   // 2. Sync ORDERS
   useEffect(() => {
@@ -234,9 +240,16 @@ export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const updateConfig = (newConfig: Partial<StoreConfig>) => {
     const updated = { ...config, ...newConfig };
     setConfig(updated);
+
+    // Sempre guardar no localStorage para resiliência (mesmo sem Firestore)
+    localStorage.setItem('retro_v10_config', JSON.stringify(updated));
+
     if (db) {
       db.collection('settings').doc('global').set(cleanForFirestore(updated), { merge: true })
-        .catch((err: any) => console.error("Error updating config:", err));
+        .catch((err: any) => {
+          console.error("Error updating config in Firestore:", err);
+          if (err.code === 'permission-denied') setSyncStatus('error');
+        });
     }
   };
 

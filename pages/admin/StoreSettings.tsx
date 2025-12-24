@@ -21,7 +21,36 @@ const StoreSettings: React.FC = () => {
     setTimeout(() => setSaved(false), 2000);
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'before' | 'after' | 'comp_before' | 'comp_after') => {
+  // Função auxiliar para redimensionar imagens antes de guardar (evita exceder limite do Firestore/LocalStorage)
+  const resizeImageForStore = (base64Str: string, maxDimension: number = 1200): Promise<string> => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+        if (width > height) {
+          if (width > maxDimension) {
+            height *= maxDimension / width;
+            width = maxDimension;
+          }
+        } else {
+          if (height > maxDimension) {
+            width *= maxDimension / height;
+            height = maxDimension;
+          }
+        }
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', 0.8));
+      };
+      img.src = base64Str;
+    });
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>, type: 'before' | 'after' | 'comp_before' | 'comp_after') => {
     const file = e.target.files?.[0];
     if (file) {
       if (file.size > 2 * 1024 * 1024) {
@@ -29,8 +58,12 @@ const StoreSettings: React.FC = () => {
         return;
       }
       const reader = new FileReader();
-      reader.onloadend = () => {
-        const base64String = reader.result as string;
+      reader.onloadend = async () => {
+        let base64String = reader.result as string;
+
+        // Redimensionar para garantir que cabe no Firestore (limite 1MB por doc)
+        base64String = await resizeImageForStore(base64String);
+
         if (type === 'before') {
           updateConfig({ heroBeforeImage: base64String });
         } else if (type === 'after') {
@@ -406,8 +439,8 @@ const StoreSettings: React.FC = () => {
                         key={opt.value}
                         onClick={() => handleThemeChange('borderRadius', opt.value)}
                         className={`px-3 py-2 text-xs font-bold rounded-lg border transition-all ${config.theme.borderRadius === opt.value
-                            ? 'bg-indigo-600 text-white border-indigo-600 shadow-md'
-                            : 'bg-white text-slate-600 border-slate-200 hover:border-indigo-300'
+                          ? 'bg-indigo-600 text-white border-indigo-600 shadow-md'
+                          : 'bg-white text-slate-600 border-slate-200 hover:border-indigo-300'
                           }`}
                       >
                         {opt.label}

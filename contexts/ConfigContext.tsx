@@ -130,6 +130,19 @@ const defaultStats: StoreConfig = {
   }
 };
 
+// Função auxiliar para preparar dados para o Firestore (evita campos undefined)
+const cleanForFirestore = (obj: any): any => {
+  if (Array.isArray(obj)) return obj.map(cleanForFirestore);
+  if (obj !== null && typeof obj === 'object') {
+    return Object.fromEntries(
+      Object.entries(obj)
+        .filter(([_, v]) => v !== undefined)
+        .map(([k, v]) => [k, cleanForFirestore(v)])
+    );
+  }
+  return obj;
+};
+
 export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [config, setConfig] = useState<StoreConfig>(() => {
     const saved = localStorage.getItem('retro_v10_config');
@@ -141,12 +154,115 @@ export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [isAdmin, setIsAdmin] = useState(false);
   const [currentCustomer, setCurrentCustomer] = useState<CustomerAccount | null>(null);
 
-  useEffect(() => localStorage.setItem('retro_v10_config', JSON.stringify(config)), [config]);
+  // 1. Sync CONFIG (StoreConfig)
+  useEffect(() => {
+    if (!db) return;
 
-  const updateConfig = (newConfig: Partial<StoreConfig>) => setConfig(prev => ({ ...prev, ...newConfig }));
-  const addOrder = (order: Order) => setOrders(prev => [order, ...prev]);
-  const updateOrder = (id: string, status: Order['status']) => setOrders(prev => prev.map(o => o.id === id ? { ...o, status } : o));
-  const addAuditLog = (action: string, details: string) => setAuditLogs(prev => [{ id: Date.now().toString(), action, details, date: new Date().toISOString(), user: 'Admin' }, ...prev]);
+    const unsub = db.collection('settings').doc('global').onSnapshot((doc: any) => {
+      if (doc.exists) {
+        const data = doc.data() as StoreConfig;
+        setConfig(prev => ({ ...prev, ...data }));
+        localStorage.setItem('retro_v10_config', JSON.stringify(data));
+      } else {
+        // Se não existir no Firestore, faz upload da config local inicial
+        db.collection('settings').doc('global').set(cleanForFirestore(config));
+      }
+    });
+
+    return () => unsub();
+  }, []);
+
+  // 2. Sync ORDERS
+  useEffect(() => {
+    if (!db) return;
+
+    const unsub = db.collection('orders').orderBy('date', 'desc').limit(100).onSnapshot((snapshot: any) => {
+      const items: Order[] = [];
+      snapshot.forEach((doc: any) => items.push({ id: doc.id, ...doc.data() } as Order));
+      setOrders(items);
+    });
+
+    return () => unsub();
+  }, []);
+
+  // 3. Sync AUDIT LOGS
+  useEffect(() => {
+    if (!db) return;
+
+    const unsub = db.collection('audit_logs').orderBy('date', 'desc').limit(50).onSnapshot((snapshot: any) => {
+      const items: AuditLog[] = [];
+      snapshot.forEach((doc: any) => items.push({ id: doc.id, ...doc.data() } as AuditLog));
+      setAuditLogs(items);
+    });
+
+    return () => unsub();
+  }, []);
+
+  const updateConfig = (newConfig: Partial<StoreConfig>) => {
+    const updated = { ...config, ...newConfig };
+    setConfig(updated);
+    if (db) {
+      db.collection('settings').doc('global').set(cleanForFirestore(updated), { merge: true })
+        .catch((err: any) => console.error("Error updating config:", err));
+    }
+  };
+
+  const addOrder = (order: Order) => {
+    if (db) {
+      const { id, ...orderData } = order;
+      db.collection('orders').doc(id || `ORD-${Date.now()}`).set(cleanForFirestore(orderData))
+        .catch((err: any) => console.error("Error adding order:", err));
+    } else {
+      setOrders(prev => [order, ...prev]);
+    }
+  };
+
+  const updateOrder = (id: string, status: Order['status']) => {
+    if (db) {
+      db.collection('orders').doc(id).update({ status })
+        .catch((err: any) => console.error("Error updating order:", err));
+    }
+  };
+
+  const addAuditLog = (action: string, details: string) => {
+    const newLog = {
+      action,
+      details,
+      date: new Date().toISOString(),
+      user: isAdmin ? 'Admin' : (currentCustomer?.firstName || 'User')
+    };
+
+    if (db) {
+      db.collection('audit_logs').add(cleanForFirestore(newLog))
+        .catch((err: any) => console.error("Error adding log:", err));
+    } else {
+      setAuditLogs(prev => [{ id: Date.now().toString(), ...newLog }, ...prev]);
+    }
+  };
+
+  const updateCustomerBalance = (id: string, amount: number) => {
+    // Customers are currently stored in config.customers
+    const updatedCustomers = config.customers.map(c =>
+      c.id === id ? { ...c, balance: c.balance + amount } : c
+    );
+    updateConfig({ customers: updatedCustomers });
+
+    if (currentCustomer?.id === id) {
+      setCurrentCustomer(prev => prev ? { ...prev, balance: prev.balance + amount } : null);
+    }
+  };
+
+  const updateCustomerPassword = (id: string, newPassword: string) => {
+    const updatedCustomers = config.customers.map(c =>
+      c.id === id ? { ...c, password: newPassword } : c
+    );
+    updateConfig({ customers: updatedCustomers });
+
+    if (currentCustomer?.id === id) {
+      setCurrentCustomer(prev => prev ? { ...prev, password: newPassword } : null);
+    }
+    addAuditLog('Alteração Password Cliente', `Cliente ID: ${id}`);
+  };
 
   const customerLogin = (email: string, password?: string) => {
     const customer = config.customers.find(x => x.email.toLowerCase() === email.toLowerCase());
@@ -178,23 +294,12 @@ export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     return newC;
   };
 
-  const updateCustomerBalance = (id: string, amount: number) => {
-    const updated = config.customers.map(c => c.id === id ? { ...c, balance: c.balance + amount } : c);
-    updateConfig({ customers: updated });
-    if (currentCustomer?.id === id) setCurrentCustomer(prev => prev ? { ...prev, balance: prev.balance + amount } : null);
-  };
-
-  const updateCustomerPassword = (id: string, newPassword: string) => {
-    const updated = config.customers.map(c => c.id === id ? { ...c, password: newPassword } : c);
-    updateConfig({ customers: updated });
-    if (currentCustomer?.id === id) setCurrentCustomer(prev => prev ? { ...prev, balance: prev.balance, password: newPassword } : null);
-    addAuditLog('Alteração Password Cliente', `Cliente ID: ${id}`);
-  };
-
   return (
     <ConfigContext.Provider value={{
-      config, orders, auditLogs, updateConfig, addOrder, updateOrder, addAuditLog, isAdmin, login: () => setIsAdmin(true), logout: () => setIsAdmin(false),
-      currentCustomer, customerLogin, customerLogout, registerCustomer, updateCustomerBalance, updateCustomerPassword
+      config, orders, auditLogs, updateConfig, addOrder, updateOrder, addAuditLog, isAdmin,
+      login: () => setIsAdmin(true), logout: () => setIsAdmin(false),
+      currentCustomer, customerLogin, customerLogout, registerCustomer,
+      updateCustomerBalance, updateCustomerPassword
     }}>
       {children}
     </ConfigContext.Provider>

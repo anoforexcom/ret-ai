@@ -108,7 +108,7 @@ const defaultStats: StoreConfig = {
   ],
   paymentMethods: [
     { id: 'cc_stripe', name: 'Cartão de Crédito', enabled: true, type: 'card', provider: 'stripe', environment: 'sandbox' },
-    { id: 'mbway_sibs', name: 'MB Way', enabled: true, type: 'mbway', provider: 'sibs', environment: 'sandbox' },
+    { id: 'mbway_manual', name: 'MBWay', enabled: true, type: 'mbway', provider: 'manual', environment: 'live' },
     { id: 'internal_balance', name: 'Saldo da Conta', enabled: true, type: 'balance', provider: 'internal' },
   ],
   bundles: defaultBundles,

@@ -84,8 +84,9 @@ const Restore: React.FC = () => {
   const handlePaymentSuccess = (method: string, amount: number, itemLabel: string) => {
     setShowPayment(false);
 
+    const orderId = `ORD-${Date.now().toString().slice(-6)}`;
     addOrder({
-      id: `ORD-${Date.now().toString().slice(-6)}`,
+      id: orderId,
       customerId: currentCustomer?.id,
       customerName: currentCustomer ? `${currentCustomer.firstName} ${currentCustomer.lastName}` : 'Visitante',
       customerEmail: currentCustomer?.email,
@@ -96,6 +97,21 @@ const Restore: React.FC = () => {
       paymentMethod: method,
       items: itemLabel
     });
+
+    // Rastreio de Google Analytics (E-commerce Purchase)
+    if ((window as any).gtag) {
+      (window as any).gtag('event', 'purchase', {
+        transaction_id: orderId,
+        value: amount,
+        currency: 'EUR',
+        items: [{
+          item_id: itemLabel,
+          item_name: itemLabel,
+          quantity: 1,
+          price: amount
+        }]
+      });
+    }
 
     if (restoredUrl) {
       const a = document.createElement('a');

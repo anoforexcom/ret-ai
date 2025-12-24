@@ -17,12 +17,6 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
-console.log("🔍 Debug Firebase Config:", {
-  hasApiKey: !!import.meta.env.VITE_FIREBASE_API_KEY,
-  hasProjectId: !!import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID
-});
-
 let db: any = null;
 let auth: any = null;
 

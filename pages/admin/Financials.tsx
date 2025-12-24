@@ -1,371 +1,382 @@
 
 import React, { useState } from 'react';
 import { useConfig } from '../../contexts/ConfigContext';
-import { 
-  DollarSign, 
-  PieChart, 
-  TrendingUp, 
-  Plus, 
-  Trash2, 
-  AlertCircle, 
-  ArrowDownCircle, 
-  ArrowUpCircle,
-  Calendar,
-  Tag,
-  CreditCard,
-  Target
+import {
+    DollarSign,
+    PieChart,
+    TrendingUp,
+    Plus,
+    Trash2,
+    AlertCircle,
+    ArrowDownCircle,
+    ArrowUpCircle,
+    Calendar,
+    Tag,
+    CreditCard,
+    Target
 } from 'lucide-react';
 import { Expense } from '../../types';
 
 const Financials: React.FC = () => {
-  const { orders, config, updateConfig, addAuditLog } = useConfig();
-  const [showAddExpense, setShowAddExpense] = useState(false);
-  const [newExpense, setNewExpense] = useState<Omit<Expense, 'id'>>({
-    date: new Date().toISOString().split('T')[0],
-    category: 'api',
-    amount: 0,
-    description: ''
-  });
+    const { orders, config, updateConfig, addAuditLog } = useConfig();
+    const [showAddExpense, setShowAddExpense] = useState(false);
+    const [newExpense, setNewExpense] = useState<Omit<Expense, 'id'>>({
+        date: new Date().toISOString().split('T')[0],
+        category: 'api',
+        amount: 0,
+        description: ''
+    });
 
-  const currentExpenses = config.expenses || [];
-
-  // Cálculos de Receita
-  const totalRevenue = orders.reduce((acc, order) => acc + (order.status === 'completed' ? order.amount : 0), 0);
-  const totalOrders = orders.filter(o => o.status === 'completed').length;
-  const aov = totalOrders > 0 ? totalRevenue / totalOrders : 0;
-
-  // Cálculos de Despesas (Manuais + Automáticas se necessário)
-  const totalExpenses = currentExpenses.reduce((acc, exp) => acc + exp.amount, 0);
-  
-  // Lucro e Margem
-  const netProfit = totalRevenue - totalExpenses;
-  const profitMargin = totalRevenue > 0 ? (netProfit / totalRevenue) * 100 : 0;
-
-  // Breakdown por Categoria
-  const categories = {
-    api: currentExpenses.filter(e => e.category === 'api').reduce((a, b) => a + b.amount, 0),
-    marketing: currentExpenses.filter(e => e.category === 'marketing').reduce((a, b) => a + b.amount, 0),
-    infra: currentExpenses.filter(e => e.category === 'infra').reduce((a, b) => a + b.amount, 0),
-    outro: currentExpenses.filter(e => e.category === 'outro').reduce((a, b) => a + b.amount, 0),
-  };
-
-  const handleAddExpense = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (newExpense.amount <= 0) return;
-
-    const expense: Expense = {
-      ...newExpense,
-      id: `EXP-${Date.now()}`
+    // Funções de utilidade para consistência de dados
+    const isPaidOrder = (status: string) => {
+        const s = (status || "").toLowerCase().trim();
+        return s === 'completed' || s === 'pago' || s === 'paid' || s === 'success';
     };
 
-    updateConfig({
-      expenses: [expense, ...currentExpenses]
-    });
-    
-    addAuditLog('Adicionar Despesa', `Despesa de ${expense.amount}€ em ${expense.category}`);
-    setShowAddExpense(false);
-    setNewExpense({
-      date: new Date().toISOString().split('T')[0],
-      category: 'api',
-      amount: 0,
-      description: ''
-    });
-  };
+    const parseAmount = (val: any) => {
+        if (typeof val === 'number') return val;
+        if (!val) return 0;
+        return parseFloat(val.toString().replace(',', '.').replace(/[^\d.]/g, '')) || 0;
+    };
 
-  const removeExpense = (id: string) => {
-    if (window.confirm('Tem a certeza que deseja remover esta despesa permanentemente do histórico?')) {
+    const currentExpenses = config.expenses || [];
+
+    // Cálculos de Receita
+    const totalRevenue = orders.reduce((acc, order) => acc + (isPaidOrder(order.status) ? parseAmount(order.amount) : 0), 0);
+    const totalOrders = orders.filter(o => isPaidOrder(o.status)).length;
+    const aov = totalOrders > 0 ? totalRevenue / totalOrders : 0;
+
+    // Cálculos de Despesas (Manuais + Automáticas se necessário)
+    const totalExpenses = currentExpenses.reduce((acc, exp) => acc + parseAmount(exp.amount), 0);
+
+    // Lucro e Margem
+    const netProfit = totalRevenue - totalExpenses;
+    const profitMargin = totalRevenue > 0 ? (netProfit / totalRevenue) * 100 : 0;
+
+    // Breakdown por Categoria
+    const categories = {
+        api: currentExpenses.filter(e => e.category === 'api').reduce((a, b) => a + parseAmount(b.amount), 0),
+        marketing: currentExpenses.filter(e => e.category === 'marketing').reduce((a, b) => a + parseAmount(b.amount), 0),
+        infra: currentExpenses.filter(e => e.category === 'infra').reduce((a, b) => a + parseAmount(b.amount), 0),
+        outro: currentExpenses.filter(e => e.category === 'outro').reduce((a, b) => a + parseAmount(b.amount), 0),
+    };
+
+    const handleAddExpense = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (newExpense.amount <= 0) return;
+
+        const expense: Expense = {
+            ...newExpense,
+            id: `EXP-${Date.now()}`
+        };
+
         updateConfig({
-            expenses: currentExpenses.filter(e => e.id !== id)
+            expenses: [expense, ...currentExpenses]
         });
-        addAuditLog('Remover Despesa', `ID: ${id}`);
-    }
-  };
 
-  // KPI Extras
-  const cac = categories.marketing > 0 && totalOrders > 0 ? categories.marketing / totalOrders : 0;
-  const roas = categories.marketing > 0 ? totalRevenue / categories.marketing : 0;
+        addAuditLog('Adicionar Despesa', `Despesa de ${expense.amount}€ em ${expense.category}`);
+        setShowAddExpense(false);
+        setNewExpense({
+            date: new Date().toISOString().split('T')[0],
+            category: 'api',
+            amount: 0,
+            description: ''
+        });
+    };
 
-  return (
-    <div className="space-y-8 animate-fadeIn">
-        <div className="flex justify-between items-center">
-            <div>
-                <h1 className="text-2xl font-bold text-slate-900">Gestão Financeira</h1>
-                <p className="text-slate-500 text-sm mt-1">Monitorização de lucros, fluxos e despesas manuais.</p>
-            </div>
-            <button 
-                onClick={() => setShowAddExpense(true)}
-                className="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-indigo-700 shadow-lg shadow-indigo-500/20 flex items-center gap-2 transition-all"
-            >
-                <Plus className="h-4 w-4" /> Registar Despesa
-            </button>
-        </div>
+    const removeExpense = (id: string) => {
+        if (window.confirm('Tem a certeza que deseja remover esta despesa permanentemente do histórico?')) {
+            updateConfig({
+                expenses: currentExpenses.filter(e => e.id !== id)
+            });
+            addAuditLog('Remover Despesa', `ID: ${id}`);
+        }
+    };
 
-        {/* Top KPI Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                <div className="flex justify-between items-start mb-4">
-                    <div className="p-2 bg-green-50 text-green-600 rounded-lg">
-                        <ArrowUpCircle className="h-6 w-6" />
-                    </div>
-                    <span className="text-xs font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded-full">Bruto</span>
+    // KPI Extras
+    const cac = categories.marketing > 0 && totalOrders > 0 ? categories.marketing / totalOrders : 0;
+    const roas = categories.marketing > 0 ? totalRevenue / categories.marketing : 0;
+
+    return (
+        <div className="space-y-8 animate-fadeIn">
+            <div className="flex justify-between items-center">
+                <div>
+                    <h1 className="text-2xl font-bold text-slate-900">Gestão Financeira</h1>
+                    <p className="text-slate-500 text-sm mt-1">Monitorização de lucros, fluxos e despesas manuais.</p>
                 </div>
-                <p className="text-sm font-medium text-slate-500 uppercase tracking-wider">Receita Total</p>
-                <h3 className="text-2xl font-bold text-slate-900 mt-1">{totalRevenue.toFixed(2)}€</h3>
-            </div>
-
-            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                <div className="flex justify-between items-start mb-4">
-                    <div className="p-2 bg-red-50 text-red-600 rounded-lg">
-                        <ArrowDownCircle className="h-6 w-6" />
-                    </div>
-                    <span className="text-xs font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded-full">Gastos</span>
-                </div>
-                <p className="text-sm font-medium text-slate-500 uppercase tracking-wider">Despesas</p>
-                <h3 className="text-2xl font-bold text-slate-900 mt-1">{totalExpenses.toFixed(2)}€</h3>
+                <button
+                    onClick={() => setShowAddExpense(true)}
+                    className="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-indigo-700 shadow-lg shadow-indigo-500/20 flex items-center gap-2 transition-all"
+                >
+                    <Plus className="h-4 w-4" /> Registar Despesa
+                </button>
             </div>
 
-            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                <div className="flex justify-between items-start mb-4">
-                    <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
-                        <DollarSign className="h-6 w-6" />
+            {/* Top KPI Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                    <div className="flex justify-between items-start mb-4">
+                        <div className="p-2 bg-green-50 text-green-600 rounded-lg">
+                            <ArrowUpCircle className="h-6 w-6" />
+                        </div>
+                        <span className="text-xs font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded-full">Bruto</span>
                     </div>
-                    <span className="text-xs font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">Líquido</span>
-                </div>
-                <p className="text-sm font-medium text-slate-500 uppercase tracking-wider">Lucro Real</p>
-                <h3 className={`text-2xl font-bold mt-1 ${netProfit >= 0 ? 'text-indigo-600' : 'text-red-600'}`}>
-                    {netProfit.toFixed(2)}€
-                </h3>
-            </div>
-
-            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                <div className="flex justify-between items-start mb-4">
-                    <div className="p-2 bg-amber-50 text-amber-600 rounded-lg">
-                        <PieChart className="h-6 w-6" />
-                    </div>
-                    <span className="text-xs font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">Eficiência</span>
-                </div>
-                <p className="text-sm font-medium text-slate-500 uppercase tracking-wider">Margem</p>
-                <h3 className="text-2xl font-bold text-slate-900 mt-1">{profitMargin.toFixed(1)}%</h3>
-            </div>
-        </div>
-
-        {/* Analytics Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Category Breakdown */}
-            <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
-                <h3 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
-                    <Target className="h-5 w-5 text-indigo-500" /> Distribuição de Custos
-                </h3>
-                <div className="space-y-6">
-                    <div>
-                        <div className="flex justify-between items-center text-sm mb-2">
-                            <span className="text-slate-600 flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-blue-500"></div> APIs IA</span>
-                            <span className="font-bold text-slate-900">{categories.api.toFixed(2)}€</span>
-                        </div>
-                        <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
-                            <div className="bg-blue-500 h-full" style={{ width: `${totalExpenses > 0 ? (categories.api/totalExpenses)*100 : 0}%` }}></div>
-                        </div>
-                    </div>
-                    <div>
-                        <div className="flex justify-between items-center text-sm mb-2">
-                            <span className="text-slate-600 flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-pink-500"></div> Marketing</span>
-                            <span className="font-bold text-slate-900">{categories.marketing.toFixed(2)}€</span>
-                        </div>
-                        <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
-                            <div className="bg-pink-500 h-full" style={{ width: `${totalExpenses > 0 ? (categories.marketing/totalExpenses)*100 : 0}%` }}></div>
-                        </div>
-                    </div>
-                    <div>
-                        <div className="flex justify-between items-center text-sm mb-2">
-                            <span className="text-slate-600 flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-indigo-500"></div> Infra</span>
-                            <span className="font-bold text-slate-900">{categories.infra.toFixed(2)}€</span>
-                        </div>
-                        <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
-                            <div className="bg-indigo-500 h-full" style={{ width: `${totalExpenses > 0 ? (categories.infra/totalExpenses)*100 : 0}%` }}></div>
-                        </div>
-                    </div>
-                    <div>
-                        <div className="flex justify-between items-center text-sm mb-2">
-                            <span className="text-slate-600 flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-slate-400"></div> Outros</span>
-                            <span className="font-bold text-slate-900">{categories.outro.toFixed(2)}€</span>
-                        </div>
-                        <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
-                            <div className="bg-slate-400 h-full" style={{ width: `${totalExpenses > 0 ? (categories.outro/totalExpenses)*100 : 0}%` }}></div>
-                        </div>
-                    </div>
+                    <p className="text-sm font-medium text-slate-500 uppercase tracking-wider">Receita Total</p>
+                    <h3 className="text-2xl font-bold text-slate-900 mt-1">{totalRevenue.toFixed(2)}€</h3>
                 </div>
 
-                <div className="mt-8 pt-6 border-t border-slate-100 space-y-4">
-                    <div className="flex justify-between items-center p-3 bg-slate-50 rounded-xl">
-                        <span className="text-sm text-slate-500">Ticket Médio (AOV)</span>
-                        <span className="font-bold text-slate-900">{aov.toFixed(2)}€</span>
+                <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                    <div className="flex justify-between items-start mb-4">
+                        <div className="p-2 bg-red-50 text-red-600 rounded-lg">
+                            <ArrowDownCircle className="h-6 w-6" />
+                        </div>
+                        <span className="text-xs font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded-full">Gastos</span>
                     </div>
-                    <div className="flex justify-between items-center p-3 bg-slate-50 rounded-xl">
-                        <span className="text-sm text-slate-500">CAC Estimado</span>
-                        <span className="font-bold text-slate-900">{cac.toFixed(2)}€</span>
+                    <p className="text-sm font-medium text-slate-500 uppercase tracking-wider">Despesas</p>
+                    <h3 className="text-2xl font-bold text-slate-900 mt-1">{totalExpenses.toFixed(2)}€</h3>
+                </div>
+
+                <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                    <div className="flex justify-between items-start mb-4">
+                        <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
+                            <DollarSign className="h-6 w-6" />
+                        </div>
+                        <span className="text-xs font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">Líquido</span>
                     </div>
-                    <div className="flex justify-between items-center p-3 bg-indigo-50 rounded-xl">
-                        <span className="text-sm text-indigo-700">ROAS Publicitário</span>
-                        <span className="font-bold text-indigo-900">{roas.toFixed(2)}x</span>
+                    <p className="text-sm font-medium text-slate-500 uppercase tracking-wider">Lucro Real</p>
+                    <h3 className={`text-2xl font-bold mt-1 ${netProfit >= 0 ? 'text-indigo-600' : 'text-red-600'}`}>
+                        {netProfit.toFixed(2)}€
+                    </h3>
+                </div>
+
+                <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                    <div className="flex justify-between items-start mb-4">
+                        <div className="p-2 bg-amber-50 text-amber-600 rounded-lg">
+                            <PieChart className="h-6 w-6" />
+                        </div>
+                        <span className="text-xs font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">Eficiência</span>
                     </div>
+                    <p className="text-sm font-medium text-slate-500 uppercase tracking-wider">Margem</p>
+                    <h3 className="text-2xl font-bold text-slate-900 mt-1">{profitMargin.toFixed(1)}%</h3>
                 </div>
             </div>
 
-            {/* Expenses List */}
-            <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
-                <div className="p-6 border-b border-slate-100">
-                    <h3 className="text-lg font-bold text-slate-900">Histórico de Despesas</h3>
+            {/* Analytics Section */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* Category Breakdown */}
+                <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+                    <h3 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
+                        <Target className="h-5 w-5 text-indigo-500" /> Distribuição de Custos
+                    </h3>
+                    <div className="space-y-6">
+                        <div>
+                            <div className="flex justify-between items-center text-sm mb-2">
+                                <span className="text-slate-600 flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-blue-500"></div> APIs IA</span>
+                                <span className="font-bold text-slate-900">{categories.api.toFixed(2)}€</span>
+                            </div>
+                            <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                                <div className="bg-blue-500 h-full" style={{ width: `${totalExpenses > 0 ? (categories.api / totalExpenses) * 100 : 0}%` }}></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div className="flex justify-between items-center text-sm mb-2">
+                                <span className="text-slate-600 flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-pink-500"></div> Marketing</span>
+                                <span className="font-bold text-slate-900">{categories.marketing.toFixed(2)}€</span>
+                            </div>
+                            <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                                <div className="bg-pink-500 h-full" style={{ width: `${totalExpenses > 0 ? (categories.marketing / totalExpenses) * 100 : 0}%` }}></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div className="flex justify-between items-center text-sm mb-2">
+                                <span className="text-slate-600 flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-indigo-500"></div> Infra</span>
+                                <span className="font-bold text-slate-900">{categories.infra.toFixed(2)}€</span>
+                            </div>
+                            <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                                <div className="bg-indigo-500 h-full" style={{ width: `${totalExpenses > 0 ? (categories.infra / totalExpenses) * 100 : 0}%` }}></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div className="flex justify-between items-center text-sm mb-2">
+                                <span className="text-slate-600 flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-slate-400"></div> Outros</span>
+                                <span className="font-bold text-slate-900">{categories.outro.toFixed(2)}€</span>
+                            </div>
+                            <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                                <div className="bg-slate-400 h-full" style={{ width: `${totalExpenses > 0 ? (categories.outro / totalExpenses) * 100 : 0}%` }}></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="mt-8 pt-6 border-t border-slate-100 space-y-4">
+                        <div className="flex justify-between items-center p-3 bg-slate-50 rounded-xl">
+                            <span className="text-sm text-slate-500">Ticket Médio (AOV)</span>
+                            <span className="font-bold text-slate-900">{aov.toFixed(2)}€</span>
+                        </div>
+                        <div className="flex justify-between items-center p-3 bg-slate-50 rounded-xl">
+                            <span className="text-sm text-slate-500">CAC Estimado</span>
+                            <span className="font-bold text-slate-900">{cac.toFixed(2)}€</span>
+                        </div>
+                        <div className="flex justify-between items-center p-3 bg-indigo-50 rounded-xl">
+                            <span className="text-sm text-indigo-700">ROAS Publicitário</span>
+                            <span className="font-bold text-indigo-900">{roas.toFixed(2)}x</span>
+                        </div>
+                    </div>
                 </div>
-                <div className="flex-grow overflow-auto max-h-[500px]">
-                    <table className="min-w-full divide-y divide-slate-200">
-                        <thead className="bg-slate-50 sticky top-0 z-10">
-                            <tr>
-                                <th className="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Data</th>
-                                <th className="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Categoria</th>
-                                <th className="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Descrição</th>
-                                <th className="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Valor</th>
-                                <th className="px-6 py-3 text-right text-xs font-bold text-slate-500 uppercase tracking-wider"></th>
-                            </tr>
-                        </thead>
-                        <tbody className="bg-white divide-y divide-slate-100">
-                            {currentExpenses.map((exp) => (
-                                <tr key={exp.id} className="hover:bg-slate-50 transition-colors animate-fadeIn">
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
-                                        {new Date(exp.date).toLocaleDateString('pt-PT')}
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
-                                            exp.category === 'api' ? 'bg-blue-100 text-blue-700' :
-                                            exp.category === 'marketing' ? 'bg-pink-100 text-pink-700' :
-                                            exp.category === 'infra' ? 'bg-indigo-100 text-indigo-700' :
-                                            'bg-slate-100 text-slate-700'
-                                        }`}>
-                                            {exp.category}
-                                        </span>
-                                    </td>
-                                    <td className="px-6 py-4 text-sm text-slate-600 max-w-[200px] truncate">
-                                        {exp.description || 'Sem descrição'}
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-slate-900">
-                                        {exp.amount.toFixed(2)}€
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-right">
-                                        <button 
-                                            onClick={() => removeExpense(exp.id)}
-                                            className="text-slate-300 hover:text-red-500 p-2 hover:bg-red-50 rounded-full transition-all"
-                                            title="Eliminar Despesa"
-                                        >
-                                            <Trash2 className="h-4 w-4" />
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))}
-                            {currentExpenses.length === 0 && (
+
+                {/* Expenses List */}
+                <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+                    <div className="p-6 border-b border-slate-100">
+                        <h3 className="text-lg font-bold text-slate-900">Histórico de Despesas</h3>
+                    </div>
+                    <div className="flex-grow overflow-auto max-h-[500px]">
+                        <table className="min-w-full divide-y divide-slate-200">
+                            <thead className="bg-slate-50 sticky top-0 z-10">
                                 <tr>
-                                    <td colSpan={5} className="px-6 py-12 text-center text-slate-400 italic font-medium">
-                                        Nenhuma despesa registada ainda.
-                                    </td>
+                                    <th className="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Data</th>
+                                    <th className="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Categoria</th>
+                                    <th className="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Descrição</th>
+                                    <th className="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Valor</th>
+                                    <th className="px-6 py-3 text-right text-xs font-bold text-slate-500 uppercase tracking-wider"></th>
                                 </tr>
-                            )}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        {/* Modal Adicionar Despesa */}
-        {showAddExpense && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setShowAddExpense(false)}></div>
-                <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden animate-scaleIn">
-                    <div className="bg-indigo-600 p-6 text-white">
-                        <h3 className="text-xl font-bold flex items-center gap-2">
-                            <Plus className="h-6 w-6" /> Registar Nova Despesa
-                        </h3>
-                        <p className="text-indigo-100 text-sm mt-1">Insira os detalhes para atualizar o seu balanço.</p>
+                            </thead>
+                            <tbody className="bg-white divide-y divide-slate-100">
+                                {currentExpenses.map((exp) => (
+                                    <tr key={exp.id} className="hover:bg-slate-50 transition-colors animate-fadeIn">
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
+                                            {new Date(exp.date).toLocaleDateString('pt-PT')}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${exp.category === 'api' ? 'bg-blue-100 text-blue-700' :
+                                                exp.category === 'marketing' ? 'bg-pink-100 text-pink-700' :
+                                                    exp.category === 'infra' ? 'bg-indigo-100 text-indigo-700' :
+                                                        'bg-slate-100 text-slate-700'
+                                                }`}>
+                                                {exp.category}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4 text-sm text-slate-600 max-w-[200px] truncate">
+                                            {exp.description || 'Sem descrição'}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-slate-900">
+                                            {exp.amount.toFixed(2)}€
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-right">
+                                            <button
+                                                onClick={() => removeExpense(exp.id)}
+                                                className="text-slate-300 hover:text-red-500 p-2 hover:bg-red-50 rounded-full transition-all"
+                                                title="Eliminar Despesa"
+                                            >
+                                                <Trash2 className="h-4 w-4" />
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                                {currentExpenses.length === 0 && (
+                                    <tr>
+                                        <td colSpan={5} className="px-6 py-12 text-center text-slate-400 italic font-medium">
+                                            Nenhuma despesa registada ainda.
+                                        </td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
                     </div>
-                    
-                    <form onSubmit={handleAddExpense} className="p-6 space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Data</label>
-                                <div className="relative">
-                                    <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                                    <input 
-                                        type="date" 
-                                        required
-                                        value={newExpense.date}
-                                        onChange={e => setNewExpense({...newExpense, date: e.target.value})}
-                                        className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-sm"
-                                    />
-                                </div>
-                            </div>
-                            <div>
-                                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Valor (€)</label>
-                                <div className="relative">
-                                    <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                                    <input 
-                                        type="number" 
-                                        step="0.01"
-                                        required
-                                        placeholder="0.00"
-                                        value={newExpense.amount || ''}
-                                        onChange={e => setNewExpense({...newExpense, amount: parseFloat(e.target.value)})}
-                                        className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-sm"
-                                    />
-                                </div>
-                            </div>
-                        </div>
-
-                        <div>
-                            <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Categoria</label>
-                            <div className="relative">
-                                <Tag className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                                <select 
-                                    value={newExpense.category}
-                                    onChange={e => setNewExpense({...newExpense, category: e.target.value as any})}
-                                    className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-sm appearance-none"
-                                >
-                                    <option value="api">Serviços / APIs IA</option>
-                                    <option value="marketing">Marketing / Ads</option>
-                                    <option value="infra">Hosting / Infraestrutura</option>
-                                    <option value="outro">Outras Despesas</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div>
-                            <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Descrição</label>
-                            <textarea 
-                                rows={2}
-                                placeholder="Para que serve esta despesa?"
-                                value={newExpense.description}
-                                onChange={e => setNewExpense({...newExpense, description: e.target.value})}
-                                className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-sm"
-                            />
-                        </div>
-
-                        <div className="pt-4 flex gap-3">
-                            <button 
-                                type="button"
-                                onClick={() => setShowAddExpense(false)}
-                                className="flex-1 px-4 py-3 bg-slate-100 text-slate-600 font-bold rounded-xl hover:bg-slate-200 transition-colors"
-                            >
-                                Cancelar
-                            </button>
-                            <button 
-                                type="submit"
-                                className="flex-2 px-8 py-3 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 shadow-lg shadow-indigo-500/30 transition-all"
-                            >
-                                Confirmar Registo
-                            </button>
-                        </div>
-                    </form>
                 </div>
             </div>
-        )}
-    </div>
-  );
+
+            {/* Modal Adicionar Despesa */}
+            {showAddExpense && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setShowAddExpense(false)}></div>
+                    <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden animate-scaleIn">
+                        <div className="bg-indigo-600 p-6 text-white">
+                            <h3 className="text-xl font-bold flex items-center gap-2">
+                                <Plus className="h-6 w-6" /> Registar Nova Despesa
+                            </h3>
+                            <p className="text-indigo-100 text-sm mt-1">Insira os detalhes para atualizar o seu balanço.</p>
+                        </div>
+
+                        <form onSubmit={handleAddExpense} className="p-6 space-y-4">
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Data</label>
+                                    <div className="relative">
+                                        <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                                        <input
+                                            type="date"
+                                            required
+                                            value={newExpense.date}
+                                            onChange={e => setNewExpense({ ...newExpense, date: e.target.value })}
+                                            className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-sm"
+                                        />
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Valor (€)</label>
+                                    <div className="relative">
+                                        <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                                        <input
+                                            type="number"
+                                            step="0.01"
+                                            required
+                                            placeholder="0.00"
+                                            value={newExpense.amount || ''}
+                                            onChange={e => setNewExpense({ ...newExpense, amount: parseFloat(e.target.value) })}
+                                            className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-sm"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Categoria</label>
+                                <div className="relative">
+                                    <Tag className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                                    <select
+                                        value={newExpense.category}
+                                        onChange={e => setNewExpense({ ...newExpense, category: e.target.value as any })}
+                                        className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-sm appearance-none"
+                                    >
+                                        <option value="api">Serviços / APIs IA</option>
+                                        <option value="marketing">Marketing / Ads</option>
+                                        <option value="infra">Hosting / Infraestrutura</option>
+                                        <option value="outro">Outras Despesas</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Descrição</label>
+                                <textarea
+                                    rows={2}
+                                    placeholder="Para que serve esta despesa?"
+                                    value={newExpense.description}
+                                    onChange={e => setNewExpense({ ...newExpense, description: e.target.value })}
+                                    className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-sm"
+                                />
+                            </div>
+
+                            <div className="pt-4 flex gap-3">
+                                <button
+                                    type="button"
+                                    onClick={() => setShowAddExpense(false)}
+                                    className="flex-1 px-4 py-3 bg-slate-100 text-slate-600 font-bold rounded-xl hover:bg-slate-200 transition-colors"
+                                >
+                                    Cancelar
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="flex-2 px-8 py-3 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 shadow-lg shadow-indigo-500/30 transition-all"
+                                >
+                                    Confirmar Registo
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
 };
 
 export default Financials;

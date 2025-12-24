@@ -8,13 +8,26 @@ const Dashboard: React.FC = () => {
   const { orders, config } = useConfig();
   const { t } = useTranslation();
 
+  // Função auxiliar para verificar se a encomenda está paga de forma permissiva
+  const isPaidOrder = (status: string) => {
+    const s = (status || "").toLowerCase().trim();
+    return s === 'completed' || s === 'pago' || s === 'paid' || s === 'success';
+  };
+
+  // Função auxiliar para converter montante de forma robusta
+  const parseAmount = (val: any) => {
+    if (typeof val === 'number') return val;
+    if (!val) return 0;
+    return parseFloat(val.toString().replace(',', '.').replace(/[^\d.]/g, '')) || 0;
+  };
+
   // Métricas de Receita
-  const totalRevenue = orders.reduce((acc, order) => acc + (order.status === 'completed' ? order.amount : 0), 0);
-  const totalOrders = orders.filter(o => o.status === 'completed').length;
-  const uniqueCustomers = new Set(orders.map(o => o.customerEmail || o.customerId || o.customerName)).size;
+  const totalRevenue = orders.reduce((acc, order) => acc + (isPaidOrder(order.status) ? parseAmount(order.amount) : 0), 0);
+  const totalOrders = orders.filter(o => isPaidOrder(o.status)).length;
+  const uniqueCustomers = new Set(orders.map(o => o.customerEmail?.trim().toLowerCase() || o.customerId || o.customerName)).size;
 
   // Métricas de Despesa e Lucro Real
-  const totalExpenses = config.expenses.reduce((acc, exp) => acc + exp.amount, 0);
+  const totalExpenses = config.expenses.reduce((acc, exp) => acc + parseAmount(exp.amount), 0);
   const netProfit = totalRevenue - totalExpenses;
 
   // Agregação de Vendas para o Gráfico (Últimos 7 dias)
@@ -24,8 +37,8 @@ const Dashboard: React.FC = () => {
     const dayStr = d.toISOString().split('T')[0];
 
     return orders
-      .filter(o => o.status === 'completed' && o.date.startsWith(dayStr))
-      .reduce((sum, o) => sum + o.amount, 0);
+      .filter(o => isPaidOrder(o.status) && o.date.startsWith(dayStr))
+      .reduce((sum, o) => sum + parseAmount(o.amount), 0);
   });
 
   const maxVal = Math.max(...chartData, 10);

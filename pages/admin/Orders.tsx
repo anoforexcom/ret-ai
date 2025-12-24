@@ -4,8 +4,16 @@ import { Download, Eye, X, User, CreditCard, Package, ExternalLink } from 'lucid
 import { Order } from '../../types';
 
 const Orders: React.FC = () => {
-  const { orders } = useConfig();
+  const { orders, config } = useConfig();
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+
+  const getCustomerDisplay = (order: Order) => {
+    if (order.customerId) {
+      const customer = config.customers.find(c => c.id === order.customerId);
+      if (customer) return `${customer.firstName} ${customer.lastName}`;
+    }
+    return order.customerName || 'Visitante';
+  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -44,7 +52,7 @@ const Orders: React.FC = () => {
               {orders.map((order) => (
                 <tr key={order.id} className="hover:bg-slate-50 transition-colors">
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">#{order.id}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">{order.customerName}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">{getCustomerDisplay(order)}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
                     {new Date(order.date).toLocaleDateString('pt-PT')} <span className="text-slate-400 text-xs">{new Date(order.date).toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' })}</span>
                   </td>
@@ -130,7 +138,7 @@ const Orders: React.FC = () => {
                       <div className="flex items-start gap-3 p-3 bg-slate-50 rounded-lg border border-slate-100">
                         <User className="h-5 w-5 text-slate-400 mt-0.5" />
                         <div>
-                          <p className="text-sm font-medium text-slate-900">{selectedOrder.customerName}</p>
+                          <p className="text-sm font-medium text-slate-900">{getCustomerDisplay(selectedOrder)}</p>
                           <p className="text-xs text-slate-500">
                             {selectedOrder.customerId ? 'Cliente Registado' : 'Cliente Visitante (Sem Registo)'}
                           </p>

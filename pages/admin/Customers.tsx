@@ -34,13 +34,21 @@ const Customers: React.FC = () => {
 
     // 2. Processar Encomendas para somar gastos
     orders.forEach(order => {
-        // Normalização do estado (case-insensitive e remove espaços)
+        // Normalização do estado (muito permissivo para garantir que nada escapa)
         const status = (order.status || "").toLowerCase().trim();
-        if (status !== 'completed' && status !== 'pago') return;
+        const isPaid = status === 'completed' || status === 'pago' || status === 'paid' || status === 'success';
+        if (!isPaid) return;
 
         const orderEmail = (order.customerEmail || "").trim().toLowerCase();
         const orderIdFromOrder = order.customerId;
-        const orderAmount = Number(order.amount) || 0;
+
+        // Converter montante de forma robusta (lida com strings, vírgulas, etc)
+        let orderAmount = 0;
+        if (typeof order.amount === 'number') {
+            orderAmount = order.amount;
+        } else if (order.amount) {
+            orderAmount = parseFloat(order.amount.toString().replace(',', '.').replace(/[^\d.]/g, '')) || 0;
+        }
 
         // Tentar encontrar o cliente registado correspondente
         let targetCustomer: any = null;

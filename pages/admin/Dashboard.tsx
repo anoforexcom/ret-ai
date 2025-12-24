@@ -38,11 +38,17 @@ const Dashboard: React.FC = () => {
   // Agregação de Vendas para o Gráfico (Últimos 7 dias)
   const chartData = Array.from({ length: 7 }, (_, i) => {
     const d = new Date();
+    d.setHours(0, 0, 0, 0); // Normalizar hoje às 00:00
     d.setDate(d.getDate() - (6 - i));
-    const dayStr = d.toISOString().split('T')[0];
+    const dayTimestamp = d.getTime();
+    const nextDayTimestamp = dayTimestamp + 24 * 60 * 60 * 1000;
 
     return orders
-      .filter(o => isPaidOrder(o.status) && (o.date || "").startsWith(dayStr))
+      .filter(o => {
+        if (!isPaidOrder(o.status)) return false;
+        const oDate = new Date(o.date);
+        return oDate.getTime() >= dayTimestamp && oDate.getTime() < nextDayTimestamp;
+      })
       .reduce((sum, o) => sum + parseAmount(o.amount), 0);
   });
 

@@ -9,15 +9,19 @@ const Customers: React.FC = () => {
     // Processar dados de clientes a partir das encomendas E das contas registadas
     const registeredMap = new Map(); // Mapeia ID -> Customer
     const emailToIdMap = new Map();  // Mapeia Email -> ID
+    const nameToIdMap = new Map();   // Mapeia Nome -> ID (Fallback Histórico)
     const visitorMap = new Map();    // Mapeia Email ou Nome -> Visitor
     const allFinalCustomers: any[] = [];
 
     // 1. Inicializar com Clientes Registados
     (config.customers || []).forEach(c => {
         const normalizedEmail = c.email.trim().toLowerCase();
+        const fullName = `${c.firstName} ${c.lastName}`.trim();
+        const normalizedName = fullName.toLowerCase();
+
         const customerData = {
             id: c.id,
-            name: `${c.firstName} ${c.lastName}`.trim(),
+            name: fullName,
             email: c.email.trim(),
             totalSpent: 0,
             orderCount: 0,
@@ -29,6 +33,9 @@ const Customers: React.FC = () => {
         registeredMap.set(c.id, customerData);
         if (normalizedEmail) {
             emailToIdMap.set(normalizedEmail, c.id);
+        }
+        if (normalizedName) {
+            nameToIdMap.set(normalizedName, c.id);
         }
     });
 
@@ -43,6 +50,7 @@ const Customers: React.FC = () => {
         if (!isPaid) return;
 
         const orderEmail = (order.customerEmail || "").trim().toLowerCase();
+        const orderName = (order.customerName || "").trim().toLowerCase();
         const orderIdFromOrder = order.customerId;
 
         // Converter montante de forma robusta (lida com strings, vírgulas, etc)
@@ -62,6 +70,12 @@ const Customers: React.FC = () => {
         // Prioridade 2: Match por Email (se não encontrar por ID)
         if (!targetCustomer && orderEmail) {
             const mappedId = emailToIdMap.get(orderEmail);
+            if (mappedId) targetCustomer = registeredMap.get(mappedId);
+        }
+
+        // Prioridade 3: Match por Nome (Último recurso para encomendas antigas sem ID/Email)
+        if (!targetCustomer && orderName) {
+            const mappedId = nameToIdMap.get(orderName);
             if (mappedId) targetCustomer = registeredMap.get(mappedId);
         }
 

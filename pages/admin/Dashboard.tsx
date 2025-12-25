@@ -52,16 +52,14 @@ const Dashboard: React.FC = () => {
   // Agregação de Vendas para o Gráfico (Últimos 7 dias)
   const chartData = Array.from({ length: 7 }, (_, i) => {
     const d = new Date();
-    d.setHours(0, 0, 0, 0); // Normalizar hoje às 00:00
     d.setDate(d.getDate() - (6 - i));
-    const dayTimestamp = d.getTime();
-    const nextDayTimestamp = dayTimestamp + 24 * 60 * 60 * 1000;
+    const dayStr = d.toISOString().split('T')[0];
 
     return orders
       .filter(o => {
         if (!isPaidOrder(o.status)) return false;
-        const oDate = new Date(o.date);
-        return oDate.getTime() >= dayTimestamp && oDate.getTime() < nextDayTimestamp;
+        const oDateStr = (o.date || "").split('T')[0];
+        return oDateStr === dayStr;
       })
       .reduce((sum, o) => sum + parseAmount(o.amount), 0);
   });
@@ -152,9 +150,6 @@ const Dashboard: React.FC = () => {
               <h2 className="text-lg font-bold text-slate-900">{t('admin.sales_performance')}</h2>
               <p className="text-sm text-slate-400">{t('admin.daily_revenue')}</p>
             </div>
-            <button className="text-indigo-600 text-sm font-bold flex items-center hover:text-indigo-800 bg-indigo-50 px-4 py-2 rounded-lg transition-colors">
-              {t('admin.financial_report')} <ArrowUpRight className="h-4 w-4 ml-1" />
-            </button>
           </div>
 
           {/* Chart Visuals */}

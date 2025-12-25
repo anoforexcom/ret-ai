@@ -14,6 +14,40 @@ const Dashboard: React.FC = () => {
     end: new Date().toISOString().split('T')[0]
   });
 
+  const exportToCSV = () => {
+    // Cabeçalhos do CSV
+    const headers = ["ID Encomenda", "Data", "Cliente", "Email", "Itens", "Método", "Montante", "Estado"];
+
+    // Dados filtrados e formatados
+    const rows = filteredOrders.map(o => [
+      o.id,
+      new Date(o.date).toLocaleDateString('pt-PT'),
+      o.customerName,
+      o.customerEmail || 'N/A',
+      o.items,
+      o.paymentMethod,
+      o.amount.toFixed(2),
+      o.status
+    ]);
+
+    // Montar conteúdo CSV
+    const csvContent = [
+      headers.join(","),
+      ...rows.map(row => row.map(cell => `"${cell}"`).join(","))
+    ].join("\n");
+
+    // Criar e disparar download
+    const blob = new Blob(["\ufeff" + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `relatorio_financeiro_${dateRange.start}_a_${dateRange.end}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   // Funções auxiliares para consistência de dados
   const isPaidOrder = (status: string) => {
     const s = (status || "").toLowerCase().trim();
@@ -195,6 +229,12 @@ const Dashboard: React.FC = () => {
               <h2 className="text-lg font-bold text-slate-900">{t('admin.sales_performance')}</h2>
               <p className="text-sm text-slate-400">{t('admin.daily_revenue')}</p>
             </div>
+            <button
+              onClick={exportToCSV}
+              className="text-indigo-600 text-sm font-bold flex items-center hover:text-indigo-800 bg-indigo-50 px-4 py-2 rounded-lg transition-colors border border-indigo-100"
+            >
+              {t('admin.financial_report')} <ArrowUpRight className="h-4 w-4 ml-1" />
+            </button>
           </div>
 
           {/* Chart Visuals */}

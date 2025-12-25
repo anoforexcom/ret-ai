@@ -53,12 +53,23 @@ const Dashboard: React.FC = () => {
   const chartData = Array.from({ length: 7 }, (_, i) => {
     const d = new Date();
     d.setDate(d.getDate() - (6 - i));
-    const dayStr = d.toISOString().split('T')[0];
+
+    // Normalizar chave do dia para YYYY-MM-DD local
+    const dayStr = d.getFullYear() + '-' +
+      String(d.getMonth() + 1).padStart(2, '0') + '-' +
+      String(d.getDate()).padStart(2, '0');
 
     return orders
       .filter(o => {
         if (!isPaidOrder(o.status)) return false;
-        const oDateStr = (o.date || "").split('T')[0];
+        if (!o.date) return false;
+
+        // Normalizar data da encomenda para YYYY-MM-DD local
+        const oDate = new Date(o.date);
+        const oDateStr = oDate.getFullYear() + '-' +
+          String(oDate.getMonth() + 1).padStart(2, '0') + '-' +
+          String(oDate.getDate()).padStart(2, '0');
+
         return oDateStr === dayStr;
       })
       .reduce((sum, o) => sum + parseAmount(o.amount), 0);
@@ -154,28 +165,34 @@ const Dashboard: React.FC = () => {
 
           {/* Chart Visuals */}
           <div className="h-64 flex items-end justify-between gap-6 px-4">
-            {chartData.map((val, i) => (
-              <div key={i} className="w-full flex flex-col items-center gap-4 group">
-                <div className="relative w-full h-full flex items-end">
-                  {/* Hover tooltip */}
-                  <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[10px] font-bold px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity z-20 pointer-events-none">
-                    {val.toFixed(0)}€
+            {chartData.map((val, i) => {
+              const percentage = maxVal > 0 ? (val / maxVal) * 100 : 0;
+              return (
+                <div key={i} className="w-full flex flex-col items-center gap-4 group">
+                  <div className="relative w-full h-full flex items-end">
+                    {/* Hover tooltip */}
+                    <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[10px] font-bold px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity z-20 pointer-events-none whitespace-nowrap">
+                      {val.toFixed(2)}€
+                    </div>
+                    <div className="w-full bg-slate-50 rounded-t-xl h-full absolute inset-0 -z-10"></div>
+                    <div
+                      className="w-full bg-gradient-to-t from-indigo-600 to-indigo-400 rounded-t-xl transition-all duration-700 ease-out group-hover:from-indigo-700 group-hover:to-indigo-500 shadow-lg shadow-indigo-500/20"
+                      style={{
+                        height: `${percentage}%`,
+                        minHeight: val > 0 ? '4px' : '0'
+                      }}
+                    ></div>
                   </div>
-                  <div className="w-full bg-slate-50 rounded-t-xl h-full absolute inset-0 -z-10"></div>
-                  <div
-                    className="w-full bg-gradient-to-t from-indigo-600 to-indigo-400 rounded-t-xl transition-all duration-700 ease-out group-hover:from-indigo-700 group-hover:to-indigo-500 shadow-lg shadow-indigo-500/20"
-                    style={{ height: `${(val / maxVal) * 100}%` }}
-                  ></div>
+                  <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+                    {(() => {
+                      const d = new Date();
+                      d.setDate(d.getDate() - (6 - i));
+                      return String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0');
+                    })()}
+                  </span>
                 </div>
-                <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
-                  {(() => {
-                    const d = new Date();
-                    d.setDate(d.getDate() - (6 - i));
-                    return d.toLocaleDateString('pt-PT', { day: '2-digit', month: '2-digit' });
-                  })()}
-                </span>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 

@@ -66,19 +66,20 @@ const Dashboard: React.FC = () => {
     return parseFloat(str) || 0;
   };
 
-  // Função auxiliar para normalizar datas para YYYY-MM-DD
+  // Função auxiliar para normalizar datas para YYYY-MM-DD local
   const normalizeDate = (dateVal: any) => {
     if (!dateVal) return "";
     try {
-      // Se for um objeto com a propriedade 'date' (recursão simples)
       const d = dateVal.toDate ? dateVal.toDate() : new Date(dateVal);
-      if (isNaN(d.getTime())) return "";
-      return d.toISOString().split('T')[0];
-    } catch (e) {
-      // Fallback para strings simples YYYY-MM-DD
-      if (typeof dateVal === 'string' && /^\d{4}-\d{2}-\d{2}/.test(dateVal)) {
-        return dateVal.split('T')[0];
+      if (isNaN(d.getTime())) {
+        // Fallback para strings simples YYYY-MM-DD
+        if (typeof dateVal === 'string' && /^\d{4}-\d{2}-\d{2}/.test(dateVal)) {
+          return dateVal.split('T')[0];
+        }
+        return "";
       }
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    } catch (e) {
       return "";
     }
   };
@@ -94,8 +95,14 @@ const Dashboard: React.FC = () => {
   const totalRevenue = filteredOrders.reduce((acc, order) => acc + (isPaidOrder(order.status) ? parseAmount(order.amount) : 0), 0);
   const totalOrders = filteredOrders.filter(o => isPaidOrder(o.status)).length;
 
-  // Clientes Únicos no Período
+  // Clientes Únicos (Registados + Visitantes no Período)
   const uniqueCustomerSet = new Set();
+  // 1. Sempre incluir todos os registados (pois são clientes fixos da base)
+  (config.customers || []).forEach(c => {
+    if (c.email) uniqueCustomerSet.add(c.email.trim().toLowerCase());
+    else uniqueCustomerSet.add(c.id);
+  });
+  // 2. Adicionar visitantes que compraram no período selecionado
   filteredOrders.forEach(o => {
     const email = o.customerEmail?.trim().toLowerCase();
     if (email) uniqueCustomerSet.add(email);
@@ -114,11 +121,11 @@ const Dashboard: React.FC = () => {
   // Agregação de Vendas para o Gráfico (Baseado no Período)
   const getDaysArray = (start: string, end: string) => {
     const arr = [];
-    let current = new Date(start + 'T12:00:00Z'); // Usar meio-dia UTC para evitar problemas de fuso
-    const endDt = new Date(end + 'T12:00:00Z');
-    while (current <= endDt) {
-      arr.push(current.toISOString().split('T')[0]);
-      current.setUTCDate(current.getUTCDate() + 1);
+    const dt = new Date(start + 'T12:00:00');
+    const endDt = new Date(end + 'T12:00:00');
+    while (dt <= endDt) {
+      arr.push(`${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`);
+      dt.setDate(dt.getDate() + 1);
     }
     return arr;
   };

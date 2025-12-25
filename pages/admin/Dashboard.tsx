@@ -51,10 +51,10 @@ const Dashboard: React.FC = () => {
   // Funções auxiliares para consistência de dados
   const isPaidOrder = (status: string) => {
     const s = (status || "").toLowerCase().trim();
-    // Aceita português (com/sem acento), inglês e estados de sucesso comuns
     return [
       'completed', 'pago', 'paid', 'success', 'concluído', 'concluido',
-      'paga', 'sucesso', 'finalizado', 'aprovado', 'approved'
+      'paga', 'sucesso', 'finalizado', 'aprovado', 'approved', 'entregue',
+      'pago_manual', 'mbway_pago', 'concluída'
     ].includes(s);
   };
 
@@ -101,11 +101,11 @@ const Dashboard: React.FC = () => {
   // Agregação de Vendas para o Gráfico (Baseado no Período)
   const getDaysArray = (start: string, end: string) => {
     const arr = [];
-    const dt = new Date(start);
-    const endDt = new Date(end);
-    while (dt <= endDt) {
-      arr.push(new Date(dt).toISOString().split('T')[0]);
-      dt.setDate(dt.getDate() + 1);
+    let current = new Date(start + 'T12:00:00Z'); // Usar meio-dia UTC para evitar problemas de fuso
+    const endDt = new Date(end + 'T12:00:00Z');
+    while (current <= endDt) {
+      arr.push(current.toISOString().split('T')[0]);
+      current.setUTCDate(current.getUTCDate() + 1);
     }
     return arr;
   };

@@ -66,15 +66,28 @@ const Dashboard: React.FC = () => {
     return parseFloat(str) || 0;
   };
 
+  // Função auxiliar para normalizar datas para YYYY-MM-DD
+  const normalizeDate = (dateVal: any) => {
+    if (!dateVal) return "";
+    try {
+      // Se for um objeto com a propriedade 'date' (recursão simples)
+      const d = dateVal.toDate ? dateVal.toDate() : new Date(dateVal);
+      if (isNaN(d.getTime())) return "";
+      return d.toISOString().split('T')[0];
+    } catch (e) {
+      // Fallback para strings simples YYYY-MM-DD
+      if (typeof dateVal === 'string' && /^\d{4}-\d{2}-\d{2}/.test(dateVal)) {
+        return dateVal.split('T')[0];
+      }
+      return "";
+    }
+  };
+
   // Filtrar encomendas pelo período selecionado
   const filteredOrders = orders.filter(o => {
-    if (!o.date) return false;
-    try {
-      const oDateStr = new Date(o.date).toISOString().split('T')[0];
-      return oDateStr >= dateRange.start && oDateStr <= dateRange.end;
-    } catch (e) {
-      return false;
-    }
+    const oDateStr = normalizeDate(o.date);
+    if (!oDateStr) return false;
+    return oDateStr >= dateRange.start && oDateStr <= dateRange.end;
   });
 
   // Métricas de Receita (Baseadas no Filtro)
@@ -118,13 +131,7 @@ const Dashboard: React.FC = () => {
     return filteredOrders
       .filter(o => {
         if (!isPaidOrder(o.status)) return false;
-        if (!o.date) return false;
-        try {
-          const oDateStr = new Date(o.date).toISOString().split('T')[0];
-          return oDateStr === dayStr;
-        } catch (e) {
-          return false;
-        }
+        return normalizeDate(o.date) === dayStr;
       })
       .reduce((sum, o) => sum + parseAmount(o.amount), 0);
   });
@@ -232,12 +239,6 @@ const Dashboard: React.FC = () => {
               <h2 className="text-lg font-bold text-slate-900">{t('admin.sales_performance')}</h2>
               <p className="text-sm text-slate-400">{t('admin.daily_revenue')}</p>
             </div>
-            <button
-              onClick={exportToCSV}
-              className="text-indigo-600 text-sm font-bold flex items-center hover:text-indigo-800 bg-indigo-50 px-4 py-2 rounded-lg transition-colors border border-indigo-100"
-            >
-              {t('admin.financial_report')} <ArrowUpRight className="h-4 w-4 ml-1" />
-            </button>
           </div>
 
           {/* Chart Visuals */}

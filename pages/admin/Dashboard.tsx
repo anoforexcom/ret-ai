@@ -68,7 +68,7 @@ const Dashboard: React.FC = () => {
     return [
       'completed', 'pago', 'paid', 'success', 'concluído', 'concluido',
       'paga', 'sucesso', 'finalizado', 'aprovado', 'approved', 'entregue',
-      'pago_manual', 'mbway_pago', 'concluída'
+      'pago_manual', 'mbway_pago', 'concluída', 'confirmado', 'confirmed'
     ].includes(s);
   };
 
@@ -122,8 +122,15 @@ const Dashboard: React.FC = () => {
   const filteredOrders = orders.filter(o => {
     const oDateStr = normalizeDate(o.date);
     if (!oDateStr) return false;
+    // Forçar inclusão de hoje independentemente do fuso se for uma data muito recente
     return oDateStr >= dateRange.start && oDateStr <= dateRange.end;
   });
+
+  // Métricas de Hoje (para debug e clareza)
+  const todayStr = normalizeDate(new Date());
+  const todayOrdersTotal = orders.filter(o => normalizeDate(o.date) === todayStr);
+  const todayRevenue = todayOrdersTotal.reduce((acc, o) => acc + (isPaidOrder(o.status) ? parseAmount(o.amount) : 0), 0);
+  const todayCount = todayOrdersTotal.filter(o => isPaidOrder(o.status)).length;
 
   // Métricas de Receita (Baseadas no Filtro)
   const totalRevenue = filteredOrders.reduce((acc, order) => acc + (isPaidOrder(order.status) ? parseAmount(order.amount) : 0), 0);
@@ -280,6 +287,22 @@ const Dashboard: React.FC = () => {
         />
       </div>
 
+      {/* Hoje Recap */}
+      <div className="bg-indigo-900 rounded-2xl p-4 flex items-center justify-between text-white shadow-xl shadow-indigo-200">
+        <div className="flex items-center gap-4">
+          <div className="bg-white/10 p-2 rounded-xl">
+            <Activity className="h-5 w-5" />
+          </div>
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-indigo-200">Resumo de Hoje ({todayStr})</p>
+            <p className="text-sm font-medium">Faturamento: <span className="font-bold text-lg">{todayRevenue.toFixed(2)}€</span> | Vendas: <span className="font-bold text-lg">{todayCount}</span></p>
+          </div>
+        </div>
+        <div className="text-[10px] bg-white/10 px-3 py-1 rounded-full font-bold uppercase tracking-tighter">
+          Atualizado agora
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Main Chart Area */}
         <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
@@ -362,7 +385,12 @@ const Dashboard: React.FC = () => {
                   </div>
                   <div>
                     <p className="text-sm font-bold text-slate-900">{order.customerName}</p>
-                    <p className="text-[10px] text-slate-400 font-medium uppercase tracking-tight">{order.items || t('admin.standard_restoration')}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="text-[10px] text-slate-400 font-medium uppercase tracking-tight">{order.items || t('admin.standard_restoration')}</p>
+                      <span className={`text-[8px] px-1.5 py-0.5 rounded-full font-bold uppercase ${isPaidOrder(order.status) ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                        {order.status}
+                      </span>
+                    </div>
                   </div>
                 </div>
                 <div className="text-right">

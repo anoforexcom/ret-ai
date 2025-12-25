@@ -111,15 +111,12 @@ const Dashboard: React.FC = () => {
   const chartDays = daysInRange.length > 31 ? daysInRange.slice(-31) : daysInRange;
 
   const chartData = chartDays.map(dayStr => {
-    return orders
+    return filteredOrders
       .filter(o => {
         if (!isPaidOrder(o.status)) return false;
         if (!o.date) return false;
 
-        const oDate = new Date(o.date);
-        const oDateStr = oDate.getFullYear() + '-' +
-          String(oDate.getMonth() + 1).padStart(2, '0') + '-' +
-          String(oDate.getDate()).padStart(2, '0');
+        const oDateStr = o.date.split('T')[0];
 
         return oDateStr === dayStr;
       })

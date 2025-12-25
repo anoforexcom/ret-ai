@@ -29,7 +29,21 @@ const Dashboard: React.FC = () => {
   // Métricas de Receita
   const totalRevenue = orders.reduce((acc, order) => acc + (isPaidOrder(order.status) ? parseAmount(order.amount) : 0), 0);
   const totalOrders = orders.filter(o => isPaidOrder(o.status)).length;
-  const uniqueCustomers = new Set(orders.map(o => o.customerEmail?.trim().toLowerCase() || o.customerId || o.customerName)).size;
+
+  // Clientes Únicos (Registados + Visitantes Únicos)
+  const uniqueCustomerSet = new Set();
+  // 1. Adicionar emails de clientes registados
+  (config.customers || []).forEach(c => {
+    if (c.email) uniqueCustomerSet.add(c.email.trim().toLowerCase());
+    else uniqueCustomerSet.add(c.id);
+  });
+  // 2. Adicionar identificadores de encomendas (para apanhar visitantes)
+  orders.forEach(o => {
+    const email = o.customerEmail?.trim().toLowerCase();
+    if (email) uniqueCustomerSet.add(email);
+    else if (o.customerName) uniqueCustomerSet.add(o.customerName.trim().toLowerCase());
+  });
+  const uniqueCustomers = uniqueCustomerSet.size;
 
   // Métricas de Despesa e Lucro Real
   const totalExpenses = config.expenses.reduce((acc, exp) => acc + parseAmount(exp.amount), 0);

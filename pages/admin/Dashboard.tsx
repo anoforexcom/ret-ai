@@ -277,34 +277,47 @@ const Dashboard: React.FC = () => {
           </div>
 
           {/* Chart Visuals */}
-          <div className="h-64 flex items-end justify-between gap-6 px-4">
-            {chartData.map((val, i) => {
-              const percentage = maxVal > 0 ? (val / maxVal) * 100 : 0;
-              return (
-                <div key={i} className="w-full flex flex-col items-center gap-4 group">
-                  <div className="relative w-full h-full flex items-end">
-                    {/* Hover tooltip */}
-                    <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[10px] font-bold px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity z-20 pointer-events-none whitespace-nowrap">
-                      {val.toFixed(2)}€
+          <div className="h-80 w-full overflow-x-auto overflow-y-hidden pb-4 custom-scrollbar">
+            <div
+              className="h-full flex items-end justify-between px-2 gap-2"
+              style={{ minWidth: chartDays.length > 10 ? `${chartDays.length * 40}px` : '100%' }}
+            >
+              {chartData.map((val, i) => {
+                const percentage = maxVal > 0 ? (val / maxVal) * 100 : 0;
+                // Mostrar label apenas para alguns dias se o range for grande
+                const shouldShowLabel = chartDays.length <= 14 || i % 3 === 0 || i === chartDays.length - 1;
+
+                return (
+                  <div key={i} className="flex-1 flex flex-col items-center gap-4 group h-full justify-end min-w-[30px]">
+                    <div className="relative w-full h-full flex items-end mb-2">
+                      {/* Hover tooltip */}
+                      <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[10px] font-bold px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity z-20 pointer-events-none whitespace-nowrap shadow-xl">
+                        {val.toFixed(2)}€
+                      </div>
+
+                      {/* Bar Track */}
+                      <div className="w-full bg-slate-50/50 rounded-t-xl h-full absolute inset-0 -z-10 border-x border-slate-100/30"></div>
+
+                      {/* Actual Bar */}
+                      <div
+                        className="w-full bg-gradient-to-t from-indigo-600 via-indigo-500 to-indigo-400 rounded-t-xl transition-all duration-700 ease-out group-hover:from-indigo-700 group-hover:to-indigo-500 shadow-md group-hover:shadow-indigo-500/40"
+                        style={{
+                          height: `${Math.max(percentage, val > 0 ? 5 : 0)}%`,
+                        }}
+                      ></div>
                     </div>
-                    <div className="w-full bg-slate-50 rounded-t-xl h-full absolute inset-0 -z-10"></div>
-                    <div
-                      className="w-full bg-gradient-to-t from-indigo-600 to-indigo-400 rounded-t-xl transition-all duration-700 ease-out group-hover:from-indigo-700 group-hover:to-indigo-500 shadow-lg shadow-indigo-500/20"
-                      style={{
-                        height: `${percentage}%`,
-                        minHeight: val > 0 ? '4px' : '0'
-                      }}
-                    ></div>
+
+                    {/* Label */}
+                    <span className={`text-[9px] font-bold uppercase tracking-tight transition-colors ${shouldShowLabel ? 'text-slate-400' : 'text-transparent'}`}>
+                      {(() => {
+                        const [year, month, day] = chartDays[i].split('-');
+                        return `${day}/${month}`;
+                      })()}
+                    </span>
                   </div>
-                  <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
-                    {(() => {
-                      const [year, month, day] = chartDays[i].split('-');
-                      return `${day}/${month}`;
-                    })()}
-                  </span>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
         </div>
 

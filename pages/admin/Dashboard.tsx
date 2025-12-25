@@ -2,11 +2,22 @@
 import React from 'react';
 import { useConfig } from '../../contexts/ConfigContext';
 import { useTranslation } from 'react-i18next';
-import { DollarSign, ShoppingBag, Users, TrendingUp, TrendingDown, ArrowUpRight, Activity, Wallet } from 'lucide-react';
+import { DollarSign, ShoppingBag, Users, TrendingUp, TrendingDown, ArrowUpRight, Activity, Wallet, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const Dashboard: React.FC = () => {
   const { orders, config } = useConfig();
   const { t } = useTranslation();
+  const scrollRef = React.useRef<HTMLDivElement>(null);
+
+  const scroll = (direction: 'left' | 'right') => {
+    if (scrollRef.current) {
+      const scrollAmount = 200;
+      scrollRef.current.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth'
+      });
+    }
+  };
 
   // Filtro de Data (Inicializado com Datas Locais)
   const [dateRange, setDateRange] = React.useState(() => {
@@ -277,46 +288,57 @@ const Dashboard: React.FC = () => {
           </div>
 
           {/* Chart Visuals */}
-          <div className="h-80 w-full overflow-x-auto overflow-y-hidden pb-4 custom-scrollbar">
-            <div
-              className="h-full flex items-end justify-between px-2 gap-2"
-              style={{ minWidth: chartDays.length > 10 ? `${chartDays.length * 40}px` : '100%' }}
+          <div className="relative group/chart">
+            {/* Navigation Arrows (Visíveis apenas em hover e se houver scroll) */}
+            <button
+              onClick={() => scroll('left')}
+              className="absolute left-0 top-1/2 -translate-y-1/2 z-30 p-2 bg-white/90 shadow-lg border border-slate-200 rounded-full text-slate-600 hover:text-indigo-600 opacity-0 group-hover/chart:opacity-100 transition-opacity ml-2"
             >
-              {chartData.map((val, i) => {
-                const percentage = maxVal > 0 ? (val / maxVal) * 100 : 0;
-                // Mostrar label apenas para alguns dias se o range for grande
-                const shouldShowLabel = chartDays.length <= 14 || i % 3 === 0 || i === chartDays.length - 1;
+              <ChevronLeft className="h-5 w-5" />
+            </button>
+            <button
+              onClick={() => scroll('right')}
+              className="absolute right-0 top-1/2 -translate-y-1/2 z-30 p-2 bg-white/90 shadow-lg border border-slate-200 rounded-full text-slate-600 hover:text-indigo-600 opacity-0 group-hover/chart:opacity-100 transition-opacity mr-2"
+            >
+              <ChevronRight className="h-5 w-5" />
+            </button>
 
-                return (
-                  <div key={i} className="flex-1 flex flex-col items-center gap-4 group h-full justify-end min-w-[30px]">
-                    <div className="relative w-full h-full flex items-end mb-2">
-                      {/* Hover tooltip */}
-                      <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[10px] font-bold px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity z-20 pointer-events-none whitespace-nowrap shadow-xl">
-                        {val.toFixed(2)}€
+            <div
+              ref={scrollRef}
+              className="h-80 w-full overflow-x-auto overflow-y-hidden pb-4 custom-scrollbar scroll-smooth"
+            >
+              <div
+                className="h-full flex items-end justify-between px-2 gap-2"
+                style={{ minWidth: chartDays.length > 7 ? `${chartDays.length * 60}px` : '100%' }}
+              >
+                {chartData.map((val, i) => {
+                  const percentage = maxVal > 0 ? (val / maxVal) * 100 : 0;
+                  const shouldShowLabel = chartDays.length <= 14 || i % 2 === 0 || i === chartDays.length - 1;
+
+                  return (
+                    <div key={i} className="flex-1 flex flex-col items-center gap-4 group h-full justify-end min-w-[40px]">
+                      <div className="relative w-full h-full flex items-end mb-2">
+                        <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[10px] font-bold px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity z-20 pointer-events-none whitespace-nowrap shadow-xl">
+                          {val.toFixed(2)}€
+                        </div>
+                        <div className="w-full bg-slate-50/50 rounded-t-xl h-full absolute inset-0 -z-10 border-x border-slate-100/30"></div>
+                        <div
+                          className="w-full bg-gradient-to-t from-indigo-600 via-indigo-500 to-indigo-400 rounded-t-xl transition-all duration-700 ease-out group-hover:from-indigo-700 group-hover:to-indigo-500 shadow-md group-hover:shadow-indigo-500/40"
+                          style={{
+                            height: `${Math.max(percentage, val > 0 ? 5 : 0)}%`,
+                          }}
+                        ></div>
                       </div>
-
-                      {/* Bar Track */}
-                      <div className="w-full bg-slate-50/50 rounded-t-xl h-full absolute inset-0 -z-10 border-x border-slate-100/30"></div>
-
-                      {/* Actual Bar */}
-                      <div
-                        className="w-full bg-gradient-to-t from-indigo-600 via-indigo-500 to-indigo-400 rounded-t-xl transition-all duration-700 ease-out group-hover:from-indigo-700 group-hover:to-indigo-500 shadow-md group-hover:shadow-indigo-500/40"
-                        style={{
-                          height: `${Math.max(percentage, val > 0 ? 5 : 0)}%`,
-                        }}
-                      ></div>
+                      <span className={`text-[9px] font-bold uppercase tracking-tight transition-colors ${shouldShowLabel ? 'text-slate-400' : 'text-transparent'}`}>
+                        {(() => {
+                          const [year, month, day] = chartDays[i].split('-');
+                          return `${day}/${month}`;
+                        })()}
+                      </span>
                     </div>
-
-                    {/* Label */}
-                    <span className={`text-[9px] font-bold uppercase tracking-tight transition-colors ${shouldShowLabel ? 'text-slate-400' : 'text-transparent'}`}>
-                      {(() => {
-                        const [year, month, day] = chartDays[i].split('-');
-                        return `${day}/${month}`;
-                      })()}
-                    </span>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
             </div>
           </div>
         </div>

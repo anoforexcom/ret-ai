@@ -8,7 +8,13 @@ const Dashboard: React.FC = () => {
   const { orders, config } = useConfig();
   const { t } = useTranslation();
 
-  // Função auxiliar para verificar se a encomenda está paga de forma ultra-permissiva
+  // Filtro de Data
+  const [dateRange, setDateRange] = React.useState({
+    start: new Date(new Date().setDate(new Date().getDate() - 30)).toISOString().split('T')[0], // Últimos 30 dias por defeito
+    end: new Date().toISOString().split('T')[0]
+  });
+
+  // Funções auxiliares para consistência de dados
   const isPaidOrder = (status: string) => {
     const s = (status || "").toLowerCase().trim();
     // Aceita português (com/sem acento), inglês e estados de sucesso comuns
@@ -26,45 +32,56 @@ const Dashboard: React.FC = () => {
     return parseFloat(str) || 0;
   };
 
-  // Métricas de Receita
-  const totalRevenue = orders.reduce((acc, order) => acc + (isPaidOrder(order.status) ? parseAmount(order.amount) : 0), 0);
-  const totalOrders = orders.filter(o => isPaidOrder(o.status)).length;
-
-  // Clientes Únicos (Registados + Visitantes Únicos)
-  const uniqueCustomerSet = new Set();
-  // 1. Adicionar emails de clientes registados
-  (config.customers || []).forEach(c => {
-    if (c.email) uniqueCustomerSet.add(c.email.trim().toLowerCase());
-    else uniqueCustomerSet.add(c.id);
+  // Filtrar encomendas pelo período selecionado
+  const filteredOrders = orders.filter(o => {
+    if (!o.date) return false;
+    const oDateStr = o.date.split('T')[0];
+    return oDateStr >= dateRange.start && oDateStr <= dateRange.end;
   });
-  // 2. Adicionar identificadores de encomendas (para apanhar visitantes)
-  orders.forEach(o => {
+
+  // Métricas de Receita (Baseadas no Filtro)
+  const totalRevenue = filteredOrders.reduce((acc, order) => acc + (isPaidOrder(order.status) ? parseAmount(order.amount) : 0), 0);
+  const totalOrders = filteredOrders.filter(o => isPaidOrder(o.status)).length;
+
+  // Clientes Únicos no Período
+  const uniqueCustomerSet = new Set();
+  filteredOrders.forEach(o => {
     const email = o.customerEmail?.trim().toLowerCase();
     if (email) uniqueCustomerSet.add(email);
     else if (o.customerName) uniqueCustomerSet.add(o.customerName.trim().toLowerCase());
   });
   const uniqueCustomers = uniqueCustomerSet.size;
 
-  // Métricas de Despesa e Lucro Real
-  const totalExpenses = config.expenses.reduce((acc, exp) => acc + parseAmount(exp.amount), 0);
+  // Métricas de Despesa e Lucro Real (Despesas filtradas por data se houver data, senão totais)
+  const filteredExpenses = config.expenses.filter(e => {
+    if (!e.date) return true;
+    return e.date >= dateRange.start && e.date <= dateRange.end;
+  });
+  const totalExpenses = filteredExpenses.reduce((acc, exp) => acc + parseAmount(exp.amount), 0);
   const netProfit = totalRevenue - totalExpenses;
 
-  // Agregação de Vendas para o Gráfico (Últimos 7 dias)
-  const chartData = Array.from({ length: 7 }, (_, i) => {
-    const d = new Date();
-    d.setDate(d.getDate() - (6 - i));
+  // Agregação de Vendas para o Gráfico (Baseado no Período)
+  const getDaysArray = (start: string, end: string) => {
+    const arr = [];
+    const dt = new Date(start);
+    const endDt = new Date(end);
+    while (dt <= endDt) {
+      arr.push(new Date(dt).toISOString().split('T')[0]);
+      dt.setDate(dt.getDate() + 1);
+    }
+    return arr;
+  };
 
-    // Normalizar chave do dia para YYYY-MM-DD local
-    const dayStr = d.getFullYear() + '-' +
-      String(d.getMonth() + 1).padStart(2, '0') + '-' +
-      String(d.getDate()).padStart(2, '0');
+  const daysInRange = getDaysArray(dateRange.start, dateRange.end);
+  // Limitar a 30 dias para não quebrar o layout do gráfico se o range for enorme
+  const chartDays = daysInRange.length > 31 ? daysInRange.slice(-31) : daysInRange;
 
+  const chartData = chartDays.map(dayStr => {
     return orders
       .filter(o => {
         if (!isPaidOrder(o.status)) return false;
         if (!o.date) return false;
 
-        // Normalizar data da encomenda para YYYY-MM-DD local
         const oDate = new Date(o.date);
         const oDateStr = oDate.getFullYear() + '-' +
           String(oDate.getMonth() + 1).padStart(2, '0') + '-' +
@@ -107,8 +124,25 @@ const Dashboard: React.FC = () => {
             <Activity className="h-4 w-4 text-green-500" />
             {t('admin.system_status')} <span className="text-green-600 font-bold">{t('admin.online')}</span>
           </div>
-          <div className="text-sm text-slate-500 bg-white px-4 py-2 rounded-xl border border-slate-200">
-            {new Date().toLocaleDateString('pt-PT')}
+          <div className="flex flex-col sm:flex-row items-center gap-3 bg-white p-2 rounded-2xl border border-slate-200 shadow-sm">
+            <div className="flex items-center gap-2 px-3 border-r border-slate-100 last:border-0">
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">De</span>
+              <input
+                type="date"
+                value={dateRange.start}
+                onChange={(e) => setDateRange(prev => ({ ...prev, start: e.target.value }))}
+                className="bg-transparent border-none text-sm font-bold text-slate-700 outline-none p-1 focus:text-indigo-600 transition-colors"
+              />
+            </div>
+            <div className="flex items-center gap-2 px-3">
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Até</span>
+              <input
+                type="date"
+                value={dateRange.end}
+                onChange={(e) => setDateRange(prev => ({ ...prev, end: e.target.value }))}
+                className="bg-transparent border-none text-sm font-bold text-slate-700 outline-none p-1 focus:text-indigo-600 transition-colors"
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -185,9 +219,8 @@ const Dashboard: React.FC = () => {
                   </div>
                   <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
                     {(() => {
-                      const d = new Date();
-                      d.setDate(d.getDate() - (6 - i));
-                      return String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0');
+                      const [year, month, day] = chartDays[i].split('-');
+                      return `${day}/${month}`;
                     })()}
                   </span>
                 </div>

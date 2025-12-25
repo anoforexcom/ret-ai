@@ -170,6 +170,7 @@ const Dashboard: React.FC = () => {
   };
 
   const daysInRange = getDaysArray(dateRange.start, dateRange.end);
+  console.log("📊 Dashboard Render:", { ordersCount: orders.length, range: dateRange });
   // Limitar a 30 dias para não quebrar o layout do gráfico se o range for enorme
   const chartDays = daysInRange.length > 31 ? daysInRange.slice(-31) : daysInRange;
 
@@ -206,7 +207,9 @@ const Dashboard: React.FC = () => {
     <div className="space-y-8 animate-fadeIn">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">{t('admin.dashboard_title')}</h1>
+          <h1 className="text-2xl font-bold text-slate-900">
+            {t('admin.dashboard_title')} <span className="text-[10px] text-indigo-400 font-normal">v1.2</span>
+          </h1>
           <p className="text-slate-500 text-sm mt-1">{t('admin.dashboard_desc')}</p>
         </div>
         <div className="flex items-center gap-4">
@@ -316,24 +319,24 @@ const Dashboard: React.FC = () => {
                   const shouldShowLabel = chartDays.length <= 14 || i % 2 === 0 || i === chartDays.length - 1;
 
                   return (
-                    <div key={i} className="flex-1 flex flex-col items-center gap-4 group h-full justify-end min-w-[50px]">
-                      <div className="relative w-full h-full flex items-end mb-2">
-                        {/* Hover tooltip - Garantir que está acima de tudo e visível */}
-                        <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[11px] font-bold px-3 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-200 z-50 pointer-events-none whitespace-nowrap shadow-2xl scale-90 group-hover:scale-100">
+                    <div key={i} className="flex-1 flex flex-col items-center gap-4 h-full justify-end min-w-[50px]">
+                      <div className="relative w-full h-full flex items-end mb-2 group cursor-pointer">
+                        {/* Hover tooltip - Posicionamento ultra-fixo */}
+                        <div className="absolute -top-14 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[12px] font-black px-3 py-2 rounded-xl opacity-0 group-hover:opacity-100 transition-all duration-300 z-[100] pointer-events-none whitespace-nowrap shadow-[0_10px_40px_rgba(0,0,0,0.3)] border border-white/10 scale-75 group-hover:scale-100 translate-y-2 group-hover:translate-y-0">
                           {val.toFixed(2)}€
-                          {/* Pequena seta no tooltip */}
-                          <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-800 rotate-45"></div>
+                          {/* Seta do tooltip */}
+                          <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-slate-900 rotate-45 border-r border-b border-white/5"></div>
                         </div>
 
-                        <div className="w-full bg-slate-50/50 rounded-t-2xl h-full absolute inset-0 -z-10 border-x border-slate-100/30"></div>
+                        <div className="w-full bg-slate-100/50 rounded-t-2xl h-full absolute inset-0 -z-10 border-x border-slate-200/20 group-hover:bg-slate-200/30 transition-colors"></div>
                         <div
-                          className="w-full bg-gradient-to-t from-indigo-600 via-indigo-500 to-indigo-400 rounded-t-2xl transition-all duration-700 ease-out group-hover:from-indigo-700 group-hover:to-indigo-500 shadow-md group-hover:shadow-indigo-500/40"
+                          className="w-full bg-gradient-to-t from-indigo-600 via-indigo-500 to-indigo-400 rounded-t-2xl transition-all duration-500 ease-out group-hover:from-indigo-500 group-hover:to-indigo-300 shadow-lg group-hover:shadow-indigo-400/50"
                           style={{
-                            height: `${Math.max(percentage, val > 0 ? 5 : 0)}%`,
+                            height: `${Math.max(percentage, val > 0 ? 6 : 0)}%`,
                           }}
                         ></div>
                       </div>
-                      <span className={`text-[10px] font-bold uppercase tracking-tight transition-colors ${shouldShowLabel ? 'text-slate-400' : 'text-transparent'}`}>
+                      <span className={`text-[10px] font-bold uppercase tracking-tight transition-colors ${shouldShowLabel ? 'text-slate-500' : 'text-transparent'}`}>
                         {(() => {
                           const [year, month, day] = chartDays[i].split('-');
                           return `${day}/${month}`;

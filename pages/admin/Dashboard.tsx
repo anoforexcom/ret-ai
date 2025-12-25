@@ -69,8 +69,12 @@ const Dashboard: React.FC = () => {
   // Filtrar encomendas pelo período selecionado
   const filteredOrders = orders.filter(o => {
     if (!o.date) return false;
-    const oDateStr = o.date.split('T')[0];
-    return oDateStr >= dateRange.start && oDateStr <= dateRange.end;
+    try {
+      const oDateStr = new Date(o.date).toISOString().split('T')[0];
+      return oDateStr >= dateRange.start && oDateStr <= dateRange.end;
+    } catch (e) {
+      return false;
+    }
   });
 
   // Métricas de Receita (Baseadas no Filtro)
@@ -115,10 +119,12 @@ const Dashboard: React.FC = () => {
       .filter(o => {
         if (!isPaidOrder(o.status)) return false;
         if (!o.date) return false;
-
-        const oDateStr = o.date.split('T')[0];
-
-        return oDateStr === dayStr;
+        try {
+          const oDateStr = new Date(o.date).toISOString().split('T')[0];
+          return oDateStr === dayStr;
+        } catch (e) {
+          return false;
+        }
       })
       .reduce((sum, o) => sum + parseAmount(o.amount), 0);
   });

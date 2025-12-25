@@ -8,10 +8,13 @@ const Dashboard: React.FC = () => {
   const { orders, config } = useConfig();
   const { t } = useTranslation();
 
-  // Filtro de Data
-  const [dateRange, setDateRange] = React.useState({
-    start: new Date(new Date().setDate(new Date().getDate() - 30)).toISOString().split('T')[0], // Últimos 30 dias por defeito
-    end: new Date().toISOString().split('T')[0]
+  // Filtro de Data (Inicializado com Datas Locais)
+  const [dateRange, setDateRange] = React.useState(() => {
+    const end = new Date();
+    const start = new Date();
+    start.setDate(end.getDate() - 30);
+    const fmt = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    return { start: fmt(start), end: fmt(end) };
   });
 
   const exportToCSV = () => {
@@ -66,18 +69,38 @@ const Dashboard: React.FC = () => {
     return parseFloat(str) || 0;
   };
 
-  // Função auxiliar para normalizar datas para YYYY-MM-DD local
+  // Função auxiliar para normalizar datas para YYYY-MM-DD local (Ultra Robusto)
   const normalizeDate = (dateVal: any) => {
     if (!dateVal) return "";
     try {
-      const d = dateVal.toDate ? dateVal.toDate() : new Date(dateVal);
-      if (isNaN(d.getTime())) {
-        // Fallback para strings simples YYYY-MM-DD
+      // 1. Caso seja Timestamp do Firestore (objeto com .toDate())
+      let d = (dateVal && typeof dateVal === 'object' && dateVal.toDate) ? dateVal.toDate() : null;
+
+      // 2. Tentar parsing manual se não for Timestamp
+      if (!d) {
+        if (typeof dateVal === 'string') {
+          const str = dateVal.trim();
+          // Lidar com DD/MM/YYYY
+          if (/^\d{1,2}\/\d{1,2}\/\d{4}/.test(str)) {
+            const [datePart] = str.split(' ');
+            const [day, month, year] = datePart.split('/');
+            d = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+          } else {
+            d = new Date(str);
+          }
+        } else {
+          d = new Date(dateVal);
+        }
+      }
+
+      if (!d || isNaN(d.getTime())) {
+        // Fallback para strings simples ISO que o motor JS pode falhar dependendo da versão
         if (typeof dateVal === 'string' && /^\d{4}-\d{2}-\d{2}/.test(dateVal)) {
-          return dateVal.split('T')[0];
+          return dateVal.split('T')[0].split(' ')[0];
         }
         return "";
       }
+
       return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
     } catch (e) {
       return "";
@@ -113,19 +136,24 @@ const Dashboard: React.FC = () => {
   // Métricas de Despesa e Lucro Real (Despesas filtradas por data se houver data, senão totais)
   const filteredExpenses = config.expenses.filter(e => {
     if (!e.date) return true;
-    return e.date >= dateRange.start && e.date <= dateRange.end;
+    const expenseDate = normalizeDate(e.date);
+    return expenseDate >= dateRange.start && expenseDate <= dateRange.end;
   });
   const totalExpenses = filteredExpenses.reduce((acc, exp) => acc + parseAmount(exp.amount), 0);
   const netProfit = totalRevenue - totalExpenses;
 
   // Agregação de Vendas para o Gráfico (Baseado no Período)
-  const getDaysArray = (start: string, end: string) => {
+  const getDaysArray = (startStr: string, endStr: string) => {
     const arr = [];
-    const dt = new Date(start + 'T12:00:00');
-    const endDt = new Date(end + 'T12:00:00');
-    while (dt <= endDt) {
-      arr.push(`${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`);
-      dt.setDate(dt.getDate() + 1);
+    const [sY, sM, sD] = startStr.split('-').map(Number);
+    const [eY, eM, eD] = endStr.split('-').map(Number);
+
+    let current = new Date(sY, sM - 1, sD, 12, 0, 0); // Meio-dia local
+    const end = new Date(eY, eM - 1, eD, 12, 0, 0);
+
+    while (current <= end) {
+      arr.push(`${current.getFullYear()}-${String(current.getMonth() + 1).padStart(2, '0')}-${String(current.getDate()).padStart(2, '0')}`);
+      current.setDate(current.getDate() + 1);
     }
     return arr;
   };
@@ -280,11 +308,11 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Recent Orders List */}
+        {/* Recent Orders List (Filtrada) */}
         <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 flex flex-col">
           <h2 className="text-lg font-bold text-slate-900 mb-6">{t('admin.recent_orders')}</h2>
           <div className="space-y-4 flex-grow">
-            {orders.slice(0, 6).map(order => (
+            {filteredOrders.slice(0, 8).map(order => (
               <div key={order.id} className="flex items-center justify-between p-3 hover:bg-slate-50 rounded-xl transition-all border border-transparent hover:border-slate-100 group">
                 <div className="flex items-center gap-3">
                   <div className="h-10 w-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-xs group-hover:bg-indigo-600 group-hover:text-white transition-colors">
@@ -301,7 +329,7 @@ const Dashboard: React.FC = () => {
                 </div>
               </div>
             ))}
-            {orders.length === 0 && (
+            {filteredOrders.length === 0 && (
               <div className="h-full flex flex-col items-center justify-center text-slate-400 py-10">
                 <Activity className="h-10 w-10 opacity-20 mb-2" />
                 <p className="text-xs">{t('admin.waiting_sales')}</p>

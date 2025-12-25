@@ -182,7 +182,7 @@ const Dashboard: React.FC = () => {
       .reduce((sum, o) => sum + parseAmount(o.amount), 0);
   });
 
-  const maxVal = Math.max(...chartData, 10);
+  const maxVal = Math.max(...chartData, 10) * 1.15; // 15% de margem no topo para tooltips
 
   const StatCard = ({ title, value, subtext, icon: Icon, color, trend, trendValue }: any) => (
     <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 hover:shadow-md transition-shadow">
@@ -305,7 +305,7 @@ const Dashboard: React.FC = () => {
 
             <div
               ref={scrollRef}
-              className="h-80 w-full overflow-x-auto overflow-y-hidden pb-4 custom-scrollbar scroll-smooth"
+              className="h-96 w-full overflow-x-auto overflow-y-visible pb-4 pt-12 custom-scrollbar scroll-smooth"
             >
               <div
                 className="h-full flex items-end justify-between px-2 gap-2"
@@ -316,20 +316,24 @@ const Dashboard: React.FC = () => {
                   const shouldShowLabel = chartDays.length <= 14 || i % 2 === 0 || i === chartDays.length - 1;
 
                   return (
-                    <div key={i} className="flex-1 flex flex-col items-center gap-4 group h-full justify-end min-w-[40px]">
+                    <div key={i} className="flex-1 flex flex-col items-center gap-4 group h-full justify-end min-w-[50px]">
                       <div className="relative w-full h-full flex items-end mb-2">
-                        <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[10px] font-bold px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity z-20 pointer-events-none whitespace-nowrap shadow-xl">
+                        {/* Hover tooltip - Garantir que está acima de tudo e visível */}
+                        <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[11px] font-bold px-3 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-200 z-50 pointer-events-none whitespace-nowrap shadow-2xl scale-90 group-hover:scale-100">
                           {val.toFixed(2)}€
+                          {/* Pequena seta no tooltip */}
+                          <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-800 rotate-45"></div>
                         </div>
-                        <div className="w-full bg-slate-50/50 rounded-t-xl h-full absolute inset-0 -z-10 border-x border-slate-100/30"></div>
+
+                        <div className="w-full bg-slate-50/50 rounded-t-2xl h-full absolute inset-0 -z-10 border-x border-slate-100/30"></div>
                         <div
-                          className="w-full bg-gradient-to-t from-indigo-600 via-indigo-500 to-indigo-400 rounded-t-xl transition-all duration-700 ease-out group-hover:from-indigo-700 group-hover:to-indigo-500 shadow-md group-hover:shadow-indigo-500/40"
+                          className="w-full bg-gradient-to-t from-indigo-600 via-indigo-500 to-indigo-400 rounded-t-2xl transition-all duration-700 ease-out group-hover:from-indigo-700 group-hover:to-indigo-500 shadow-md group-hover:shadow-indigo-500/40"
                           style={{
                             height: `${Math.max(percentage, val > 0 ? 5 : 0)}%`,
                           }}
                         ></div>
                       </div>
-                      <span className={`text-[9px] font-bold uppercase tracking-tight transition-colors ${shouldShowLabel ? 'text-slate-400' : 'text-transparent'}`}>
+                      <span className={`text-[10px] font-bold uppercase tracking-tight transition-colors ${shouldShowLabel ? 'text-slate-400' : 'text-transparent'}`}>
                         {(() => {
                           const [year, month, day] = chartDays[i].split('-');
                           return `${day}/${month}`;

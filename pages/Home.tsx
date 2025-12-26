@@ -56,12 +56,12 @@ const Home: React.FC = () => {
                 >
                   {t('home.hero.cta_restore')} <ArrowRight className="h-5 w-5" />
                 </Link>
-                <a
-                  href="#precos"
+                <Link
+                  to="/pricing"
                   className="bg-white/5 hover:bg-white/10 text-white border border-white/10 backdrop-blur-md px-8 py-4 rounded-xl font-bold text-lg transition-all flex items-center justify-center"
                 >
                   {t('home.hero.cta_pricing')}
-                </a>
+                </Link>
               </div>
               <div className="mt-10 flex items-center gap-4">
                 <div className="flex -space-x-2">

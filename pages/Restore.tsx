@@ -5,6 +5,7 @@ import { restoreImage } from '../services/geminiService';
 import PaymentModal from '../components/PaymentModal';
 import { useConfig } from '../contexts/ConfigContext';
 import { useTranslation } from 'react-i18next';
+import { sendPaymentConfirmation } from '../services/emailService';
 
 const Restore: React.FC = () => {
   const [status, setStatus] = useState<AppStatus>(AppStatus.IDLE);
@@ -127,7 +128,6 @@ const Restore: React.FC = () => {
       });
     }
 
-    import { sendPaymentConfirmation } from '../services/emailService';
 
     if (finalCustomerEmail) {
       sendPaymentConfirmation(

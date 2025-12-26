@@ -129,8 +129,9 @@ const Dashboard: React.FC = () => {
   // Métricas de Hoje (para debug e clareza)
   const todayStr = normalizeDate(new Date());
   const todayOrdersTotal = orders.filter(o => normalizeDate(o.date) === todayStr);
-  const todayRevenue = todayOrdersTotal.reduce((acc, o) => acc + (isPaidOrder(o.status) ? parseAmount(o.amount) : 0), 0);
-  const todayCount = todayOrdersTotal.filter(o => isPaidOrder(o.status)).length;
+  const todayRevenueValue = todayOrdersTotal.reduce((acc, o) => acc + (isPaidOrder(o.status) ? parseAmount(o.amount) : 0), 0);
+  const todayPaidCount = todayOrdersTotal.filter(o => isPaidOrder(o.status)).length;
+  const todayTotalCount = todayOrdersTotal.length;
 
   // Métricas de Receita (Baseadas no Filtro)
   const totalRevenue = filteredOrders.reduce((acc, order) => acc + (isPaidOrder(order.status) ? parseAmount(order.amount) : 0), 0);
@@ -288,18 +289,27 @@ const Dashboard: React.FC = () => {
       </div>
 
       {/* Hoje Recap */}
-      <div className="bg-indigo-900 rounded-2xl p-4 flex items-center justify-between text-white shadow-xl shadow-indigo-200">
+      <div className="bg-indigo-950 rounded-2xl p-4 flex items-center justify-between text-white shadow-xl border border-indigo-800/50">
         <div className="flex items-center gap-4">
-          <div className="bg-white/10 p-2 rounded-xl">
-            <Activity className="h-5 w-5" />
+          <div className="bg-indigo-500/20 p-2 rounded-xl border border-indigo-400/20">
+            <Activity className="h-5 w-5 text-indigo-400" />
           </div>
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-indigo-200">Resumo de Hoje ({todayStr})</p>
-            <p className="text-sm font-medium">Faturamento: <span className="font-bold text-lg">{todayRevenue.toFixed(2)}€</span> | Vendas: <span className="font-bold text-lg">{todayCount}</span></p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-indigo-400">Atividade de Hoje ({todayStr})</p>
+            <p className="text-sm font-medium">
+              Vendas Pagas: <span className="font-bold text-lg text-emerald-400">{todayRevenueValue.toFixed(2)}€</span>
+              <span className="mx-2 text-indigo-700">|</span>
+              Nº Encomendas: <span className="font-bold text-lg">{todayPaidCount}</span>
+              {todayTotalCount > todayPaidCount && (
+                <span className="ml-3 text-[10px] bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded border border-yellow-500/30">
+                  + {todayTotalCount - todayPaidCount} pendente(s) detetada(s)
+                </span>
+              )}
+            </p>
           </div>
         </div>
-        <div className="text-[10px] bg-white/10 px-3 py-1 rounded-full font-bold uppercase tracking-tighter">
-          Atualizado agora
+        <div className="hidden sm:block text-[9px] bg-indigo-500/10 px-3 py-1 rounded-full font-bold uppercase tracking-widest text-indigo-400 border border-indigo-400/10">
+          Sync Real-time Ativo
         </div>
       </div>
 
@@ -373,11 +383,11 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Recent Orders List (Filtrada) */}
+        {/* Histórico Recente (Mostra todas para confirmar chegada) */}
         <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 flex flex-col">
-          <h2 className="text-lg font-bold text-slate-900 mb-6">{t('admin.recent_orders')}</h2>
+          <h2 className="text-lg font-bold text-slate-900 mb-6 font-display">Últimas Atividades</h2>
           <div className="space-y-4 flex-grow">
-            {filteredOrders.slice(0, 8).map(order => (
+            {orders.slice(0, 10).map(order => (
               <div key={order.id} className="flex items-center justify-between p-3 hover:bg-slate-50 rounded-xl transition-all border border-transparent hover:border-slate-100 group">
                 <div className="flex items-center gap-3">
                   <div className="h-10 w-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-xs group-hover:bg-indigo-600 group-hover:text-white transition-colors">

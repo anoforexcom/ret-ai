@@ -127,6 +127,18 @@ const Restore: React.FC = () => {
       });
     }
 
+    import { sendPaymentConfirmation } from '../services/emailService';
+
+    if (finalCustomerEmail) {
+      sendPaymentConfirmation(
+        finalCustomerEmail,
+        finalCustomerName,
+        orderId,
+        analyticsAmount,
+        itemLabel
+      );
+    }
+
     if (restoredUrl) {
       const a = document.createElement('a');
       a.href = restoredUrl;

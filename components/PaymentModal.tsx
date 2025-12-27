@@ -80,8 +80,23 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onSuccess 
 
     if (activeMethod?.type === 'balance' && currentCustomer) {
       updateCustomerBalance(currentCustomer.id, -selectedTier.price);
-    } else if (!currentCustomer && shouldRegister && email && firstName) {
-      finalCustomer = registerCustomer({ firstName, lastName, email });
+    } else {
+      // Registo ou utilização de conta existente para outros métodos
+      if (!currentCustomer && shouldRegister && email && firstName) {
+        finalCustomer = registerCustomer({ firstName, lastName, email });
+      }
+
+      // Lógica de Crédito de Saldo para Bundles
+      if (selectedTier.photos > 1) {
+        // Se for Bundle, 1 foto é consumida agora, o resto vai para saldo
+        // Cálculo: (Preço Total / Total Photos) * (Total Photos - 1)
+        const unitPrice = selectedTier.price / selectedTier.photos;
+        const balanceToCredit = unitPrice * (selectedTier.photos - 1);
+
+        if (finalCustomer) {
+          updateCustomerBalance(finalCustomer.id, balanceToCredit);
+        }
+      }
     }
 
     onSuccess(methodName, selectedTier.price, selectedTier.label, {

@@ -161,6 +161,9 @@ const Dashboard: React.FC = () => {
   const totalExpenses = filteredExpenses.reduce((acc, exp) => acc + parseAmount(exp.amount), 0);
   const netProfit = totalRevenue - totalExpenses;
 
+  // Calculo de Saldo em Custódia (Total de saldo de todos os clientes)
+  const escrowBalance = (config.customers || []).reduce((acc, c) => acc + (c.balance || 0), 0);
+
   // Agregação de Vendas para o Gráfico (Baseado no Período)
   const getDaysArray = (startStr: string, endStr: string) => {
     const arr = [];
@@ -249,7 +252,7 @@ const Dashboard: React.FC = () => {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
         <StatCard
           title={t('admin.gross_revenue')}
           value={`${totalRevenue.toFixed(2)}€`}
@@ -284,6 +287,15 @@ const Dashboard: React.FC = () => {
           trendValue="+3"
           icon={Users}
           color="bg-purple-600"
+          trend="up"
+        />
+        <StatCard
+          title="Saldo em Custódia"
+          value={`${escrowBalance.toFixed(2)}€`}
+          subtext="Pré-pagos"
+          trendValue="Ativo"
+          icon={Activity}
+          color="bg-amber-500"
           trend="up"
         />
       </div>

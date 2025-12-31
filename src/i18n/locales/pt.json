@@ -658,10 +658,209 @@
   "common": {
     "loading": "A carregar...",
     "error": "Erro",
-    "success": "Sucesso",
-    "save": "Guardar",
-    "cancel": "Cancelar",
     "open_menu": "Abrir Menu",
     "close_menu": "Fechar Menu"
+  },
+  "testimonials_items": {
+    "t1": {
+      "text": "Restaurei as fotos de casamento dos meus pais. O resultado foi emocionante, as cores parecem tão naturais!",
+      "location": "Porto, PT"
+    },
+    "t2": {
+      "text": "Serviço rápido e de qualidade incrível. Recomendo vivamente para quem quer preservar memórias.",
+      "location": "Lisboa, PT"
+    },
+    "t3": {
+      "text": "Incrível como a IA conseguiu detetar as cores certas da farda militar do meu avô.",
+      "location": "Braga, PT"
+    },
+    "t4": {
+      "text": "As fotos da minha infância ganharam uma vida que eu já nem me lembrava. Muito grata!",
+      "location": "Coimbra, PT"
+    },
+    "t5": {
+      "text": "Recuperei uma foto rasgada de 1950. Nem parece a mesma imagem, o restauro é perfeito.",
+      "location": "Faro, PT"
+    },
+    "t6": {
+      "text": "Excelente trabalho na nitidez das faces. Consegui ver os olhos da minha bisavó com clareza.",
+      "location": "Viseu, PT"
+    },
+    "t7": {
+      "text": "O processo é tão simples! Carreguei a foto e em segundos tinha a versão colorida.",
+      "location": "Aveiro, PT"
+    },
+    "t8": {
+      "text": "Usei para um presente de aniversário e foi o sucesso da festa. Toda a gente ficou boquiaberta.",
+      "location": "Sintra, PT"
+    },
+    "t9": {
+      "text": "A recolorização da pele é muito realista, nada daquelas cores artificiais que se vê por aí.",
+      "location": "Setúbal, PT"
+    },
+    "t10": {
+      "text": "Memórias de família não têm preço. Pagar este valor por este resultado é quase um presente.",
+      "location": "Évora, PT"
+    },
+    "t11": {
+      "text": "Restaurei fotos da aldeia de 1940. Ajudou muito a documentar a história da nossa freguesia.",
+      "location": "Guarda, PT"
+    },
+    "t12": {
+      "text": "A luz e o brilho que as fotos ganharam é algo fenomenal. Parecem tiradas ontem.",
+      "location": "Funchal, PT"
+    },
+    "t13": {
+      "text": "A paisagem dos Açores em 1960 colorida pela RetroColor é simplesmente mágica.",
+      "location": "Ponta Delgada, PT"
+    },
+    "t14": {
+      "text": "Consegui remover manchas de humidade que estavam a destruir a única foto do meu pai.",
+      "location": "Leiria, PT"
+    },
+    "t15": {
+      "text": "Qualidade profissional por uma fração do custo de um estúdio físico. Recomendo!",
+      "location": "Castelo Branco, PT"
+    },
+    "t16": {
+      "text": "Fiquei emocionada ao ver o vestido de noiva da minha mãe com a cor original.",
+      "location": "Santarém, PT"
+    },
+    "t17": {
+      "text": "Muito fácil de usar. Até para quem não percebe nada de computadores como eu.",
+      "location": "Bragança, PT"
+    },
+    "t18": {
+      "text": "As fotos do Alentejo antigo ficam lindas com estas cores quentes e naturais.",
+      "location": "Beja, PT"
+    },
+    "t19": {
+      "text": "O restauro de texturas é o que mais me impressionou. O detalhe da pedra é incrível.",
+      "location": "Portalegre, PT"
+    },
+    "t20": {
+      "text": "As cores dos trajes tradicionais foram reproduzidas com uma precisão histórica enorme.",
+      "location": "Viana do Castelo, PT"
+    },
+    "t21": {
+      "text": "Um serviço indispensável para quem gosta de genealogia e história da família.",
+      "location": "Lisboa, PT"
+    },
+    "t22": {
+      "text": "Rápido, barato e eficaz. Já restaurei mais de 20 fotos e continuarei a usar.",
+      "location": "Porto, PT"
+    },
+    "t23": {
+      "text": "Excelente para recuperar fotos que estavam esquecidas no sótão e danificadas.",
+      "location": "Chaves, PT"
+    },
+    "t24": {
+      "text": "O mar parece tão real! Consegui sentir o verão de 1975 nesta foto.",
+      "location": "Lagos, PT"
+    },
+    "t25": {
+      "text": "A inteligência artificial deste site está noutro nível. Parabéns à equipa.",
+      "location": "Angra do Heroísmo, PT"
+    },
+    "t26": {
+      "text": "Mandei imprimir as fotos restauradas e ficaram com uma qualidade de galeria.",
+      "location": "Torres Vedras, PT"
+    },
+    "t27": {
+      "text": "Consegui identificar pessoas em fotos antigas que antes estavam demasiado escuras.",
+      "location": "Barcelos, PT"
+    },
+    "t28": {
+      "text": "O suporte técnico foi impecável quando tive uma dúvida sobre o download.",
+      "location": "Almada, PT"
+    },
+    "t29": {
+      "text": "A neve nas fotos antigas da Serra da Estrela ficou com um contraste perfeito.",
+      "location": "Covilhã, PT"
+    },
+    "t30": {
+      "text": "Reviver momentos de família através da cor é uma experiência única.",
+      "location": "Figueira da Foz, PT"
+    },
+    "t31": {
+      "text": "Melhor investimento que fiz este ano para o meu arquivo pessoal.",
+      "location": "Esposende, PT"
+    },
+    "t32": {
+      "text": "Consegui restaurar a única foto que tinha da minha avó jovem. Chorei de alegria.",
+      "location": "Oliveira de Azeméis, PT"
+    },
+    "t33": {
+      "text": "As texturas do Convento de Cristo em fotos de 1930 ficaram soberbas.",
+      "location": "Tomar, PT"
+    },
+    "t34": {
+      "text": "Serviço cinco estrelas. Simples, intuitivo e com resultados profissionais.",
+      "location": "Caldas da Rainha, PT"
+    },
+    "t35": {
+      "text": "A IA removeu todos os vincos da foto que estava dobrada há décadas.",
+      "location": "Penafiel, PT"
+    },
+    "t36": {
+      "text": "As cores do Carnaval antigo ganharam uma vibração fantástica.",
+      "location": "Ovar, PT"
+    },
+    "t37": {
+      "text": "O restauro das árvores e vinhas do Douro é muito fiel à realidade.",
+      "location": "Vila Real, PT"
+    },
+    "t38": {
+      "text": "Consegui ver detalhes nos barcos de pesca que nem sabia que existiam.",
+      "location": "Sesimbra, PT"
+    },
+    "t39": {
+      "text": "Preço justo para a tecnologia avançada que estão a oferecer aqui.",
+      "location": "Mirandela, PT"
+    },
+    "t40": {
+      "text": "As fotos de família na feira antiga ficaram um espetáculo!",
+      "location": "Ponte de Lima, PT"
+    },
+    "t41": {
+      "text": "O restauro do castelo ao fundo da foto da minha família ficou muito nítido.",
+      "location": "Silves, PT"
+    },
+    "t42": {
+      "text": "Adorei como os tons de azul do mar foram captados pela RetroColor.",
+      "location": "Espinho, PT"
+    },
+    "t43": {
+      "text": "Um serviço que honra o passado com a tecnologia do futuro.",
+      "location": "Abrantes, PT"
+    },
+    "t44": {
+      "text": "Muito satisfeita. As fotos parecem ter sido tiradas com uma câmara moderna.",
+      "location": "Felgueiras, PT"
+    },
+    "t45": {
+      "text": "A velocidade de processamento é o que mais me surpreendeu. Quase imediato.",
+      "location": "Maia, PT"
+    },
+    "t46": {
+      "text": "Recuperei memórias que achava perdidas para sempre devido ao tempo.",
+      "location": "Pombal, PT"
+    },
+    "t47": {
+      "text": "As cores das aldeias de xisto antigas ficaram muito autênticas.",
+      "location": "Lousã, PT"
+    },
+    "t48": {
+      "text": "Uma forma maravilhosa de mostrar aos meus filhos como era o mundo dos avós.",
+      "location": "Amadora, PT"
+    },
+    "t49": {
+      "text": "O restauro da baía antiga colorida é agora o meu fundo de ecrã favorito.",
+      "location": "Câmara de Lobos, PT"
+    },
+    "t50": {
+      "text": "Obrigada RetroColor por me devolverem o sorriso do meu avô a cores.",
+      "location": "Albufeira, PT"
+    }
   }
 }

@@ -280,14 +280,18 @@ const Home: React.FC = () => {
                     <Star key={i} className="h-3 w-3 text-yellow-400 fill-current" />
                   ))}
                 </div>
-                <p className="text-slate-700 italic text-sm mb-6 leading-relaxed line-clamp-3">"{t.text}"</p>
+                <p className="text-slate-700 italic text-sm mb-6 leading-relaxed line-clamp-3">
+                  "{t(`testimonials_items.${t.id}.text`, { defaultValue: t.text })}"
+                </p>
                 <div className="flex items-center gap-3">
                   <div className="h-8 w-8 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-xs">
                     {t.name.charAt(0)}
                   </div>
                   <div>
                     <p className="text-xs font-bold text-slate-900">{t.name}</p>
-                    <p className="text-[10px] text-slate-400 font-medium uppercase tracking-tight">{t.location}</p>
+                    <p className="text-[10px] text-slate-400 font-medium uppercase tracking-tight">
+                      {t(`testimonials_items.${t.id}.location`, { defaultValue: t.location })}
+                    </p>
                   </div>
                 </div>
               </div>

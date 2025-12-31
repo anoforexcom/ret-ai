@@ -658,10 +658,209 @@
     "common": {
         "loading": "Loading...",
         "error": "Error",
-        "success": "Success",
-        "save": "Save",
-        "cancel": "Cancel",
         "open_menu": "Open Menu",
         "close_menu": "Close Menu"
+    },
+    "testimonials_items": {
+        "t1": {
+            "text": "I restored my parents' wedding photos. The result was emotional, the colors look so natural!",
+            "location": "Porto, PT"
+        },
+        "t2": {
+            "text": "Fast service and amazing quality. I highly recommend it for anyone who wants to preserve memories.",
+            "location": "Lisbon, PT"
+        },
+        "t3": {
+            "text": "Incredible how the AI managed to detect the right colors of my grandfather's military uniform.",
+            "location": "Braga, PT"
+        },
+        "t4": {
+            "text": "My childhood photos gained a life I didn't even remember. Very grateful!",
+            "location": "Coimbra, PT"
+        },
+        "t5": {
+            "text": "I recovered a torn photo from 1950. It doesn't even look like the same image, the restoration is perfect.",
+            "location": "Faro, PT"
+        },
+        "t6": {
+            "text": "Excellent work on face clarity. I could see my great-grandmother's eyes clearly.",
+            "location": "Viseu, PT"
+        },
+        "t7": {
+            "text": "The process is so simple! I uploaded the photo and in seconds I had the colored version.",
+            "location": "Aveiro, PT"
+        },
+        "t8": {
+            "text": "I used it for a birthday gift and it was the success of the party. Everyone was speechless.",
+            "location": "Sintra, PT"
+        },
+        "t9": {
+            "text": "The skin recolorization is very realistic, none of those artificial colors you see around.",
+            "location": "Setubal, PT"
+        },
+        "t10": {
+            "text": "Family memories have no price. Paying this amount for this result is almost a gift.",
+            "location": "Evora, PT"
+        },
+        "t11": {
+            "text": "I restored photos of the village from 1940. It helped a lot to document the history of our parish.",
+            "location": "Guarda, PT"
+        },
+        "t12": {
+            "text": "The light and brightness the photos gained is something phenomenal. They look like they were taken yesterday.",
+            "location": "Funchal, PT"
+        },
+        "t13": {
+            "text": "The Azores landscape in 1960 colored by RetroColor is simply magical.",
+            "location": "Ponta Delgada, PT"
+        },
+        "t14": {
+            "text": "I managed to remove moisture stains that were destroying the only photo of my father.",
+            "location": "Leiria, PT"
+        },
+        "t15": {
+            "text": "Professional quality for a fraction of the cost of a physical studio. Highly recommended!",
+            "location": "Castelo Branco, PT"
+        },
+        "t16": {
+            "text": "I was emotional seeing my mother's wedding dress with the original color.",
+            "location": "Santarem, PT"
+        },
+        "t17": {
+            "text": "Very easy to use. Even for someone who doesn't understand computers like me.",
+            "location": "Braganca, PT"
+        },
+        "t18": {
+            "text": "Old Alentejo photos look beautiful with these warm and natural colors.",
+            "location": "Beja, PT"
+        },
+        "t19": {
+            "text": "The texture restoration is what impressed me the most. The stone detail is incredible.",
+            "location": "Portalegre, PT"
+        },
+        "t20": {
+            "text": "The colors of traditional costumes were reproduced with enormous historical precision.",
+            "location": "Viana do Castelo, PT"
+        },
+        "t21": {
+            "text": "An indispensable service for anyone who likes genealogy and family history.",
+            "location": "Lisbon, PT"
+        },
+        "t22": {
+            "text": "Fast, cheap and effective. I have already restored more than 20 photos and will continue to use it.",
+            "location": "Porto, PT"
+        },
+        "t23": {
+            "text": "Excellent for recovering photos that were forgotten in the attic and damaged.",
+            "location": "Chaves, PT"
+        },
+        "t24": {
+            "text": "The sea looks so real! I could feel the summer of 1975 in this photo.",
+            "location": "Lagos, PT"
+        },
+        "t25": {
+            "text": "The artificial intelligence of this site is on another level. Congratulations to the team.",
+            "location": "Angra do Heroismo, PT"
+        },
+        "t26": {
+            "text": "I had the restored photos printed and they came out with gallery quality.",
+            "location": "Torres Vedras, PT"
+        },
+        "t27": {
+            "text": "I managed to identify people in old photos that were previously too dark.",
+            "location": "Barcelos, PT"
+        },
+        "t28": {
+            "text": "The technical support was impeccable when I had a question about the download.",
+            "location": "Almada, PT"
+        },
+        "t29": {
+            "text": "The snow in the old photos of Serra da Estrela had perfect contrast.",
+            "location": "Covilha, PT"
+        },
+        "t30": {
+            "text": "Reliving family moments through color is a unique experience.",
+            "location": "Figueira da Foz, PT"
+        },
+        "t31": {
+            "text": "Best investment I made this year for my personal archive.",
+            "location": "Esposende, PT"
+        },
+        "t32": {
+            "text": "I managed to restore the only photo I had of my grandmother young. I cried with joy.",
+            "location": "Oliveira de Azemeis, PT"
+        },
+        "t33": {
+            "text": "The textures of the Convent of Christ in photos from 1930 look superb.",
+            "location": "Tomar, PT"
+        },
+        "t34": {
+            "text": "Five-star service. Simple, intuitive and with professional results.",
+            "location": "Caldas da Rainha, PT"
+        },
+        "t35": {
+            "text": "The AI removed all the creases from the photo that had been folded for decades.",
+            "location": "Penafiel, PT"
+        },
+        "t36": {
+            "text": "The colors of the old Carnival gained a fantastic vibration.",
+            "location": "Ovar, PT"
+        },
+        "t37": {
+            "text": "The restoration of the trees and vineyards of the Douro is very faithful to reality.",
+            "location": "Vila Real, PT"
+        },
+        "t38": {
+            "text": "I could see details in fishing boats that I didn't even know existed.",
+            "location": "Sesimbra, PT"
+        },
+        "t39": {
+            "text": "Fair price for the advanced technology they are offering here.",
+            "location": "Mirandela, PT"
+        },
+        "t40": {
+            "text": "The family photos at the old fair look spectacular!",
+            "location": "Ponte de Lima, PT"
+        },
+        "t41": {
+            "text": "The restoration of the castle in the background of my family's photo became very clear.",
+            "location": "Silves, PT"
+        },
+        "t42": {
+            "text": "I loved how the shades of blue of the sea were captured by RetroColor.",
+            "location": "Espinho, PT"
+        },
+        "t43": {
+            "text": "A service that honors the past with the technology of the future.",
+            "location": "Abrantes, PT"
+        },
+        "t44": {
+            "text": "Very satisfied. The photos look like they were taken with a modern camera.",
+            "location": "Felgueiras, PT"
+        },
+        "t45": {
+            "text": "The processing speed is what surprised me the most. Almost immediate.",
+            "location": "Maia, PT"
+        },
+        "t46": {
+            "text": "I recovered memories that I thought were lost forever due to time.",
+            "location": "Pombal, PT"
+        },
+        "t47": {
+            "text": "The colors of the old schist villages look very authentic.",
+            "location": "Lousa, PT"
+        },
+        "t48": {
+            "text": "A wonderful way to show my children what their grandparents' world was like.",
+            "location": "Amadora, PT"
+        },
+        "t49": {
+            "text": "The restoration of the old colored bay is now my favorite wallpaper.",
+            "location": "Camara de Lobos, PT"
+        },
+        "t50": {
+            "text": "Thank you RetroColor for giving me back my grandfather's smile in color.",
+            "location": "Albufeira, PT"
+        }
     }
 }

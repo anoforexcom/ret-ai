@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { Order } from '../../types';
 
 const Orders: React.FC = () => {
-  const { orders, config } = useConfig();
+  const { orders, config, updateOrder, deleteOrder } = useConfig();
   const { t, i18n } = useTranslation();
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
@@ -76,7 +76,7 @@ const Orders: React.FC = () => {
                         <button
                           onClick={() => {
                             if (window.confirm(t('admin.orders_v.confirm_paid') || 'Confirmar pagamento?')) {
-                              useConfig().updateOrder(order.id, 'completed');
+                              updateOrder(order.id, 'completed');
                             }
                           }}
                           className="text-slate-400 hover:text-emerald-600 p-1.5 hover:bg-slate-100 rounded-lg transition-all"
@@ -88,7 +88,7 @@ const Orders: React.FC = () => {
                         <button
                           onClick={() => {
                             if (window.confirm(t('admin.orders_v.confirm_pending') || 'Marcar como pendente?')) {
-                              useConfig().updateOrder(order.id, 'pending');
+                              updateOrder(order.id, 'pending');
                             }
                           }}
                           className="text-slate-400 hover:text-amber-600 p-1.5 hover:bg-slate-100 rounded-lg transition-all"
@@ -101,7 +101,7 @@ const Orders: React.FC = () => {
                       <button
                         onClick={() => {
                           if (window.confirm(t('admin.orders_v.confirm_delete') || 'Eliminar esta encomenda permanentemente?')) {
-                            useConfig().deleteOrder(order.id);
+                            deleteOrder(order.id);
                           }
                         }}
                         className="text-slate-400 hover:text-red-600 p-1.5 hover:bg-slate-100 rounded-lg transition-all"

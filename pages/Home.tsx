@@ -273,24 +273,24 @@ const Home: React.FC = () => {
           </div>
 
           <div className="flex overflow-x-auto gap-6 pb-8 snap-x snap-mandatory scrollbar-hide">
-            {testimonials.map((t) => (
-              <div key={t.id} className="flex-shrink-0 w-80 bg-white p-8 rounded-[2rem] border border-slate-100 snap-center shadow-sm">
+            {testimonials.map((t_item) => (
+              <div key={t_item.id} className="flex-shrink-0 w-80 bg-white p-8 rounded-[2rem] border border-slate-100 snap-center shadow-sm">
                 <div className="flex gap-1 mb-4">
                   {[...Array(5)].map((_, i) => (
                     <Star key={i} className="h-3 w-3 text-yellow-400 fill-current" />
                   ))}
                 </div>
                 <p className="text-slate-700 italic text-sm mb-6 leading-relaxed line-clamp-3">
-                  "{t(`testimonials_items.${t.id}.text`, { defaultValue: t.text })}"
+                  "{t(`testimonials_items.${t_item.id}.text`, { defaultValue: t_item.text })}"
                 </p>
                 <div className="flex items-center gap-3">
                   <div className="h-8 w-8 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-xs">
-                    {t.name.charAt(0)}
+                    {t_item.name.charAt(0)}
                   </div>
                   <div>
-                    <p className="text-xs font-bold text-slate-900">{t.name}</p>
+                    <p className="text-xs font-bold text-slate-900">{t_item.name}</p>
                     <p className="text-[10px] text-slate-400 font-medium uppercase tracking-tight">
-                      {t(`testimonials_items.${t.id}.location`, { defaultValue: t.location })}
+                      {t(`testimonials_items.${t_item.id}.location`, { defaultValue: t_item.location })}
                     </p>
                   </div>
                 </div>

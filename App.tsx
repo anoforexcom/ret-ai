@@ -14,6 +14,7 @@ import RefundPolicy from './pages/RefundPolicy';
 import CookiePolicy from './pages/CookiePolicy';
 import Testimonials from './pages/Testimonials';
 import Pricing from './pages/Pricing';
+import ScrollToTop from './components/ScrollToTop';
 
 // Admin Pages
 import AdminLayout from './pages/admin/AdminLayout';
@@ -84,6 +85,7 @@ function App() {
     <ConfigProvider>
       <StyleInjector />
       <Router>
+        <ScrollToTop />
         <div className="flex flex-col min-h-screen">
           <Routes>
             {/* Admin Routes */}

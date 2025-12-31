@@ -95,8 +95,14 @@
             },
             "tooltips": {
                 "view_details": "View Details",
-                "download_result": "Download Result"
+                "download_result": "Download Result",
+                "mark_paid": "Mark as Paid",
+                "mark_pending": "Mark as Pending",
+                "delete_order": "Delete Order"
             },
+            "confirm_paid": "Do you want to mark this order as paid? This will update the revenue statistics.",
+            "confirm_pending": "Do you want to mark this order as pending? This will remove the amount from revenue statistics.",
+            "confirm_delete": "Are you sure you want to permanently delete this order?",
             "no_orders": "There are no registered orders yet.",
             "modal": {
                 "details_title": "Order Details",

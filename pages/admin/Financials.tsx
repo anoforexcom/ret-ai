@@ -29,13 +29,16 @@ const Financials: React.FC = () => {
         description: ''
     });
 
-    // Funções de utilidade para consistência de dados
+    // Função auxiliar para consistência de dados (Ultra-Robusta)
     const isPaidOrder = (status: string) => {
         const s = (status || "").toLowerCase().trim();
-        return [
+        const paidKeywords = [
             'completed', 'pago', 'paid', 'success', 'concluído', 'concluido',
-            'paga', 'sucesso', 'finalizado', 'aprovado', 'approved'
-        ].includes(s);
+            'paga', 'sucesso', 'finalizado', 'aprovado', 'approved', 'entregue',
+            'pago_manual', 'mbway_pago', 'concluída', 'confirmado', 'confirmed',
+            'sucedido', 'completo', 'complete', 'pago / concluído', 'pago / concluido'
+        ];
+        return paidKeywords.some(keyword => s.includes(keyword));
     };
 
     const parseAmount = (val: any) => {

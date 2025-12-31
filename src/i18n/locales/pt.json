@@ -95,8 +95,14 @@
       },
       "tooltips": {
         "view_details": "Ver Detalhes",
-        "download_result": "Baixar Resultado"
+        "download_result": "Baixar Resultado",
+        "mark_paid": "Marcar como Pago",
+        "mark_pending": "Marcar como Pendente",
+        "delete_order": "Eliminar Encomenda"
       },
+      "confirm_paid": "Deseja marcar esta encomenda como paga? Isto atualizará as estatísticas de receita.",
+      "confirm_pending": "Deseja marcar esta encomenda como pendente? Isto removerá o valor das estatísticas de receita.",
+      "confirm_delete": "Tem a certeza que deseja eliminar esta encomenda permanentemente?",
       "no_orders": "Ainda não existem encomendas registadas.",
       "modal": {
         "details_title": "Detalhes da Encomenda",

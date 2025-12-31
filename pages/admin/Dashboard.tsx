@@ -75,14 +75,18 @@ const Dashboard: React.FC = () => {
     document.body.removeChild(link);
   };
 
-  // Funções auxiliares para consistência de dados
+  // Função auxiliar para consistência de dados (Ultra-Robusta)
   const isPaidOrder = (status: string) => {
     const s = (status || "").toLowerCase().trim();
-    return [
+    const paidKeywords = [
       'completed', 'pago', 'paid', 'success', 'concluído', 'concluido',
       'paga', 'sucesso', 'finalizado', 'aprovado', 'approved', 'entregue',
-      'pago_manual', 'mbway_pago', 'concluída', 'confirmado', 'confirmed'
-    ].includes(s);
+      'pago_manual', 'mbway_pago', 'concluída', 'confirmado', 'confirmed',
+      'sucedido', 'completo', 'complete', 'pago / concluído', 'pago / concluido'
+    ];
+
+    // Verifica se o status contém qualquer uma das palavras-chave ou é igual a elas
+    return paidKeywords.some(keyword => s.includes(keyword));
   };
 
   // Função auxiliar para converter montante de forma robusta

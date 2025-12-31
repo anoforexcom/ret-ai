@@ -10,6 +10,7 @@ interface ConfigContextType {
   updateConfig: (newConfig: Partial<StoreConfig>) => void;
   addOrder: (order: Order) => void;
   updateOrder: (id: string, status: Order['status']) => void;
+  deleteOrder: (id: string) => void;
   addAuditLog: (action: string, details: string) => void;
   isAdmin: boolean;
   login: () => void;
@@ -270,6 +271,15 @@ export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     }
   };
 
+  const deleteOrder = (id: string) => {
+    if (db) {
+      db.collection('orders').doc(id).delete()
+        .catch((err: any) => console.error("Error deleting order:", err));
+    } else {
+      setOrders(prev => prev.filter(o => o.id !== id));
+    }
+  };
+
   const addAuditLog = (action: string, details: string) => {
     const newLog = {
       action,
@@ -342,7 +352,7 @@ export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   return (
     <ConfigContext.Provider value={{
-      config, orders, auditLogs, updateConfig, addOrder, updateOrder, addAuditLog, isAdmin,
+      config, orders, auditLogs, updateConfig, addOrder, updateOrder, deleteOrder, addAuditLog, isAdmin,
       login: () => setIsAdmin(true), logout: () => setIsAdmin(false),
       currentCustomer, customerLogin, customerLogout, registerCustomer,
       updateCustomerBalance, updateCustomerPassword, syncStatus

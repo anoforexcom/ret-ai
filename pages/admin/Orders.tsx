@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useConfig } from '../../contexts/ConfigContext';
-import { Download, Eye, X, User, CreditCard, Package, ExternalLink } from 'lucide-react';
+import { Download, Eye, X, User, CreditCard, Package, ExternalLink, Check, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Order } from '../../types';
 
@@ -63,23 +63,53 @@ const Orders: React.FC = () => {
                     {getStatusBadge(order.status)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <button
-                      onClick={() => setSelectedOrder(order)}
-                      className="text-indigo-600 hover:text-indigo-900 mr-3 p-1 hover:bg-indigo-50 rounded transition-colors"
-                      title="Ver Detalhes"
-                    >
-                      <Eye className="h-4 w-4" />
-                    </button>
-                    {order.imageUrl && (
-                      <a
-                        href={order.imageUrl}
-                        download={`encomenda-${order.id}.png`}
-                        className="text-slate-500 hover:text-green-600 inline-block p-1 hover:bg-green-50 rounded transition-colors"
-                        title="Baixar Resultado"
+                    <div className="flex items-center justify-end gap-2">
+                      <button
+                        onClick={() => setSelectedOrder(order)}
+                        className="text-slate-400 hover:text-indigo-600 p-1.5 hover:bg-slate-100 rounded-lg transition-all"
+                        title={t('admin.orders_v.tooltips.view_details')}
                       >
-                        <Download className="h-4 w-4" />
-                      </a>
-                    )}
+                        <Eye className="h-4 w-4" />
+                      </button>
+
+                      {order.status !== 'completed' ? (
+                        <button
+                          onClick={() => {
+                            if (window.confirm(t('admin.orders_v.confirm_paid') || 'Confirmar pagamento?')) {
+                              useConfig().updateOrder(order.id, 'completed');
+                            }
+                          }}
+                          className="text-slate-400 hover:text-emerald-600 p-1.5 hover:bg-slate-100 rounded-lg transition-all"
+                          title={t('admin.orders_v.tooltips.mark_paid')}
+                        >
+                          <Check className="h-4 w-4" />
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => {
+                            if (window.confirm(t('admin.orders_v.confirm_pending') || 'Marcar como pendente?')) {
+                              useConfig().updateOrder(order.id, 'pending');
+                            }
+                          }}
+                          className="text-slate-400 hover:text-amber-600 p-1.5 hover:bg-slate-100 rounded-lg transition-all"
+                          title={t('admin.orders_v.tooltips.mark_pending')}
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      )}
+
+                      <button
+                        onClick={() => {
+                          if (window.confirm(t('admin.orders_v.confirm_delete') || 'Eliminar esta encomenda permanentemente?')) {
+                            useConfig().deleteOrder(order.id);
+                          }
+                        }}
+                        className="text-slate-400 hover:text-red-600 p-1.5 hover:bg-slate-100 rounded-lg transition-all"
+                        title={t('admin.orders_v.tooltips.delete_order')}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}

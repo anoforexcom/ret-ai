@@ -275,6 +275,7 @@
       "name_placeholder": "Nome",
       "surname_placeholder": "Apelido",
       "email_placeholder": "Seu melhor email",
+      "password_placeholder": "Escolha uma Palavra-passe",
       "create_account": "CRIAR CONTA PARA ACEDER DEPOIS"
     },
     "selection": "Seleção",

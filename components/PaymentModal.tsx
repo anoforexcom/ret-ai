@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { X, Lock, CreditCard, Smartphone, Wallet, Package, Check, Apple, Box, User, Mail, UserPlus, Coins, AlertCircle } from 'lucide-react';
+import { X, Lock, CreditCard, Smartphone, Wallet, Package, Check, Apple, Box, User, Mail, UserPlus, Coins, AlertCircle, Key, Eye, EyeOff } from 'lucide-react';
 import { useConfig } from '../contexts/ConfigContext';
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import { PaymentMethod } from '../types';
@@ -31,6 +31,8 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onSuccess 
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
+  const [regPassword, setRegPassword] = useState('');
+  const [showRegPassword, setShowRegPassword] = useState(false);
   const [shouldRegister, setShouldRegister] = useState(true);
 
   const [isProcessing, setIsProcessing] = useState(false);
@@ -83,7 +85,12 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onSuccess 
     } else {
       // Registo ou utilização de conta existente para outros métodos
       if (!currentCustomer && shouldRegister && email && firstName) {
-        finalCustomer = registerCustomer({ firstName, lastName, email });
+        finalCustomer = registerCustomer({
+          firstName,
+          lastName,
+          email,
+          password: regPassword || undefined
+        });
       }
 
       // Lógica de Crédito de Saldo para Bundles
@@ -201,6 +208,27 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onSuccess 
                         <UserPlus className="h-3 w-3" /> {t('payment_modal.form.create_account')}
                       </span>
                     </label>
+
+                    {shouldRegister && (
+                      <div className="relative animate-fadeIn">
+                        <Key className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                        <input
+                          type={showRegPassword ? "text" : "password"}
+                          placeholder={t('payment_modal.form.password_placeholder')}
+                          value={regPassword}
+                          onChange={e => setRegPassword(e.target.value)}
+                          required={shouldRegister}
+                          className="w-full pl-9 pr-10 py-2 text-sm bg-white border border-slate-200 rounded-lg outline-none focus:ring-1 focus:ring-indigo-500"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowRegPassword(!showRegPassword)}
+                          className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                        >
+                          {showRegPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        </button>
+                      </div>
+                    )}
                   </>
                 ) : (
                   <div className="bg-white p-3 rounded-xl border border-indigo-100 flex items-center gap-3">

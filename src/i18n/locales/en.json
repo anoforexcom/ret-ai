@@ -275,6 +275,7 @@
             "name_placeholder": "Name",
             "surname_placeholder": "Surname",
             "email_placeholder": "Your best email",
+            "password_placeholder": "Choose a Password",
             "create_account": "CREATE ACCOUNT FOR LATER ACCESS"
         },
         "selection": "Selection",

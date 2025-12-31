@@ -15,9 +15,11 @@ const CustomerLayout: React.FC = () => {
   const location = useLocation();
 
   const toggleLanguage = () => {
-    const newLang = i18n.language === 'pt' ? 'en' : 'pt';
-    i18n.changeLanguage(newLang);
+    const isPt = i18n.language.startsWith('pt');
+    i18n.changeLanguage(isPt ? 'en' : 'pt');
   };
+
+  const isCurrentPt = i18n.language.startsWith('pt');
 
   if (!currentCustomer) {
     return (
@@ -29,7 +31,7 @@ const CustomerLayout: React.FC = () => {
               className="absolute top-4 right-4 p-2 bg-white/10 rounded-xl hover:bg-white/20 transition-all flex items-center gap-2"
             >
               <Globe className="h-4 w-4" />
-              <span className="text-xs font-bold uppercase">{i18n.language === 'pt' ? 'EN' : 'PT'}</span>
+              <span className="text-xs font-bold uppercase">{isCurrentPt ? 'EN' : 'PT'}</span>
             </button>
             <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-4">
               <User className="h-8 w-8" />
@@ -130,10 +132,10 @@ const CustomerLayout: React.FC = () => {
             <button
               onClick={toggleLanguage}
               className="p-3 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 hover:bg-white/20 transition-all flex items-center gap-2"
-              title={i18n.language === 'pt' ? "Switch to English" : "Mudar para Português"}
+              title={isCurrentPt ? "Switch to English" : "Mudar para Português"}
             >
               <Globe className="h-5 w-5" />
-              <span className="text-sm font-bold uppercase tracking-tight">{i18n.language === 'pt' ? 'EN' : 'PT'}</span>
+              <span className="text-sm font-bold uppercase tracking-tight">{isCurrentPt ? 'EN' : 'PT'}</span>
             </button>
             <div className="bg-white/10 backdrop-blur-sm px-6 py-4 rounded-2xl border border-white/20 text-center md:text-left">
               <p className="text-xs font-bold uppercase tracking-widest text-indigo-300">{t('customer.dashboard.balance_label')}</p>

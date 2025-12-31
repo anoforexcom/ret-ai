@@ -39,9 +39,11 @@ const AdminLayout: React.FC = () => {
   };
 
   const toggleLanguage = () => {
-    const newLang = i18n.language === 'pt' ? 'en' : 'pt';
-    i18n.changeLanguage(newLang);
+    const isPt = i18n.language.startsWith('pt');
+    i18n.changeLanguage(isPt ? 'en' : 'pt');
   };
+
+  const isCurrentPt = i18n.language.startsWith('pt');
 
   if (!isAdmin) {
     return (
@@ -51,7 +53,7 @@ const AdminLayout: React.FC = () => {
           className="absolute top-4 right-4 p-2 bg-white rounded-xl shadow-sm border border-slate-200 hover:bg-slate-50 transition-all flex items-center gap-2"
         >
           <Globe className="h-4 w-4 text-slate-400" />
-          <span className="text-xs font-bold text-slate-600 uppercase">{i18n.language === 'pt' ? 'EN' : 'PT'}</span>
+          <span className="text-xs font-bold text-slate-600 uppercase">{isCurrentPt ? 'EN' : 'PT'}</span>
         </button>
         <Link
           to="/"
@@ -112,10 +114,10 @@ const AdminLayout: React.FC = () => {
           <button
             onClick={toggleLanguage}
             className="p-2 hover:bg-slate-800 rounded-lg transition-colors flex items-center gap-1.5"
-            title={i18n.language === 'pt' ? "Mudar para Inglês" : "Mudar para Português"}
+            title={isCurrentPt ? "Mudar para Inglês" : "Mudar para Português"}
           >
             <Globe className="h-5 w-5 text-slate-400" />
-            <span className="text-[10px] font-black text-slate-400 uppercase">{i18n.language === 'pt' ? 'EN' : 'PT'}</span>
+            <span className="text-[10px] font-black text-slate-400 uppercase">{isCurrentPt ? 'EN' : 'PT'}</span>
           </button>
           <button
             onClick={() => setIsSidebarOpen(true)}

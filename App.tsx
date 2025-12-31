@@ -54,6 +54,10 @@ const StyleInjector: React.FC = () => {
     }
 
     styleTag.innerHTML = `
+      :root, body {
+        overflow-x: hidden;
+        width: 100%;
+      }
       :root {
         font-family: var(--brand-font), 'Inter', sans-serif !important;
       }

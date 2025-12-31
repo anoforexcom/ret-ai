@@ -14,9 +14,11 @@ const Header: React.FC = () => {
 
   // Toggle Language
   const toggleLanguage = () => {
-    const newLang = i18n.language === 'pt' ? 'en' : 'pt';
-    i18n.changeLanguage(newLang);
+    const isPt = i18n.language.startsWith('pt');
+    i18n.changeLanguage(isPt ? 'en' : 'pt');
   };
+
+  const isCurrentPt = i18n.language.startsWith('pt');
 
   // Mapa para traduzir os itens do menu configurável (fallback)
   const getTranslatedLabel = (label: string) => {
@@ -65,9 +67,9 @@ const Header: React.FC = () => {
             <button
               onClick={toggleLanguage}
               className="p-1 rounded-lg hover:bg-slate-100 transition-all active:scale-95"
-              title={i18n.language === 'pt' ? "Switch to English" : "Mudar para Português"}
+              title={isCurrentPt ? "Switch to English" : "Mudar para Português"}
             >
-              {i18n.language === 'pt' ? (
+              {isCurrentPt ? (
                 <div className="flex items-center gap-2">
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" className="h-5 w-7 rounded-sm shadow-sm border border-slate-100">
                     <rect width="600" height="400" fill="#000080" />
@@ -130,9 +132,9 @@ const Header: React.FC = () => {
             <button
               onClick={toggleLanguage}
               className="p-2 rounded-lg hover:bg-slate-100 transition-all active:scale-95"
-              title={i18n.language === 'pt' ? "Switch to English" : "Mudar para Português"}
+              title={isCurrentPt ? "Switch to English" : "Mudar para Português"}
             >
-              {i18n.language === 'pt' ? (
+              {isCurrentPt ? (
                 <div className="flex items-center gap-1.5">
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" className="h-4 w-6 rounded-sm shadow-sm border border-slate-100">
                     <rect width="600" height="400" fill="#000080" />
@@ -186,10 +188,10 @@ const Header: React.FC = () => {
             <div className="pt-4 pb-2 border-t border-gray-100 mt-2 space-y-1">
               <button
                 onClick={toggleLanguage}
-                className="w-full flex items-center gap-2 pl-3 pr-4 py-2 text-base font-medium text-gray-600 hover:bg-gray-50"
+                className="w-full flex items-center gap-3 pl-3 pr-4 py-3 text-base font-bold text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 rounded-xl transition-all"
               >
-                <Globe className="h-4 w-4" />
-                {i18n.language === 'pt' ? "Switch to English" : "Mudar para Português"}
+                <Globe className="h-5 w-5" />
+                {isCurrentPt ? "Switch to English" : "Mudar para Português"}
               </button>
               <Link to="/customer" onClick={() => setIsOpen(false)} className="flex items-center gap-2 pl-3 pr-4 py-2 text-base font-medium text-gray-600 hover:bg-gray-50">
                 <User className="h-4 w-4" /> {t('menu.account')}

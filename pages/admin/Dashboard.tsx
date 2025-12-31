@@ -1,12 +1,13 @@
 
 import React from 'react';
+import { Outlet, NavLink, Link } from 'react-router-dom';
 import { useConfig } from '../../contexts/ConfigContext';
 import { useTranslation } from 'react-i18next';
 import { DollarSign, ShoppingBag, Users, TrendingUp, TrendingDown, ArrowUpRight, Activity, Wallet, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const Dashboard: React.FC = () => {
   const { orders, config } = useConfig();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const scrollRef = React.useRef<HTMLDivElement>(null);
 
   const scroll = (direction: 'left' | 'right') => {
@@ -28,14 +29,26 @@ const Dashboard: React.FC = () => {
     return { start: fmt(start), end: fmt(end) };
   });
 
+  // Efeito para encostar o gráfico à direita no início
+  React.useLayoutEffect(() => {
+    if (scrollRef.current) {
+      // Usar requestAnimationFrame para garantir que o DOM renderizou o conteúdo novo do scroll
+      requestAnimationFrame(() => {
+        if (scrollRef.current) {
+          scrollRef.current.scrollLeft = scrollRef.current.scrollWidth;
+        }
+      });
+    }
+  }, [orders, dateRange]);
+
   const exportToCSV = () => {
     // Cabeçalhos do CSV
-    const headers = ["ID Encomenda", "Data", "Cliente", "Email", "Itens", "Método", "Montante", "Estado"];
+    const headers = t('admin.dashboard_v.csv_headers', { returnObjects: true }) as string[];
 
     // Dados filtrados e formatados
     const rows = filteredOrders.map(o => [
       o.id,
-      new Date(o.date).toLocaleDateString('pt-PT'),
+      new Date(o.date).toLocaleDateString(i18n.language === 'pt' ? 'pt-PT' : 'en-US'),
       o.customerName,
       o.customerEmail || 'N/A',
       o.items,
@@ -55,7 +68,7 @@ const Dashboard: React.FC = () => {
     const link = document.createElement("a");
     const url = URL.createObjectURL(blob);
     link.setAttribute("href", url);
-    link.setAttribute("download", `relatorio_financeiro_${dateRange.start}_a_${dateRange.end}.csv`);
+    link.setAttribute("download", `financial_report_${dateRange.start}_to_${dateRange.end}.csv`);
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();
@@ -230,7 +243,7 @@ const Dashboard: React.FC = () => {
           </div>
           <div className="flex flex-col sm:flex-row items-center gap-3 bg-white p-2 rounded-2xl border border-slate-200 shadow-sm">
             <div className="flex items-center gap-2 px-3 border-r border-slate-100 last:border-0">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">De</span>
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t('admin.dashboard_v.from')}</span>
               <input
                 type="date"
                 value={dateRange.start}
@@ -239,7 +252,7 @@ const Dashboard: React.FC = () => {
               />
             </div>
             <div className="flex items-center gap-2 px-3">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Até</span>
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t('admin.dashboard_v.to')}</span>
               <input
                 type="date"
                 value={dateRange.end}
@@ -290,9 +303,9 @@ const Dashboard: React.FC = () => {
           trend="up"
         />
         <StatCard
-          title="Saldo em Custódia"
+          title={t('admin.dashboard_v.escrow_balance')}
           value={`${escrowBalance.toFixed(2)}€`}
-          subtext="Pré-pagos"
+          subtext={t('admin.dashboard_v.prepaid')}
           trendValue="Ativo"
           icon={Activity}
           color="bg-amber-500"
@@ -307,21 +320,21 @@ const Dashboard: React.FC = () => {
             <Activity className="h-5 w-5 text-indigo-400" />
           </div>
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-indigo-400">Atividade de Hoje ({todayStr})</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-indigo-400">{t('admin.dashboard_v.today_activity')} ({todayStr})</p>
             <p className="text-sm font-medium">
-              Vendas Pagas: <span className="font-bold text-lg text-emerald-400">{todayRevenueValue.toFixed(2)}€</span>
+              {t('admin.dashboard_v.paid_sales')} <span className="font-bold text-lg text-emerald-400">{todayRevenueValue.toFixed(2)}€</span>
               <span className="mx-2 text-indigo-700">|</span>
-              Nº Encomendas: <span className="font-bold text-lg">{todayPaidCount}</span>
+              {t('admin.dashboard_v.orders_count')} <span className="font-bold text-lg">{todayPaidCount}</span>
               {todayTotalCount > todayPaidCount && (
                 <span className="ml-3 text-[10px] bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded border border-yellow-500/30">
-                  + {todayTotalCount - todayPaidCount} pendente(s) detetada(s)
+                  + {todayTotalCount - todayPaidCount} {t('admin.dashboard_v.pending_detected')}
                 </span>
               )}
             </p>
           </div>
         </div>
         <div className="hidden sm:block text-[9px] bg-indigo-500/10 px-3 py-1 rounded-full font-bold uppercase tracking-widest text-indigo-400 border border-indigo-400/10">
-          Sync Real-time Ativo
+          {t('admin.dashboard_v.realtime_sync_active')}
         </div>
       </div>
 
@@ -397,7 +410,7 @@ const Dashboard: React.FC = () => {
 
         {/* Histórico Recente (Mostra todas para confirmar chegada) */}
         <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 flex flex-col">
-          <h2 className="text-lg font-bold text-slate-900 mb-6 font-display">Últimas Atividades</h2>
+          <h2 className="text-lg font-bold text-slate-900 mb-6 font-display">{t('admin.dashboard_v.recent_activities')}</h2>
           <div className="space-y-4 flex-grow">
             {orders.slice(0, 10).map(order => (
               <div key={order.id} className="flex items-center justify-between p-3 hover:bg-slate-50 rounded-xl transition-all border border-transparent hover:border-slate-100 group">
@@ -417,7 +430,7 @@ const Dashboard: React.FC = () => {
                 </div>
                 <div className="text-right">
                   <p className="text-sm font-black text-slate-900">{order.amount.toFixed(2)}€</p>
-                  <span className="text-[9px] text-slate-400 font-bold uppercase">{new Date(order.date).toLocaleDateString('pt-PT')}</span>
+                  <span className="text-[9px] text-slate-400 font-bold uppercase">{new Date(order.date).toLocaleDateString(i18n.language === 'pt' ? 'pt-PT' : 'en-US')}</span>
                 </div>
               </div>
             ))}
@@ -428,9 +441,9 @@ const Dashboard: React.FC = () => {
               </div>
             )}
           </div>
-          <a href="/#/admin/orders" className="w-full mt-6 py-3 text-center text-sm font-bold text-indigo-600 bg-indigo-50 rounded-xl hover:bg-indigo-100 transition-colors">
+          <Link to="/admin/orders" className="w-full mt-6 py-3 text-center text-sm font-bold text-indigo-600 bg-indigo-50 rounded-xl hover:bg-indigo-100 transition-colors">
             {t('admin.view_all_history')}
-          </a>
+          </Link>
         </div>
       </div>
     </div>

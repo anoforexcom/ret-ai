@@ -16,9 +16,11 @@ import {
     Target
 } from 'lucide-react';
 import { Expense } from '../../types';
+import { useTranslation } from 'react-i18next';
 
 const Financials: React.FC = () => {
     const { orders, config, updateConfig, addAuditLog } = useConfig();
+    const { t, i18n } = useTranslation();
     const [showAddExpense, setShowAddExpense] = useState(false);
     const [newExpense, setNewExpense] = useState<Omit<Expense, 'id'>>({
         date: new Date().toISOString().split('T')[0],
@@ -89,12 +91,11 @@ const Financials: React.FC = () => {
     };
 
     const removeExpense = (id: string) => {
-        if (window.confirm('Tem a certeza que deseja remover esta despesa permanentemente do histórico?')) {
-            updateConfig({
-                expenses: currentExpenses.filter(e => e.id !== id)
-            });
-            addAuditLog('Remover Despesa', `ID: ${id}`);
-        }
+        if (!confirm(t('admin.financials_v.confirm_delete'))) return;
+        updateConfig({
+            expenses: currentExpenses.filter(e => e.id !== id)
+        });
+        addAuditLog('Remover Despesa', `ID: ${id}`);
     };
 
     // KPI Extras
@@ -102,52 +103,52 @@ const Financials: React.FC = () => {
     const roas = categories.marketing > 0 ? totalRevenue / categories.marketing : 0;
 
     return (
-        <div className="space-y-8 animate-fadeIn">
-            <div className="flex justify-between items-center">
+        <div className="animate-fadeIn">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-8">
                 <div>
-                    <h1 className="text-2xl font-bold text-slate-900">Gestão Financeira</h1>
-                    <p className="text-slate-500 text-sm mt-1">Monitorização de lucros, fluxos e despesas manuais.</p>
+                    <h1 className="text-2xl font-bold text-slate-900">{t('admin.financials_v.title')}</h1>
+                    <p className="text-slate-500 text-sm mt-1">{t('admin.financials_v.desc')}</p>
                 </div>
                 <button
                     onClick={() => setShowAddExpense(true)}
-                    className="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-indigo-700 shadow-lg shadow-indigo-500/20 flex items-center gap-2 transition-all"
+                    className="flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white font-bold rounded-2xl hover:bg-indigo-700 shadow-lg shadow-indigo-500/20 transition-all active:scale-95"
                 >
-                    <Plus className="h-4 w-4" /> Registar Despesa
+                    <Plus className="h-5 w-5" /> {t('admin.financials_v.register_expense')}
                 </button>
             </div>
 
             {/* Top KPI Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden">
                     <div className="flex justify-between items-start mb-4">
-                        <div className="p-2 bg-green-50 text-green-600 rounded-lg">
-                            <ArrowUpCircle className="h-6 w-6" />
+                        <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
+                            <DollarSign className="h-6 w-6" />
                         </div>
-                        <span className="text-xs font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded-full">Bruto</span>
+                        <span className="text-xs font-bold text-slate-400 bg-slate-50 px-2 py-0.5 rounded-full">{t('admin.financials_v.kpi.gross')}</span>
                     </div>
-                    <p className="text-sm font-medium text-slate-500 uppercase tracking-wider">Receita Total</p>
+                    <p className="text-sm font-medium text-slate-500 uppercase tracking-wider">{t('admin.financials_v.kpi.total_revenue')}</p>
                     <h3 className="text-2xl font-bold text-slate-900 mt-1">{totalRevenue.toFixed(2)}€</h3>
                 </div>
 
                 <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
                     <div className="flex justify-between items-start mb-4">
-                        <div className="p-2 bg-red-50 text-red-600 rounded-lg">
+                        <div className="p-2 bg-rose-50 text-rose-600 rounded-lg">
                             <ArrowDownCircle className="h-6 w-6" />
                         </div>
-                        <span className="text-xs font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded-full">Gastos</span>
+                        <span className="text-xs font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-full">{t('admin.financials_v.kpi.spent')}</span>
                     </div>
-                    <p className="text-sm font-medium text-slate-500 uppercase tracking-wider">Despesas</p>
+                    <p className="text-sm font-medium text-slate-500 uppercase tracking-wider">{t('admin.financials_v.kpi.expenses')}</p>
                     <h3 className="text-2xl font-bold text-slate-900 mt-1">{totalExpenses.toFixed(2)}€</h3>
                 </div>
 
                 <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
                     <div className="flex justify-between items-start mb-4">
-                        <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
-                            <DollarSign className="h-6 w-6" />
+                        <div className="p-2 bg-emerald-50 text-emerald-600 rounded-lg">
+                            <ArrowUpCircle className="h-6 w-6" />
                         </div>
-                        <span className="text-xs font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">Líquido</span>
+                        <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">{t('admin.financials_v.kpi.net')}</span>
                     </div>
-                    <p className="text-sm font-medium text-slate-500 uppercase tracking-wider">Lucro Real</p>
+                    <p className="text-sm font-medium text-slate-500 uppercase tracking-wider">{t('admin.financials_v.kpi.real_profit')}</p>
                     <h3 className={`text-2xl font-bold mt-1 ${netProfit >= 0 ? 'text-indigo-600' : 'text-red-600'}`}>
                         {netProfit.toFixed(2)}€
                     </h3>
@@ -158,9 +159,9 @@ const Financials: React.FC = () => {
                         <div className="p-2 bg-amber-50 text-amber-600 rounded-lg">
                             <PieChart className="h-6 w-6" />
                         </div>
-                        <span className="text-xs font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">Eficiência</span>
+                        <span className="text-xs font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">{t('admin.financials_v.kpi.efficiency')}</span>
                     </div>
-                    <p className="text-sm font-medium text-slate-500 uppercase tracking-wider">Margem</p>
+                    <p className="text-sm font-medium text-slate-500 uppercase tracking-wider">{t('admin.financials_v.kpi.margin')}</p>
                     <h3 className="text-2xl font-bold text-slate-900 mt-1">{profitMargin.toFixed(1)}%</h3>
                 </div>
             </div>
@@ -170,12 +171,12 @@ const Financials: React.FC = () => {
                 {/* Category Breakdown */}
                 <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
                     <h3 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
-                        <Target className="h-5 w-5 text-indigo-500" /> Distribuição de Custos
+                        <Target className="h-5 w-5 text-indigo-500" /> {t('admin.financials_v.analytics.cost_distribution')}
                     </h3>
                     <div className="space-y-6">
                         <div>
                             <div className="flex justify-between items-center text-sm mb-2">
-                                <span className="text-slate-600 flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-blue-500"></div> APIs IA</span>
+                                <span className="text-slate-600 flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-blue-500"></div> {t('admin.financials_v.analytics.api_ai')}</span>
                                 <span className="font-bold text-slate-900">{categories.api.toFixed(2)}€</span>
                             </div>
                             <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
@@ -184,7 +185,7 @@ const Financials: React.FC = () => {
                         </div>
                         <div>
                             <div className="flex justify-between items-center text-sm mb-2">
-                                <span className="text-slate-600 flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-pink-500"></div> Marketing</span>
+                                <span className="text-slate-600 flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-pink-500"></div> {t('admin.financials_v.analytics.marketing')}</span>
                                 <span className="font-bold text-slate-900">{categories.marketing.toFixed(2)}€</span>
                             </div>
                             <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
@@ -193,7 +194,7 @@ const Financials: React.FC = () => {
                         </div>
                         <div>
                             <div className="flex justify-between items-center text-sm mb-2">
-                                <span className="text-slate-600 flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-indigo-500"></div> Infra</span>
+                                <span className="text-slate-600 flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-indigo-500"></div> {t('admin.financials_v.analytics.infra')}</span>
                                 <span className="font-bold text-slate-900">{categories.infra.toFixed(2)}€</span>
                             </div>
                             <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
@@ -202,7 +203,7 @@ const Financials: React.FC = () => {
                         </div>
                         <div>
                             <div className="flex justify-between items-center text-sm mb-2">
-                                <span className="text-slate-600 flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-slate-400"></div> Outros</span>
+                                <span className="text-slate-600 flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-slate-400"></div> {t('admin.financials_v.analytics.others')}</span>
                                 <span className="font-bold text-slate-900">{categories.outro.toFixed(2)}€</span>
                             </div>
                             <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
@@ -213,15 +214,15 @@ const Financials: React.FC = () => {
 
                     <div className="mt-8 pt-6 border-t border-slate-100 space-y-4">
                         <div className="flex justify-between items-center p-3 bg-slate-50 rounded-xl">
-                            <span className="text-sm text-slate-500">Ticket Médio (AOV)</span>
+                            <span className="text-sm text-slate-500">{t('admin.financials_v.analytics.aov')}</span>
                             <span className="font-bold text-slate-900">{aov.toFixed(2)}€</span>
                         </div>
                         <div className="flex justify-between items-center p-3 bg-slate-50 rounded-xl">
-                            <span className="text-sm text-slate-500">CAC Estimado</span>
+                            <span className="text-sm text-slate-500">{t('admin.financials_v.analytics.cac')}</span>
                             <span className="font-bold text-slate-900">{cac.toFixed(2)}€</span>
                         </div>
                         <div className="flex justify-between items-center p-3 bg-indigo-50 rounded-xl">
-                            <span className="text-sm text-indigo-700">ROAS Publicitário</span>
+                            <span className="text-sm text-indigo-700">{t('admin.financials_v.analytics.roas')}</span>
                             <span className="font-bold text-indigo-900">{roas.toFixed(2)}x</span>
                         </div>
                     </div>
@@ -230,16 +231,16 @@ const Financials: React.FC = () => {
                 {/* Expenses List */}
                 <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
                     <div className="p-6 border-b border-slate-100">
-                        <h3 className="text-lg font-bold text-slate-900">Histórico de Despesas</h3>
+                        <h3 className="text-lg font-bold text-slate-900">{t('admin.financials_v.history.title')}</h3>
                     </div>
                     <div className="flex-grow overflow-auto max-h-[500px]">
                         <table className="min-w-full divide-y divide-slate-200">
                             <thead className="bg-slate-50 sticky top-0 z-10">
                                 <tr>
-                                    <th className="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Data</th>
-                                    <th className="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Categoria</th>
-                                    <th className="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Descrição</th>
-                                    <th className="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Valor</th>
+                                    <th className="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">{t('admin.financials_v.history.table.date')}</th>
+                                    <th className="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">{t('admin.financials_v.history.table.category')}</th>
+                                    <th className="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">{t('admin.financials_v.history.table.description')}</th>
+                                    <th className="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">{t('admin.financials_v.history.table.amount')}</th>
                                     <th className="px-6 py-3 text-right text-xs font-bold text-slate-500 uppercase tracking-wider"></th>
                                 </tr>
                             </thead>
@@ -247,7 +248,7 @@ const Financials: React.FC = () => {
                                 {currentExpenses.map((exp) => (
                                     <tr key={exp.id} className="hover:bg-slate-50 transition-colors animate-fadeIn">
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
-                                            {new Date(exp.date).toLocaleDateString('pt-PT')}
+                                            {new Date(exp.date).toLocaleDateString(i18n.language === 'pt' ? 'pt-PT' : 'en-US')}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${exp.category === 'api' ? 'bg-blue-100 text-blue-700' :
@@ -259,7 +260,7 @@ const Financials: React.FC = () => {
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 text-sm text-slate-600 max-w-[200px] truncate">
-                                            {exp.description || 'Sem descrição'}
+                                            {exp.description || t('admin.financials_v.history.no_description')}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-slate-900">
                                             {exp.amount.toFixed(2)}€
@@ -268,7 +269,7 @@ const Financials: React.FC = () => {
                                             <button
                                                 onClick={() => removeExpense(exp.id)}
                                                 className="text-slate-300 hover:text-red-500 p-2 hover:bg-red-50 rounded-full transition-all"
-                                                title="Eliminar Despesa"
+                                                title={t('admin.financials_v.history.delete_tooltip')}
                                             >
                                                 <Trash2 className="h-4 w-4" />
                                             </button>
@@ -278,7 +279,7 @@ const Financials: React.FC = () => {
                                 {currentExpenses.length === 0 && (
                                     <tr>
                                         <td colSpan={5} className="px-6 py-12 text-center text-slate-400 italic font-medium">
-                                            Nenhuma despesa registada ainda.
+                                            {t('admin.financials_v.history.no_expenses')}
                                         </td>
                                     </tr>
                                 )}
@@ -295,15 +296,15 @@ const Financials: React.FC = () => {
                     <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden animate-scaleIn">
                         <div className="bg-indigo-600 p-6 text-white">
                             <h3 className="text-xl font-bold flex items-center gap-2">
-                                <Plus className="h-6 w-6" /> Registar Nova Despesa
+                                <Plus className="h-6 w-6" /> {t('admin.financials_v.modal.title')}
                             </h3>
-                            <p className="text-indigo-100 text-sm mt-1">Insira os detalhes para atualizar o seu balanço.</p>
+                            <p className="text-indigo-100 text-sm mt-1">{t('admin.financials_v.modal.desc')}</p>
                         </div>
 
                         <form onSubmit={handleAddExpense} className="p-6 space-y-4">
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Data</label>
+                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">{t('admin.financials_v.history.table.date')}</label>
                                     <div className="relative">
                                         <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                                         <input
@@ -316,7 +317,7 @@ const Financials: React.FC = () => {
                                     </div>
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Valor (€)</label>
+                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">{t('admin.financials_v.history.table.amount')} (€)</label>
                                     <div className="relative">
                                         <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                                         <input
@@ -333,7 +334,7 @@ const Financials: React.FC = () => {
                             </div>
 
                             <div>
-                                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Categoria</label>
+                                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">{t('admin.financials_v.history.table.category')}</label>
                                 <div className="relative">
                                     <Tag className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                                     <select
@@ -341,19 +342,19 @@ const Financials: React.FC = () => {
                                         onChange={e => setNewExpense({ ...newExpense, category: e.target.value as any })}
                                         className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-sm appearance-none"
                                     >
-                                        <option value="api">Serviços / APIs IA</option>
-                                        <option value="marketing">Marketing / Ads</option>
-                                        <option value="infra">Hosting / Infraestrutura</option>
-                                        <option value="outro">Outras Despesas</option>
+                                        <option value="api">{t('admin.financials_v.modal.categories.api')}</option>
+                                        <option value="marketing">{t('admin.financials_v.modal.categories.marketing')}</option>
+                                        <option value="infra">{t('admin.financials_v.modal.categories.infra')}</option>
+                                        <option value="outro">{t('admin.financials_v.modal.categories.outro')}</option>
                                     </select>
                                 </div>
                             </div>
 
                             <div>
-                                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Descrição</label>
+                                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">{t('admin.financials_v.history.table.description')}</label>
                                 <textarea
                                     rows={2}
-                                    placeholder="Para que serve esta despesa?"
+                                    placeholder={t('admin.financials_v.modal.placeholder_desc')}
                                     value={newExpense.description}
                                     onChange={e => setNewExpense({ ...newExpense, description: e.target.value })}
                                     className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-sm"
@@ -366,13 +367,13 @@ const Financials: React.FC = () => {
                                     onClick={() => setShowAddExpense(false)}
                                     className="flex-1 px-4 py-3 bg-slate-100 text-slate-600 font-bold rounded-xl hover:bg-slate-200 transition-colors"
                                 >
-                                    Cancelar
+                                    {t('admin.financials_v.modal.cancel')}
                                 </button>
                                 <button
                                     type="submit"
                                     className="flex-2 px-8 py-3 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 shadow-lg shadow-indigo-500/30 transition-all"
                                 >
-                                    Confirmar Registo
+                                    {t('admin.financials_v.modal.confirm')}
                                 </button>
                             </div>
                         </form>

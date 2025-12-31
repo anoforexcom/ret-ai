@@ -2,10 +2,12 @@
 import React, { useState, useRef } from 'react';
 import { useConfig } from '../../contexts/ConfigContext';
 import { Save, Plus, Trash2, CreditCard, Layout, Smartphone, Wallet, Palette, Type, Box, Settings2, Globe, ShieldCheck, Image as ImageIcon, Upload, AlertCircle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { PaymentMethod } from '../../types';
 
 const StoreSettings: React.FC = () => {
   const { config, updateConfig, addAuditLog, syncStatus } = useConfig();
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<'general' | 'payments' | 'menus' | 'design'>('general');
   const [saved, setSaved] = useState(false);
   const [editingPaymentId, setEditingPaymentId] = useState<string | null>(null);
@@ -17,7 +19,7 @@ const StoreSettings: React.FC = () => {
 
   const handleSave = () => {
     setSaved(true);
-    addAuditLog('Configurações Atualizadas', `Separador: ${activeTab}`);
+    addAuditLog(t('admin.settings_v.audit.updated'), `${t('admin.settings_v.audit.tab')}: ${activeTab}`);
     setTimeout(() => setSaved(false), 2000);
   };
 
@@ -54,7 +56,7 @@ const StoreSettings: React.FC = () => {
     const file = e.target.files?.[0];
     if (file) {
       if (file.size > 2 * 1024 * 1024) {
-        alert("O ficheiro é demasiado grande. Máximo 2MB para otimização do site.");
+        alert(t('admin.settings_v.file_too_large'));
         return;
       }
       const reader = new FileReader();
@@ -89,7 +91,7 @@ const StoreSettings: React.FC = () => {
 
   const addMenuItem = (menuType: 'mainMenu' | 'footerMenu') => {
     const currentMenu = config[menuType] || [];
-    const newMenu = [...currentMenu, { id: Date.now().toString(), label: 'Novo Link', path: '/' }];
+    const newMenu = [...currentMenu, { id: Date.now().toString(), label: t('admin.settings_v.new_link_label'), path: '/' }];
     updateConfig({ [menuType]: newMenu });
   };
 
@@ -112,7 +114,7 @@ const StoreSettings: React.FC = () => {
     const currentPayments = config.paymentMethods || [];
     const newMethod: PaymentMethod = {
       id: `pm_${Date.now()}`,
-      name: 'Novo Método',
+      name: t('admin.settings_v.payments.new_method'),
       enabled: false,
       type: 'card',
       provider: 'manual',
@@ -129,7 +131,7 @@ const StoreSettings: React.FC = () => {
   };
 
   const removePaymentMethod = (id: string) => {
-    if (window.confirm('Eliminar este método de pagamento permanentemente?')) {
+    if (window.confirm(t('admin.settings_v.confirm_delete_payment'))) {
       const currentPayments = config.paymentMethods || [];
       const newPayments = currentPayments.filter(p => p.id !== id);
       updateConfig({ paymentMethods: newPayments });
@@ -153,20 +155,20 @@ const StoreSettings: React.FC = () => {
     <div>
       <div className="flex justify-between items-center mb-8">
         <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-bold text-slate-900">Configurações da Loja</h1>
+          <h1 className="text-2xl font-bold text-slate-900">{t('admin.settings_v.title')}</h1>
           {syncStatus === 'connected' ? (
             <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-green-50 border border-green-100 text-green-600 text-[10px] font-black uppercase tracking-wider">
-              <ShieldCheck className="h-3.5 w-3.5" /> Cloud Sync Ativo
+              <ShieldCheck className="h-3.5 w-3.5" /> {t('admin.settings_v.sync_active')}
             </div>
           ) : (
             <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-red-50 border border-red-100 text-red-500 text-[10px] font-black uppercase tracking-wider">
-              <AlertCircle className="h-3.5 w-3.5" /> Cloud Sync Off (Local)
+              <AlertCircle className="h-3.5 w-3.5" /> {t('admin.settings_v.sync_local')}
             </div>
           )}
         </div>
         {saved && (
           <span className="text-green-600 bg-green-50 px-3 py-1 rounded-full text-sm font-medium animate-pulse">
-            Alterações guardadas!
+            {t('admin.settings_v.saved')}
           </span>
         )}
       </div>
@@ -178,25 +180,25 @@ const StoreSettings: React.FC = () => {
             onClick={() => setActiveTab('general')}
             className={`flex-1 min-w-[120px] py-4 text-sm font-medium text-center ${activeTab === 'general' ? 'bg-indigo-50 text-indigo-600 border-b-2 border-indigo-600' : 'text-slate-500 hover:text-slate-700'}`}
           >
-            Geral & Conteúdo
+            {t('admin.settings_v.tabs.general')}
           </button>
           <button
             onClick={() => setActiveTab('design')}
             className={`flex-1 min-w-[120px] py-4 text-sm font-medium text-center ${activeTab === 'design' ? 'bg-indigo-50 text-indigo-600 border-b-2 border-indigo-600' : 'text-slate-500 hover:text-slate-700'}`}
           >
-            Design & Grafismo
+            {t('admin.settings_v.tabs.design')}
           </button>
           <button
             onClick={() => setActiveTab('payments')}
             className={`flex-1 min-w-[120px] py-4 text-sm font-medium text-center ${activeTab === 'payments' ? 'bg-indigo-50 text-indigo-600 border-b-2 border-indigo-600' : 'text-slate-500 hover:text-slate-700'}`}
           >
-            Pagamentos & API
+            {t('admin.settings_v.tabs.payments')}
           </button>
           <button
             onClick={() => setActiveTab('menus')}
             className={`flex-1 min-w-[120px] py-4 text-sm font-medium text-center ${activeTab === 'menus' ? 'bg-indigo-50 text-indigo-600 border-b-2 border-indigo-600' : 'text-slate-500 hover:text-slate-700'}`}
           >
-            Menus de Navegação
+            {t('admin.settings_v.tabs.menus')}
           </button>
         </div>
 
@@ -204,10 +206,10 @@ const StoreSettings: React.FC = () => {
           {activeTab === 'general' && (
             <div className="space-y-6 max-w-2xl">
               <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
-                <Settings2 className="h-5 w-5 text-indigo-600" /> Informações Básicas
+                <Settings2 className="h-5 w-5 text-indigo-600" /> {t('admin.settings_v.general.basic_info')}
               </h3>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Nome da Loja</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1">{t('admin.settings_v.general.store_name')}</label>
                 <input
                   type="text"
                   value={config.storeName}
@@ -216,7 +218,7 @@ const StoreSettings: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Título Hero (Página Inicial)</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1">{t('admin.settings_v.general.hero_title')}</label>
                 <input
                   type="text"
                   value={config.heroTitle}
@@ -227,11 +229,11 @@ const StoreSettings: React.FC = () => {
 
               <div className="pt-6 border-t border-slate-100">
                 <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
-                  <ImageIcon className="h-5 w-5 text-indigo-600" /> Imagens do Hero (Comparação 1)
+                  <ImageIcon className="h-5 w-5 text-indigo-600" /> {t('admin.settings_v.general.hero_images')}
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Imagem "Antes"</label>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">{t('admin.settings_v.general.image_before')}</label>
                     <div
                       onClick={() => beforeInputRef.current?.click()}
                       className="mt-2 h-40 w-full rounded-xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center cursor-pointer hover:border-indigo-400 hover:bg-indigo-50/30 transition-all group overflow-hidden"
@@ -241,7 +243,7 @@ const StoreSettings: React.FC = () => {
                       ) : (
                         <>
                           <Upload className="h-8 w-8 text-slate-300 group-hover:text-indigo-400 mb-2" />
-                          <span className="text-xs text-slate-400 font-bold group-hover:text-indigo-600">CARREGAR ANTES</span>
+                          <span className="text-xs text-slate-400 font-bold group-hover:text-indigo-600">{t('admin.settings_v.general.upload_before')}</span>
                         </>
                       )}
                     </div>
@@ -264,7 +266,7 @@ const StoreSettings: React.FC = () => {
                       ) : (
                         <>
                           <Upload className="h-8 w-8 text-slate-300 group-hover:text-indigo-400 mb-2" />
-                          <span className="text-xs text-slate-400 font-bold group-hover:text-indigo-600">CARREGAR DEPOIS</span>
+                          <span className="text-xs text-slate-400 font-bold group-hover:text-indigo-600">{t('admin.settings_v.general.upload_after')}</span>
                         </>
                       )}
                     </div>
@@ -281,11 +283,11 @@ const StoreSettings: React.FC = () => {
 
               <div className="pt-6 border-t border-slate-100">
                 <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
-                  <ImageIcon className="h-5 w-5 text-indigo-600" /> Segunda Comparação (Meio da Página)
+                  <ImageIcon className="h-5 w-5 text-indigo-600" /> {t('admin.settings_v.general.second_comparison')}
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Imagem "Antes"</label>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">{t('admin.settings_v.general.image_before')}</label>
                     <div
                       onClick={() => compBeforeInputRef.current?.click()}
                       className="mt-2 h-40 w-full rounded-xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center cursor-pointer hover:border-indigo-400 hover:bg-indigo-50/30 transition-all group overflow-hidden"
@@ -295,7 +297,7 @@ const StoreSettings: React.FC = () => {
                       ) : (
                         <>
                           <Upload className="h-8 w-8 text-slate-300 group-hover:text-indigo-400 mb-2" />
-                          <span className="text-xs text-slate-400 font-bold group-hover:text-indigo-600">CARREGAR ANTES</span>
+                          <span className="text-xs text-slate-400 font-bold group-hover:text-indigo-600">{t('admin.settings_v.general.upload_before')}</span>
                         </>
                       )}
                     </div>
@@ -318,7 +320,7 @@ const StoreSettings: React.FC = () => {
                       ) : (
                         <>
                           <Upload className="h-8 w-8 text-slate-300 group-hover:text-indigo-400 mb-2" />
-                          <span className="text-xs text-slate-400 font-bold group-hover:text-indigo-600">CARREGAR DEPOIS</span>
+                          <span className="text-xs text-slate-400 font-bold group-hover:text-indigo-600">{t('admin.settings_v.general.upload_after')}</span>
                         </>
                       )}
                     </div>
@@ -334,7 +336,7 @@ const StoreSettings: React.FC = () => {
               </div>
 
               <div className="pt-6 border-t border-slate-100">
-                <label className="block text-sm font-medium text-slate-700 mb-1">Texto do Rodapé</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1">{t('admin.settings_v.general.footer_text')}</label>
                 <textarea
                   value={config.footerText}
                   onChange={(e) => updateConfig({ footerText: e.target.value })}
@@ -345,7 +347,7 @@ const StoreSettings: React.FC = () => {
 
               <div className="pt-6 border-t border-slate-100">
                 <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
-                  <Settings2 className="h-5 w-5 text-indigo-600" /> Redes Sociais
+                  <Settings2 className="h-5 w-5 text-indigo-600" /> {t('admin.settings_v.general.social_networks')}
                 </h3>
                 <div className="space-y-4">
                   <div>
@@ -382,7 +384,7 @@ const StoreSettings: React.FC = () => {
               </div>
               <div className="pt-4">
                 <button onClick={handleSave} className="flex items-center gap-2 bg-indigo-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-500/20">
-                  <Save className="h-4 w-4" /> Guardar Configurações
+                  <Save className="h-4 w-4" /> {t('admin.settings_v.general.save_btn')}
                 </button>
               </div>
             </div>
@@ -392,11 +394,11 @@ const StoreSettings: React.FC = () => {
             <div className="space-y-10 max-w-2xl">
               <div>
                 <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
-                  <Palette className="h-5 w-5 text-indigo-600" /> Identidade Visual
+                  <Palette className="h-5 w-5 text-indigo-600" /> {t('admin.settings_v.design.visual_identity')}
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">Cor Primária (Marca)</label>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">{t('admin.settings_v.design.primary_color')}</label>
                     <div className="flex items-center gap-3">
                       <input
                         type="color"
@@ -413,7 +415,7 @@ const StoreSettings: React.FC = () => {
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">Cor Secundária (Gradients)</label>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">{t('admin.settings_v.design.secondary_color')}</label>
                     <div className="flex items-center gap-3">
                       <input
                         type="color"
@@ -434,17 +436,17 @@ const StoreSettings: React.FC = () => {
 
               <div className="pt-6 border-t border-slate-100">
                 <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
-                  <Box className="h-5 w-5 text-indigo-600" /> Estilo dos Elementos
+                  <Box className="h-5 w-5 text-indigo-600" /> {t('admin.settings_v.design.element_style')}
                 </h3>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Arredondamento Global (Radius)</label>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">{t('admin.settings_v.design.radius_global')}</label>
                   <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
                     {[
-                      { label: 'Nenhum', value: '0px' },
-                      { label: 'Suave', value: '4px' },
-                      { label: 'Padrão', value: '8px' },
-                      { label: 'Redondo', value: '16px' },
-                      { label: 'Extra', value: '24px' },
+                      { label: t('admin.settings_v.design.radius_options.none'), value: '0px' },
+                      { label: t('admin.settings_v.design.radius_options.soft'), value: '4px' },
+                      { label: t('admin.settings_v.design.radius_options.default'), value: '8px' },
+                      { label: t('admin.settings_v.design.radius_options.round'), value: '16px' },
+                      { label: t('admin.settings_v.design.radius_options.extra'), value: '24px' },
                     ].map((opt) => (
                       <button
                         key={opt.value}
@@ -463,26 +465,26 @@ const StoreSettings: React.FC = () => {
 
               <div className="pt-6 border-t border-slate-100">
                 <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
-                  <Type className="h-5 w-5 text-indigo-600" /> Tipografia
+                  <Type className="h-5 w-5 text-indigo-600" /> {t('admin.settings_v.design.typography')}
                 </h3>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Família de Fontes</label>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">{t('admin.settings_v.design.font_family')}</label>
                   <select
                     value={config.theme.fontFamily}
                     onChange={(e) => handleThemeChange('fontFamily', e.target.value)}
                     className="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
                   >
-                    <option value="Inter">Inter (Padrão Moderno)</option>
-                    <option value="serif">Serif (Clássico/Elegante)</option>
-                    <option value="mono">Monospaced (Técnico)</option>
-                    <option value="sans-serif">System Sans-Serif</option>
+                    <option value="Inter">{t('admin.settings_v.design.font_options.inter')}</option>
+                    <option value="serif">{t('admin.settings_v.design.font_options.serif')}</option>
+                    <option value="mono">{t('admin.settings_v.design.font_options.mono')}</option>
+                    <option value="sans-serif">{t('admin.settings_v.design.font_options.system')}</option>
                   </select>
                 </div>
               </div>
 
               <div className="pt-8">
                 <button onClick={handleSave} className="w-full md:w-auto flex items-center justify-center gap-2 bg-indigo-600 text-white px-8 py-3 rounded-lg font-bold hover:bg-indigo-700 shadow-xl shadow-indigo-500/20 transition-all">
-                  <Save className="h-5 w-5" /> Aplicar Grafismo
+                  <Save className="h-5 w-5" /> {t('admin.settings_v.design.apply_btn')}
                 </button>
               </div>
             </div>
@@ -492,13 +494,13 @@ const StoreSettings: React.FC = () => {
             <div className="space-y-8">
               <div className="flex justify-between items-center">
                 <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-                  <Settings2 className="h-5 w-5 text-indigo-600" /> Métodos & Provedores
+                  <Settings2 className="h-5 w-5 text-indigo-600" /> {t('admin.settings_v.payments.methods_providers')}
                 </h3>
                 <button
                   onClick={handleAddPaymentMethod}
                   className="text-sm font-bold text-indigo-600 flex items-center gap-1 bg-indigo-50 px-3 py-1.5 rounded-lg hover:bg-indigo-100 transition-all"
                 >
-                  <Plus className="h-4 w-4" /> Novo Método
+                  <Plus className="h-4 w-4" /> {t('admin.settings_v.payments.new_method')}
                 </button>
               </div>
 
@@ -552,7 +554,7 @@ const StoreSettings: React.FC = () => {
                       <div className="pt-6 border-t border-slate-200/50 space-y-6 animate-fadeIn">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                           <div>
-                            <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Provedor / Gateway</label>
+                            <label className="block text-xs font-bold text-slate-500 uppercase mb-2">{t('admin.settings_v.payments.provider_gateway')}</label>
                             <select
                               value={method.provider}
                               onChange={(e) => updatePaymentMethod(method.id, { provider: e.target.value as any })}
@@ -566,28 +568,28 @@ const StoreSettings: React.FC = () => {
                             </select>
                           </div>
                           <div>
-                            <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Ambiente</label>
+                            <label className="block text-xs font-bold text-slate-500 uppercase mb-2">{t('admin.settings_v.payments.environment')}</label>
                             <select
                               value={method.environment}
                               onChange={(e) => updatePaymentMethod(method.id, { environment: e.target.value as any })}
                               className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-sm"
                             >
-                              <option value="sandbox">Sandbox / Testes</option>
-                              <option value="live">Live / Produção</option>
+                              <option value="sandbox">{t('admin.settings_v.payments.env_options.sandbox')}</option>
+                              <option value="live">{t('admin.settings_v.payments.env_options.live')}</option>
                             </select>
                           </div>
                           <div>
-                            <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Tipo de Pagamento</label>
+                            <label className="block text-xs font-bold text-slate-500 uppercase mb-2">{t('admin.settings_v.payments.payment_type')}</label>
                             <select
                               value={method.type}
                               onChange={(e) => updatePaymentMethod(method.id, { type: e.target.value as any })}
                               className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-sm"
                             >
-                              <option value="card">Cartão (Visa/Mastercard)</option>
-                              <option value="paypal">PayPal Wallet</option>
-                              <option value="mbway">MB Way</option>
-                              <option value="multibanco">Multibanco (Referência)</option>
-                              <option value="apple_pay">Apple Pay / Google Pay</option>
+                              <option value="card">{t('admin.settings_v.payments.card')}</option>
+                              <option value="paypal">{t('admin.settings_v.payments.paypal_wallet')}</option>
+                              <option value="mbway">{t('admin.settings_v.payments.mbway')}</option>
+                              <option value="multibanco">{t('admin.settings_v.payments.multibanco')}</option>
+                              <option value="apple_pay">{t('admin.settings_v.payments.apple_google_pay')}</option>
                             </select>
                           </div>
                         </div>
@@ -596,11 +598,11 @@ const StoreSettings: React.FC = () => {
                           {method.provider !== 'manual' && (
                             <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 border-dashed">
                               <h4 className="text-xs font-bold text-slate-700 uppercase mb-4 flex items-center gap-2">
-                                <ShieldCheck className="h-4 w-4 text-green-500" /> Credenciais do Gateway
+                                <ShieldCheck className="h-4 w-4 text-green-500" /> {t('admin.settings_v.payments.gateway_credentials')}
                               </h4>
                               <div className="space-y-4">
                                 <div>
-                                  <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Public Key / Client ID</label>
+                                  <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">{t('admin.settings_v.payments.public_key')} / Client ID</label>
                                   <input
                                     type="text"
                                     value={method.clientId || ''}
@@ -611,7 +613,7 @@ const StoreSettings: React.FC = () => {
                                 </div>
                                 {method.provider !== 'paypal' && (
                                   <div>
-                                    <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Secret Key (Apenas p/ Referência)</label>
+                                    <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">{t('admin.settings_v.payments.secret_key')}</label>
                                     <input
                                       type="password"
                                       value={method.apiKey || ''}
@@ -629,7 +631,7 @@ const StoreSettings: React.FC = () => {
                               onClick={() => setEditingPaymentId(null)}
                               className="text-xs font-bold text-indigo-600 bg-white border border-indigo-100 px-4 py-2 rounded-xl hover:bg-indigo-50"
                             >
-                              Fechar Configuração
+                              {t('admin.settings_v.payments.close_config')}
                             </button>
                           </div>
                         </div>
@@ -641,7 +643,7 @@ const StoreSettings: React.FC = () => {
 
               <div className="pt-6">
                 <button onClick={handleSave} className="w-full md:w-auto flex items-center justify-center gap-2 bg-indigo-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-indigo-700 shadow-xl shadow-indigo-500/20 transition-all">
-                  <Save className="h-5 w-5" /> Guardar Todos os Métodos
+                  <Save className="h-5 w-5" /> {t('admin.settings_v.payments.save_all_btn')}
                 </button>
               </div>
             </div>
@@ -653,10 +655,10 @@ const StoreSettings: React.FC = () => {
               <div>
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="text-lg font-medium text-slate-900 flex items-center gap-2">
-                    <Layout className="h-4 w-4" /> Menu Principal
+                    <Layout className="h-4 w-4" /> {t('admin.settings_v.menus.main_menu')}
                   </h3>
                   <button onClick={() => addMenuItem('mainMenu')} className="text-sm text-indigo-600 hover:text-indigo-800 flex items-center gap-1">
-                    <Plus className="h-4 w-4" /> Adicionar Link
+                    <Plus className="h-4 w-4" /> {t('admin.settings_v.menus.add_link')}
                   </button>
                 </div>
                 <div className="space-y-3">
@@ -666,7 +668,7 @@ const StoreSettings: React.FC = () => {
                         type="text"
                         value={item.label}
                         onChange={(e) => handleMenuChange('mainMenu', idx, 'label', e.target.value)}
-                        placeholder="Nome"
+                        placeholder={t('admin.settings_v.menus.link_name')}
                         className="flex-1 px-3 py-2 border border-slate-300 rounded-md text-sm"
                       />
                       <input
@@ -690,10 +692,10 @@ const StoreSettings: React.FC = () => {
               <div>
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="text-lg font-medium text-slate-900 flex items-center gap-2">
-                    <Layout className="h-4 w-4" /> Menu Rodapé
+                    <Layout className="h-4 w-4" /> {t('admin.settings_v.menus.footer_menu')}
                   </h3>
                   <button onClick={() => addMenuItem('footerMenu')} className="text-sm text-indigo-600 hover:text-indigo-800 flex items-center gap-1">
-                    <Plus className="h-4 w-4" /> Adicionar Link
+                    <Plus className="h-4 w-4" /> {t('admin.settings_v.menus.add_link')}
                   </button>
                 </div>
                 <div className="space-y-3">
@@ -703,7 +705,7 @@ const StoreSettings: React.FC = () => {
                         type="text"
                         value={item.label}
                         onChange={(e) => handleMenuChange('footerMenu', idx, 'label', e.target.value)}
-                        placeholder="Nome"
+                        placeholder={t('admin.settings_v.menus.link_name')}
                         className="flex-1 px-3 py-2 border border-slate-300 rounded-md text-sm"
                       />
                       <input

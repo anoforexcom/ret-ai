@@ -3,22 +3,34 @@ import React, { useState } from 'react';
 import { Outlet, Navigate, Link, useLocation } from 'react-router-dom';
 import { useConfig } from '../../contexts/ConfigContext';
 import { useTranslation } from 'react-i18next';
-import { LayoutDashboard, History, Wallet, User, LogOut, Wand2, ChevronRight, Mail, Key, Eye, EyeOff, AlertCircle } from 'lucide-react';
+import { LayoutDashboard, History, Wallet, User, LogOut, Wand2, ChevronRight, Mail, Key, Eye, EyeOff, AlertCircle, Globe } from 'lucide-react';
 
 const CustomerLayout: React.FC = () => {
   const { currentCustomer, customerLogin, customerLogout, config } = useConfig();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const location = useLocation();
 
+  const toggleLanguage = () => {
+    const newLang = i18n.language === 'pt' ? 'en' : 'pt';
+    i18n.changeLanguage(newLang);
+  };
+
   if (!currentCustomer) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
         <div className="max-w-md w-full bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden">
-          <div className="bg-indigo-600 p-8 text-white text-center">
+          <div className="bg-indigo-600 p-8 text-white text-center relative">
+            <button
+              onClick={toggleLanguage}
+              className="absolute top-4 right-4 p-2 bg-white/10 rounded-xl hover:bg-white/20 transition-all flex items-center gap-2"
+            >
+              <Globe className="h-4 w-4" />
+              <span className="text-xs font-bold uppercase">{i18n.language === 'pt' ? 'EN' : 'PT'}</span>
+            </button>
             <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-4">
               <User className="h-8 w-8" />
             </div>
@@ -37,7 +49,7 @@ const CustomerLayout: React.FC = () => {
               }
             }} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Email Registado</label>
+                <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">{t('customer.login.email_label')}</label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                   <input
@@ -105,18 +117,28 @@ const CustomerLayout: React.FC = () => {
     <div className="min-h-screen bg-slate-50 flex flex-col">
       <div className="bg-indigo-900 text-white py-12 px-4">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
-          <div className="flex items-center gap-4">
+          <div className="flex flex-col md:flex-row items-center gap-4">
             <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center font-bold text-2xl border-2 border-white/20">
               {currentCustomer.firstName.charAt(0)}
             </div>
-            <div>
+            <div className="text-center md:text-left">
               <h1 className="text-2xl font-bold">{t('customer.dashboard.welcome', { name: currentCustomer.firstName })}</h1>
               <p className="text-indigo-200 text-sm">{t('customer.dashboard.welcome_subtitle', { store: config.storeName })}</p>
             </div>
           </div>
-          <div className="bg-white/10 backdrop-blur-sm px-6 py-4 rounded-2xl border border-white/20 text-center md:text-left">
-            <p className="text-xs font-bold uppercase tracking-widest text-indigo-300">{t('customer.dashboard.balance_label')}</p>
-            <p className="text-3xl font-black">{currentCustomer.balance.toFixed(2)}€</p>
+          <div className="flex items-center gap-4">
+            <button
+              onClick={toggleLanguage}
+              className="p-3 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 hover:bg-white/20 transition-all flex items-center gap-2"
+              title={i18n.language === 'pt' ? "Switch to English" : "Mudar para Português"}
+            >
+              <Globe className="h-5 w-5" />
+              <span className="text-sm font-bold uppercase tracking-tight">{i18n.language === 'pt' ? 'EN' : 'PT'}</span>
+            </button>
+            <div className="bg-white/10 backdrop-blur-sm px-6 py-4 rounded-2xl border border-white/20 text-center md:text-left">
+              <p className="text-xs font-bold uppercase tracking-widest text-indigo-300">{t('customer.dashboard.balance_label')}</p>
+              <p className="text-3xl font-black">{currentCustomer.balance.toFixed(2)}€</p>
+            </div>
           </div>
         </div>
       </div>

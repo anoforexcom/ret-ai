@@ -14,14 +14,15 @@ import {
   ShieldCheck,
   Menu,
   X,
-  ArrowLeft
+  ArrowLeft,
+  Globe
 } from 'lucide-react';
 import { useConfig } from '../../contexts/ConfigContext';
 import { useTranslation } from 'react-i18next';
 
 const AdminLayout: React.FC = () => {
   const { isAdmin, login, logout, config } = useConfig();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -37,9 +38,21 @@ const AdminLayout: React.FC = () => {
     }
   };
 
+  const toggleLanguage = () => {
+    const newLang = i18n.language === 'pt' ? 'en' : 'pt';
+    i18n.changeLanguage(newLang);
+  };
+
   if (!isAdmin) {
     return (
-      <div className="min-h-screen bg-slate-100 flex flex-col items-center justify-center p-4">
+      <div className="min-h-screen bg-slate-100 flex flex-col items-center justify-center p-4 relative">
+        <button
+          onClick={toggleLanguage}
+          className="absolute top-4 right-4 p-2 bg-white rounded-xl shadow-sm border border-slate-200 hover:bg-slate-50 transition-all flex items-center gap-2"
+        >
+          <Globe className="h-4 w-4 text-slate-400" />
+          <span className="text-xs font-bold text-slate-600 uppercase">{i18n.language === 'pt' ? 'EN' : 'PT'}</span>
+        </button>
         <Link
           to="/"
           className="flex items-center gap-2 text-slate-500 hover:text-indigo-600 mb-6 transition-colors font-medium"
@@ -95,13 +108,23 @@ const AdminLayout: React.FC = () => {
           <Wand2 className="h-6 w-6 text-indigo-400" />
           <span className="font-bold text-base tracking-tight">{config.storeName}</span>
         </div>
-        <button
-          onClick={() => setIsSidebarOpen(true)}
-          className="p-2 hover:bg-slate-800 rounded-lg transition-colors"
-          aria-label="Abrir Menu"
-        >
-          <Menu className="h-6 w-6" />
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={toggleLanguage}
+            className="p-2 hover:bg-slate-800 rounded-lg transition-colors flex items-center gap-1.5"
+            title={i18n.language === 'pt' ? "Mudar para Inglês" : "Mudar para Português"}
+          >
+            <Globe className="h-5 w-5 text-slate-400" />
+            <span className="text-[10px] font-black text-slate-400 uppercase">{i18n.language === 'pt' ? 'EN' : 'PT'}</span>
+          </button>
+          <button
+            onClick={() => setIsSidebarOpen(true)}
+            className="p-2 hover:bg-slate-800 rounded-lg transition-colors"
+            aria-label={t('common.open_menu')}
+          >
+            <Menu className="h-6 w-6" />
+          </button>
+        </div>
       </div>
 
       {/* Mobile Backdrop Overlay */}
@@ -127,38 +150,38 @@ const AdminLayout: React.FC = () => {
           <button
             onClick={() => setIsSidebarOpen(false)}
             className="md:hidden p-1 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white transition-colors"
-            aria-label="Fechar Menu"
+            aria-label={t('common.close_menu')}
           >
             <X className="h-6 w-6" />
           </button>
         </div>
 
         <nav className="flex-1 p-4 space-y-1 overflow-y-auto custom-scrollbar">
-          <p className="px-4 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-2 mt-2">Visão Geral</p>
+          <p className="px-4 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-2 mt-2">{t('admin.overview')}</p>
           <NavLink to="/admin" end className={navItemClass} onClick={handleNavLinkClick}>
-            <LayoutDashboard className="h-4 w-4" /> Dashboard
+            <LayoutDashboard className="h-4 w-4" /> {t('admin.dashboard')}
           </NavLink>
           <NavLink to="/admin/financials" className={navItemClass} onClick={handleNavLinkClick}>
-            <PieChart className="h-4 w-4" /> Finanças
+            <PieChart className="h-4 w-4" /> {t('admin.financials')}
           </NavLink>
 
-          <p className="px-4 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-2 mt-6">Gestão</p>
+          <p className="px-4 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-2 mt-6">{t('admin.management')}</p>
           <NavLink to="/admin/orders" className={navItemClass} onClick={handleNavLinkClick}>
-            <ShoppingCart className="h-4 w-4" /> Encomendas
+            <ShoppingCart className="h-4 w-4" /> {t('admin.orders')}
           </NavLink>
           <NavLink to="/admin/products" className={navItemClass} onClick={handleNavLinkClick}>
-            <Package className="h-4 w-4" /> Produtos
+            <Package className="h-4 w-4" /> {t('admin.products')}
           </NavLink>
           <NavLink to="/admin/customers" className={navItemClass} onClick={handleNavLinkClick}>
-            <Users className="h-4 w-4" /> Clientes
+            <Users className="h-4 w-4" /> {t('admin.customers')}
           </NavLink>
 
-          <p className="px-4 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-2 mt-6">Sistema</p>
+          <p className="px-4 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-2 mt-6">{t('admin.system')}</p>
           <NavLink to="/admin/settings" className={navItemClass} onClick={handleNavLinkClick}>
-            <Settings className="h-4 w-4" /> Configurações
+            <Settings className="h-4 w-4" /> {t('admin.settings')}
           </NavLink>
           <NavLink to="/admin/security" className={navItemClass} onClick={handleNavLinkClick}>
-            <ShieldCheck className="h-4 w-4" /> Segurança
+            <ShieldCheck className="h-4 w-4" /> {t('admin.security')}
           </NavLink>
         </nav>
 
@@ -171,7 +194,7 @@ const AdminLayout: React.FC = () => {
             className="flex items-center gap-3 px-4 py-3 w-full text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors text-sm font-medium"
           >
             <LogOut className="h-4 w-4" />
-            Terminar Sessão
+            {t('admin.logout')}
           </button>
         </div>
       </aside>

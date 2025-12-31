@@ -28,7 +28,7 @@
     "unique_customers": "Clientes Únicos",
     "registered": "registados",
     "sales_performance": "Performance de Vendas",
-    "daily_revenue": "Receita bruta diária dos últimos 7 dias",
+    "daily_revenue": "Receita bruta diária",
     "financial_report": "Relatório Financeiro",
     "day": "Dia",
     "recent_orders": "Encomendas Recentes",
@@ -54,6 +54,301 @@
       "back_site": "Voltar ao site",
       "error_password": "Senha incorreta. Verifique as suas credenciais.",
       "restricted_footer": "Acesso Restrito • RetroColor AI"
+    },
+    "dashboard_v": {
+      "csv_headers": [
+        "ID Encomenda",
+        "Data",
+        "Cliente",
+        "Email",
+        "Itens",
+        "Método",
+        "Montante",
+        "Estado"
+      ],
+      "escrow_balance": "Saldo em Custódia",
+      "prepaid": "Pré-pagos",
+      "today_activity": "Atividade de Hoje",
+      "paid_sales": "Vendas Pagas:",
+      "orders_count": "Nº Encomendas:",
+      "pending_detected": "pendente(s) detetada(s)",
+      "realtime_sync_active": "Sync Real-time Ativo",
+      "recent_activities": "Últimas Atividades",
+      "from": "De",
+      "to": "Até"
+    },
+    "orders_v": {
+      "title": "Gestão de Encomendas",
+      "export_csv": "Exportar CSV",
+      "table": {
+        "id": "ID",
+        "customer": "Cliente",
+        "date": "Data",
+        "amount": "Valor",
+        "status": "Estado",
+        "actions": "Ações"
+      },
+      "badges": {
+        "paid_completed": "Pago / Concluído",
+        "refunded": "Reembolsado",
+        "pending": "Pendente"
+      },
+      "tooltips": {
+        "view_details": "Ver Detalhes",
+        "download_result": "Baixar Resultado"
+      },
+      "no_orders": "Ainda não existem encomendas registadas.",
+      "modal": {
+        "details_title": "Detalhes da Encomenda",
+        "performed_at": "Realizada a",
+        "close": "Fechar",
+        "customer_info": "Informação do Cliente",
+        "registered": "Cliente Registado",
+        "visitor": "Cliente Visitante (Sem Registo)",
+        "payment_details": "Detalhes do Pagamento",
+        "method": "Método",
+        "unknown": "Desconhecido",
+        "item": "Item",
+        "total_paid": "Total Pago",
+        "current_status": "Estado Atual",
+        "restored_file": "Ficheiro Restaurado",
+        "image_not_available": "Imagem não disponível",
+        "download_file": "Baixar Ficheiro"
+      }
+    },
+    "customers_v": {
+      "title": "Análise de Clientes",
+      "subtitle": "Gestão de utilizadores registados e histórico de visitantes.",
+      "clv_avg": "CLV Médio",
+      "registered": "Clientes Registados",
+      "escrow": "Saldo em Custódia",
+      "table": {
+        "user": "Utilizador",
+        "status": "Estado",
+        "balance": "Saldo",
+        "total_spent": "Gasto Total",
+        "last_activity": "Última Atividade"
+      },
+      "status": {
+        "registered": "Registado",
+        "visitor": "Visitante"
+      },
+      "orders_count": "encomendas"
+    },
+    "financials_v": {
+      "title": "Gestão Financeira",
+      "desc": "Monitorização de lucros, fluxos e despesas manuais.",
+      "register_expense": "Registar Despesa",
+      "kpi": {
+        "gross": "Bruto",
+        "total_revenue": "Receita Total",
+        "spent": "Gastos",
+        "expenses": "Despesas",
+        "net": "Líquido",
+        "real_profit": "Lucro Real",
+        "efficiency": "Eficiência",
+        "margin": "Margem"
+      },
+      "analytics": {
+        "cost_distribution": "Distribuição de Custos",
+        "api_ai": "APIs IA",
+        "marketing": "Marketing",
+        "infra": "Infra",
+        "others": "Outros",
+        "aov": "Ticket Médio (AOV)",
+        "cac": "CAC Estimado",
+        "roas": "ROAS Publicitário"
+      },
+      "history": {
+        "title": "Histórico de Despesas",
+        "table": {
+          "date": "Data",
+          "category": "Categoria",
+          "description": "Descrição",
+          "amount": "Valor"
+        },
+        "no_description": "Sem descrição",
+        "delete_tooltip": "Eliminar Despesa",
+        "no_expenses": "Nenhuma despesa registada ainda."
+      },
+      "modal": {
+        "title": "Registar Nova Despesa",
+        "desc": "Insira os detalhes para atualizar o seu balanço.",
+        "categories": {
+          "api": "Serviços / APIs IA",
+          "marketing": "Marketing / Ads",
+          "infra": "Hosting / Infraestrutura",
+          "outro": "Outras Despesas"
+        },
+        "placeholder_desc": "Para que serve esta despesa?",
+        "cancel": "Cancelar",
+        "confirm": "Confirmar Registo"
+      },
+      "confirm_delete": "Tem a certeza que deseja remover esta despesa permanentemente do histórico?"
+    },
+    "settings_v": {
+      "title": "Configurações da Loja",
+      "sync_active": "Cloud Sync Ativo",
+      "sync_off": "Cloud Sync Off (Local)",
+      "saved_success": "Alterações guardadas!",
+      "tabs": {
+        "general": "Geral & Conteúdo",
+        "design": "Design & Grafismo",
+        "payments": "Pagamentos & API",
+        "menus": "Menus de Navegação"
+      },
+      "general": {
+        "basic_info": "Informações Básicas",
+        "store_name": "Nome da Loja",
+        "hero_title": "Título Hero (Página Inicial)",
+        "hero_images": "Imagens do Hero (Comparação 1)",
+        "comparison_2": "Segunda Comparação (Meio da Página)",
+        "before": "Imagem \"Antes\"",
+        "after": "Imagem \"Depois\"",
+        "upload_before": "CARREGAR ANTES",
+        "upload_after": "CARREGAR DEPOIS",
+        "footer_text_label": "Texto do Rodapé",
+        "social": "Redes Sociais",
+        "save": "Guardar Configurações"
+      },
+      "design": {
+        "visual_identity": "Identidade Visual",
+        "primary_color": "Cor Primária (Marca)",
+        "secondary_color": "Cor Secundária (Gradients)",
+        "element_style": "Estilo dos Elementos",
+        "global_radius": "Arredondamento Global (Radius)",
+        "radius_options": {
+          "none": "Nenhum",
+          "soft": "Suave",
+          "standard": "Padrão",
+          "round": "Redondo",
+          "extra": "Extra"
+        },
+        "typography": "Tipografia",
+        "font_family": "Família de Fontes",
+        "font_options": {
+          "inter": "Inter (Padrão Moderno)",
+          "serif": "Serif (Clássico/Elegante)",
+          "mono": "Monospaced (Técnico)",
+          "sans": "System Sans-Serif"
+        },
+        "apply": "Aplicar Grafismo"
+      },
+      "payments": {
+        "title": "Métodos & Provedores",
+        "new": "Novo Método",
+        "meth_name": "Nome do Método",
+        "provider": "Provedor / Gateway",
+        "env": "Ambiente",
+        "env_options": {
+          "sandbox": "Sandbox / Testes",
+          "live": "Live / Produção"
+        },
+        "type": "Tipo de Pagamento",
+        "type_options": {
+          "card": "Cartão (Visa/Mastercard)",
+          "paypal": "PayPal Wallet",
+          "mbway": "MB Way",
+          "multibanco": "Multibanco (Referência)",
+          "apple_google": "Apple Pay / Google Pay"
+        },
+        "credentials": "Credenciais do Gateway",
+        "pub_key": "Public Key / Client ID",
+        "sec_key": "Secret Key (Apenas p/ Referência)",
+        "close": "Fechar Configuração",
+        "save_all": "Guardar Todos os Métodos"
+      },
+      "menus": {
+        "main": "Menu Principal",
+        "footer": "Menu Rodapé",
+        "add_link": "Adicionar Link"
+      },
+      "error_file_large": "O ficheiro é demasiado grande. Máximo 2MB para otimização do site.",
+      "confirm_delete_method": "Eliminar este método de pagamento permanentemente?",
+      "new_link_default": "Novo Link",
+      "new_method_default": "Novo Método"
+    },
+    "products_v": {
+      "title": "Gestão de Produtos",
+      "desc": "Configure os preços e pacotes da loja.",
+      "add_bundle": "Adicionar Pacote",
+      "form": {
+        "name": "Nome do Pacote",
+        "price": "Preço",
+        "photos": "Qtd. Fotos",
+        "featured": "Destaque",
+        "active": "Ativo",
+        "save": "Guardar",
+        "cancel": "Cancelar"
+      },
+      "photos_included": "Fotos incluídas",
+      "popular_badge": "Pacote Popular",
+      "confirm_delete": "Deseja eliminar este pacote?",
+      "new_bundle_label": "Novo Pacote",
+      "audit": {
+        "edit": "Editar Produto",
+        "name": "Nome",
+        "create": "Criar Produto",
+        "delete": "Eliminar Produto"
+      }
+    },
+    "security_v": {
+      "title": "Segurança e Acesso",
+      "desc": "Monitorização de atividade e controlo de permissões da equipa.",
+      "invite_btn": "Convidar Membro",
+      "change_pw": {
+        "title": "Alterar Senha",
+        "desc": "Defina uma nova senha mestra para aceder a este painel administrativo. Recomendamos o uso de pelo menos 8 caracteres.",
+        "label": "Nova Senha",
+        "placeholder": "Min. 4 caracteres",
+        "btn": "Atualizar Senha",
+        "success": "Senha atualizada com sucesso!"
+      },
+      "roles": {
+        "owner": "Proprietário",
+        "admin": "Administrador",
+        "manager": "Gestor",
+        "viewer": "Visualizador",
+        "perms_owner": "Acesso total a todas as funcionalidades e configurações.",
+        "perms_admin": "Gestão de encomendas, produtos e utilizadores. Sem acesso à eliminação da loja.",
+        "perms_manager": "Gestão de encomendas e produtos. Acesso limitado a configurações.",
+        "perms_viewer": "Apenas visualização de dados e estatísticas. Sem permissão de edição."
+      },
+      "team": {
+        "title": "Gestão de Equipa",
+        "table": {
+          "member": "Membro",
+          "role": "Cargo",
+          "status": "Estado",
+          "actions": "Ações"
+        },
+        "status": {
+          "active": "Ativo",
+          "invited": "Convidado"
+        },
+        "remove_tooltip": "Remover Membro"
+      },
+      "audit": {
+        "title": "Logs de Auditoria",
+        "real_time": "Tempo Real",
+        "table": {
+          "datetime": "Data/Hora",
+          "user": "Utilizador",
+          "action": "Ação",
+          "details": "Detalhes"
+        },
+        "no_logs": "Aguardando atividade do sistema..."
+      },
+      "modal": {
+        "title": "Convidar para Equipa",
+        "desc": "O novo membro receberá um email de acesso.",
+        "full_name": "Nome Completo",
+        "name_placeholder": "ex: João Silva",
+        "email": "Email Profissional",
+        "role_perms": "Cargo & Permissões",
+        "cancel": "Cancelar",
+        "confirm": "Enviar Convite"
+      }
     }
   },
   "customer": {
@@ -79,6 +374,62 @@
         "history": "Encomendas",
         "wallet": "Saldo & Carregamentos",
         "logout": "Sair da Conta"
+      },
+      "v": {
+        "completed_restores": "Restauros Concluídos",
+        "view_history": "Ver todo o histórico",
+        "new_restore_title": "Novo Restauro",
+        "new_restore_desc": "Dê vida a mais uma memória hoje",
+        "studio_btn": "Ir para o Estúdio",
+        "recent_orders": "Encomendas Recentes",
+        "view_all": "Ver Todas",
+        "paid_badge": "Pago",
+        "no_orders": "Ainda não realizou encomendas.",
+        "security_title": "Segurança",
+        "pw_desc": "Defina uma nova palavra-passe para a sua conta.",
+        "new_pw_label": "Nova Password",
+        "min_chars": "Mínimo 4 caracteres",
+        "update_btn": "Atualizar Palavra-passe",
+        "pw_updated": "Palavra-passe atualizada!"
+      },
+      "history_v": {
+        "title": "Histórico de Restauros",
+        "table": {
+          "order": "Encomenda",
+          "date": "Data",
+          "plan": "Plano / Item",
+          "amount": "Valor",
+          "actions": "Ações"
+        },
+        "balance_payment": "Saldo",
+        "download_tooltip": "Baixar Foto HD",
+        "no_orders": "Ainda não realizou encomendas."
+      },
+      "wallet_v": {
+        "title": "Carregar Saldo",
+        "desc": "Adicione fundos para usar em restauros futuros.",
+        "current_balance": "Saldo Atual",
+        "choose_amount": "Escolha o valor do carregamento",
+        "recommended": "RECOMENDADO",
+        "bonus_tag": "BÓNUS",
+        "ssl_secure": "Pagamento processado de forma segura via SSL 256-bit.",
+        "status": {
+          "processing": "PROCESSANDO...",
+          "success": "CARREGAMENTO COM SUCESSO!",
+          "load": "CARREGAR",
+          "now": "AGORA"
+        },
+        "why_topup": {
+          "title": "Porquê carregar saldo?",
+          "item1": "Checkouts mais rápidos (sem cartões)",
+          "item2": "Ganhe bónus extra em carregamentos altos",
+          "item3": "Faturação única unificada"
+        },
+        "audit": {
+          "topup": "Recarga de Saldo",
+          "customer_loaded": "Cliente carregou",
+          "bonus": "Bónus"
+        }
       }
     }
   },
@@ -309,6 +660,8 @@
     "error": "Erro",
     "success": "Sucesso",
     "save": "Guardar",
-    "cancel": "Cancelar"
+    "cancel": "Cancelar",
+    "open_menu": "Abrir Menu",
+    "close_menu": "Fechar Menu"
   }
 }

@@ -126,7 +126,36 @@ const Header: React.FC = () => {
             </Link>
           </div>
 
-          <div className="flex items-center md:hidden">
+          <div className="flex items-center gap-2 md:hidden">
+            <button
+              onClick={toggleLanguage}
+              className="p-2 rounded-lg hover:bg-slate-100 transition-all active:scale-95"
+              title={i18n.language === 'pt' ? "Switch to English" : "Mudar para Português"}
+            >
+              {i18n.language === 'pt' ? (
+                <div className="flex items-center gap-1.5">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" className="h-4 w-6 rounded-sm shadow-sm border border-slate-100">
+                    <rect width="600" height="400" fill="#000080" />
+                    <rect width="600" height="400" fill="#cf142b" clipPath="polygon(0 0, 600 0, 600 400, 0 400)" />
+                    <path d="M0 0 L600 400 M0 400 L600 0" stroke="#fff" strokeWidth="60" />
+                    <path d="M0 0 L600 400 M0 400 L600 0" stroke="#cf142b" strokeWidth="40" />
+                    <path d="M300 0 V400 M0 200 H600" stroke="#fff" strokeWidth="100" />
+                    <path d="M300 0 V400 M0 200 H600" stroke="#cf142b" strokeWidth="60" />
+                  </svg>
+                  <span className="text-[10px] font-black text-slate-400">EN</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-1.5">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" className="h-4 w-6 rounded-sm shadow-sm border border-slate-100">
+                    <rect width="240" height="400" fill="#006600" />
+                    <rect x="240" width="360" height="400" fill="#ff0000" />
+                    <circle cx="240" cy="200" r="80" fill="#ffff00" />
+                    <circle cx="240" cy="200" r="70" fill="#ffffff" stroke="#000" strokeWidth="2" />
+                  </svg>
+                  <span className="text-[10px] font-black text-slate-400">PT</span>
+                </div>
+              )}
+            </button>
             <button
               onClick={() => setIsOpen(!isOpen)}
               className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none"
@@ -154,11 +183,18 @@ const Header: React.FC = () => {
                 {getTranslatedLabel(link.label)}
               </Link>
             ))}
-            <div className="pt-4 pb-2 border-t border-gray-100 mt-2">
-              <Link to="/customer" onClick={() => setIsOpen(false)} className="flex items-center gap-2 pl-3 pr-4 py-2 text-base font-medium text-gray-600">
+            <div className="pt-4 pb-2 border-t border-gray-100 mt-2 space-y-1">
+              <button
+                onClick={toggleLanguage}
+                className="w-full flex items-center gap-2 pl-3 pr-4 py-2 text-base font-medium text-gray-600 hover:bg-gray-50"
+              >
+                <Globe className="h-4 w-4" />
+                {i18n.language === 'pt' ? "Switch to English" : "Mudar para Português"}
+              </button>
+              <Link to="/customer" onClick={() => setIsOpen(false)} className="flex items-center gap-2 pl-3 pr-4 py-2 text-base font-medium text-gray-600 hover:bg-gray-50">
                 <User className="h-4 w-4" /> {t('menu.account')}
               </Link>
-              <Link to="/admin" onClick={() => setIsOpen(false)} className="flex items-center gap-2 pl-3 pr-4 py-2 text-base font-medium text-indigo-600">
+              <Link to="/admin" onClick={() => setIsOpen(false)} className="flex items-center gap-2 pl-3 pr-4 py-2 text-base font-medium text-indigo-600 hover:bg-gray-50">
                 <Lock className="h-4 w-4" /> {t('menu.admin_area')}
               </Link>
             </div>

@@ -188,9 +188,11 @@ const Header: React.FC = () => {
             <div className="pt-4 pb-2 border-t border-gray-100 mt-2 space-y-1">
               <button
                 onClick={toggleLanguage}
-                className="w-full flex items-center gap-3 pl-3 pr-4 py-3 text-base font-bold text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 rounded-xl transition-all"
+                className="w-full flex items-center gap-3 pl-3 pr-4 py-4 text-base font-black text-indigo-700 bg-indigo-50 rounded-2xl transition-all border-2 border-indigo-100 shadow-sm active:scale-95"
               >
-                <Globe className="h-5 w-5" />
+                <div className="bg-white p-1.5 rounded-lg shadow-sm">
+                  <Globe className="h-5 w-5 text-indigo-600" />
+                </div>
                 {isCurrentPt ? "Switch to English" : "Mudar para Português"}
               </button>
               <Link to="/customer" onClick={() => setIsOpen(false)} className="flex items-center gap-2 pl-3 pr-4 py-2 text-base font-medium text-gray-600 hover:bg-gray-50">

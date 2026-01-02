@@ -396,16 +396,16 @@
       "menu": {
         "home": "Início",
         "history": "Encomendas",
-        "wallet": "Saldo & Carregamentos",
-        "logout": "Sair da Conta"
+        "wallet": "Carteira",
+        "logout": "Sair"
       },
       "v": {
-        "completed_restores": "Restauros Concluídos",
+        "completed_restores": "Restauros",
         "view_history": "Ver todo o histórico",
         "new_restore_title": "Novo Restauro",
         "new_restore_desc": "Dê vida a mais uma memória hoje",
         "studio_btn": "Ir para o Estúdio",
-        "recent_orders": "Encomendas Recentes",
+        "recent_orders": "Encomendas Recent.",
         "view_all": "Ver Todas",
         "paid_badge": "Pago",
         "no_orders": "Ainda não realizou encomendas.",
@@ -417,7 +417,7 @@
         "pw_updated": "Palavra-passe atualizada!"
       },
       "history_v": {
-        "title": "Histórico de Restauros",
+        "title": "Histórico",
         "table": {
           "order": "Encomenda",
           "date": "Data",
@@ -430,7 +430,7 @@
         "no_orders": "Ainda não realizou encomendas."
       },
       "wallet_v": {
-        "title": "Carregar Saldo",
+        "title": "Recarregar",
         "desc": "Adicione fundos para usar em restauros futuros.",
         "current_balance": "Saldo Atual",
         "choose_amount": "Escolha o valor do carregamento",

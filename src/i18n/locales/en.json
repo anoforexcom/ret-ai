@@ -396,16 +396,16 @@
             "menu": {
                 "home": "Home",
                 "history": "Orders",
-                "wallet": "Balance & Top-ups",
+                "wallet": "Wallet",
                 "logout": "Logout"
             },
             "v": {
-                "completed_restores": "Completed Restorations",
+                "completed_restores": "Restored",
                 "view_history": "View all history",
                 "new_restore_title": "New Restoration",
                 "new_restore_desc": "Bring another memory to life today",
                 "studio_btn": "Go to Studio",
-                "recent_orders": "Recent Orders",
+                "recent_orders": "Orders",
                 "view_all": "View All",
                 "paid_badge": "Paid",
                 "no_orders": "You haven't placed any orders yet.",
@@ -417,7 +417,7 @@
                 "pw_updated": "Password updated!"
             },
             "history_v": {
-                "title": "Restoration History",
+                "title": "History",
                 "table": {
                     "order": "Order",
                     "date": "Date",
@@ -430,7 +430,7 @@
                 "no_orders": "You haven't placed any orders yet."
             },
             "wallet_v": {
-                "title": "Top-up Balance",
+                "title": "Top-up",
                 "desc": "Add funds to use for future restorations.",
                 "current_balance": "Current Balance",
                 "choose_amount": "Choose top-up amount",

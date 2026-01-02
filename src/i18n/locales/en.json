@@ -133,8 +133,13 @@
                 "status": "Status",
                 "balance": "Balance",
                 "total_spent": "Total Spent",
-                "last_activity": "Last Activity"
+                "last_activity": "Last Activity",
+                "actions": "Actions"
             },
+            "edit_balance": "Adjust Balance",
+            "adjust_balance_title": "Adjust Customer Balance",
+            "save_balance": "Update Balance",
+            "close": "Close",
             "status": {
                 "registered": "Registered",
                 "visitor": "Visitor"

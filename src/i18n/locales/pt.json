@@ -133,8 +133,13 @@
         "status": "Estado",
         "balance": "Saldo",
         "total_spent": "Gasto Total",
-        "last_activity": "Última Atividade"
+        "last_activity": "Última Atividade",
+        "actions": "Ações"
       },
+      "edit_balance": "Ajustar Saldo",
+      "adjust_balance_title": "Ajustar Saldo do Cliente",
+      "save_balance": "Atualizar Saldo",
+      "close": "Fechar",
       "status": {
         "registered": "Registado",
         "visitor": "Visitante"

@@ -1,12 +1,13 @@
-
 import React from 'react';
 import { useConfig } from '../../contexts/ConfigContext';
-import { User, Mail, Calendar, TrendingUp, Coins, BadgeCheck } from 'lucide-react';
+import { User, Mail, Calendar, TrendingUp, Coins, BadgeCheck, Edit2, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 const Customers: React.FC = () => {
-    const { orders, config } = useConfig();
+    const { orders, config, updateCustomerBalance } = useConfig();
     const { t, i18n } = useTranslation();
+    const [editingCustomer, setEditingCustomer] = React.useState<any>(null);
+    const [newBalance, setNewBalance] = React.useState<string>("");
 
     // Processar dados de clientes a partir das encomendas E das contas registadas
     const registeredMap = new Map(); // Mapeia ID -> Customer
@@ -153,6 +154,7 @@ const Customers: React.FC = () => {
                                 <th className="px-6 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('admin.customers_v.table.balance')}</th>
                                 <th className="px-6 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('admin.customers_v.table.total_spent')}</th>
                                 <th className="px-6 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('admin.customers_v.table.last_activity')}</th>
+                                <th className="px-6 py-4 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('admin.customers_v.table.actions')}</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-50">
@@ -194,12 +196,86 @@ const Customers: React.FC = () => {
                                             {new Date(customer.lastOrder).toLocaleDateString(i18n.language === 'pt' ? 'pt-PT' : 'en-US')}
                                         </div>
                                     </td>
+                                    <td className="px-6 py-4 text-right">
+                                        {customer.isRegistered && (
+                                            <button
+                                                onClick={() => {
+                                                    setEditingCustomer(customer);
+                                                    setNewBalance(customer.balance.toString());
+                                                }}
+                                                className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                                                title={t('admin.customers_v.edit_balance')}
+                                            >
+                                                <Edit2 className="h-4 w-4" />
+                                            </button>
+                                        )}
+                                    </td>
                                 </tr>
                             ))}
                         </tbody>
                     </table>
                 </div>
             </div>
+
+            {/* Modal de Ajuste de Saldo */}
+            {editingCustomer && (
+                <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                    <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden animate-slideUp">
+                        <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+                            <h3 className="font-bold text-slate-900">{t('admin.customers_v.adjust_balance_title')}</h3>
+                            <button onClick={() => setEditingCustomer(null)} className="text-slate-400 hover:text-slate-600">
+                                <X className="h-5 w-5" />
+                            </button>
+                        </div>
+                        <div className="p-8">
+                            <div className="flex items-center gap-4 mb-6">
+                                <div className="h-12 w-12 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold text-lg">
+                                    {editingCustomer.name.charAt(0)}
+                                </div>
+                                <div>
+                                    <p className="font-bold text-slate-900">{editingCustomer.name}</p>
+                                    <p className="text-xs text-slate-500">{editingCustomer.email}</p>
+                                </div>
+                            </div>
+
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">
+                                        {t('admin.customers_v.table.balance')} (€)
+                                    </label>
+                                    <input
+                                        type="number"
+                                        step="0.01"
+                                        value={newBalance}
+                                        onChange={(e) => setNewBalance(e.target.value)}
+                                        className="w-full h-12 px-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all font-bold text-lg"
+                                        placeholder="0.00"
+                                    />
+                                </div>
+
+                                <button
+                                    onClick={() => {
+                                        const amount = parseFloat(newBalance) || 0;
+                                        const diff = amount - editingCustomer.balance;
+                                        updateCustomerBalance(editingCustomer.id, diff);
+                                        setEditingCustomer(null);
+                                    }}
+                                    className="w-full h-12 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-indigo-200"
+                                >
+                                    {t('admin.customers_v.save_balance')}
+                                </button>
+
+                                <button
+                                    onClick={() => setEditingCustomer(null)}
+                                    className="w-full h-12 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold rounded-xl transition-all"
+                                >
+                                    {t('admin.customers_v.close')}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

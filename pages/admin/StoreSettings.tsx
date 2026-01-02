@@ -256,7 +256,7 @@ const StoreSettings: React.FC = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Imagem "Depois"</label>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">{t('admin.settings_v.general.image_after')}</label>
                     <div
                       onClick={() => afterInputRef.current?.click()}
                       className="mt-2 h-40 w-full rounded-xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center cursor-pointer hover:border-indigo-400 hover:bg-indigo-50/30 transition-all group overflow-hidden"
@@ -310,7 +310,7 @@ const StoreSettings: React.FC = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Imagem "Depois"</label>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">{t('admin.settings_v.general.image_after')}</label>
                     <div
                       onClick={() => compAfterInputRef.current?.click()}
                       className="mt-2 h-40 w-full rounded-xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center cursor-pointer hover:border-indigo-400 hover:bg-indigo-50/30 transition-all group overflow-hidden"

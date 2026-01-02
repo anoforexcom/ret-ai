@@ -213,8 +213,12 @@
     "settings_v": {
       "title": "Configurações da Loja",
       "sync_active": "Cloud Sync Ativo",
-      "sync_off": "Cloud Sync Off (Local)",
-      "saved_success": "Alterações guardadas!",
+      "sync_local": "Cloud Sync Off (Local)",
+      "saved": "Alterações guardadas!",
+      "audit": {
+        "updated": "Configurações Atualizadas",
+        "tab": "Separador"
+      },
       "tabs": {
         "general": "Geral & Conteúdo",
         "design": "Design & Grafismo",
@@ -226,25 +230,25 @@
         "store_name": "Nome da Loja",
         "hero_title": "Título Hero (Página Inicial)",
         "hero_images": "Imagens do Hero (Comparação 1)",
-        "comparison_2": "Segunda Comparação (Meio da Página)",
-        "before": "Imagem \"Antes\"",
-        "after": "Imagem \"Depois\"",
+        "second_comparison": "Segunda Comparação (Meio da Página)",
+        "image_before": "Imagem \"Antes\"",
+        "image_after": "Imagem \"Depois\"",
         "upload_before": "CARREGAR ANTES",
         "upload_after": "CARREGAR DEPOIS",
-        "footer_text_label": "Texto do Rodapé",
-        "social": "Redes Sociais",
-        "save": "Guardar Configurações"
+        "footer_text": "Texto do Rodapé",
+        "social_networks": "Redes Sociais",
+        "save_btn": "Guardar Configurações"
       },
       "design": {
         "visual_identity": "Identidade Visual",
         "primary_color": "Cor Primária (Marca)",
         "secondary_color": "Cor Secundária (Gradients)",
         "element_style": "Estilo dos Elementos",
-        "global_radius": "Arredondamento Global (Radius)",
+        "radius_global": "Arredondamento Global (Radius)",
         "radius_options": {
           "none": "Nenhum",
           "soft": "Suave",
-          "standard": "Padrão",
+          "default": "Padrão",
           "round": "Redondo",
           "extra": "Extra"
         },
@@ -254,43 +258,42 @@
           "inter": "Inter (Padrão Moderno)",
           "serif": "Serif (Clássico/Elegante)",
           "mono": "Monospaced (Técnico)",
-          "sans": "System Sans-Serif"
+          "system": "System Sans-Serif"
         },
-        "apply": "Aplicar Grafismo"
+        "apply_btn": "Aplicar Grafismo"
       },
       "payments": {
-        "title": "Métodos & Provedores",
-        "new": "Novo Método",
+        "methods_providers": "Métodos & Provedores",
+        "new_method": "Novo Método",
         "meth_name": "Nome do Método",
-        "provider": "Provedor / Gateway",
-        "env": "Ambiente",
+        "provider_gateway": "Provedor / Gateway",
+        "environment": "Ambiente",
         "env_options": {
           "sandbox": "Sandbox / Testes",
           "live": "Live / Produção"
         },
-        "type": "Tipo de Pagamento",
-        "type_options": {
-          "card": "Cartão (Visa/Mastercard)",
-          "paypal": "PayPal Wallet",
-          "mbway": "MB Way",
-          "multibanco": "Multibanco (Referência)",
-          "apple_google": "Apple Pay / Google Pay"
-        },
-        "credentials": "Credenciais do Gateway",
-        "pub_key": "Public Key / Client ID",
-        "sec_key": "Secret Key (Apenas p/ Referência)",
-        "close": "Fechar Configuração",
-        "save_all": "Guardar Todos os Métodos"
+        "payment_type": "Tipo de Pagamento",
+        "card": "Cartão (Visa/Mastercard)",
+        "paypal_wallet": "PayPal Wallet",
+        "mbway": "MB Way",
+        "multibanco": "Multibanco (Referência)",
+        "apple_google_pay": "Apple Pay / Google Pay",
+        "gateway_credentials": "Credenciais do Gateway",
+        "public_key": "Public Key / Client ID",
+        "secret_key": "Secret Key (Apenas p/ Referência)",
+        "close_config": "Fechar Configuração",
+        "save_all_btn": "Guardar Todos os Métodos"
       },
       "menus": {
-        "main": "Menu Principal",
-        "footer": "Menu Rodapé",
-        "add_link": "Adicionar Link"
+        "main_menu": "Menu Principal",
+        "footer_menu": "Menu Rodapé",
+        "add_link": "Adicionar Link",
+        "link_name": "Nome do Link"
       },
-      "error_file_large": "O ficheiro é demasiado grande. Máximo 2MB para otimização do site.",
-      "confirm_delete_method": "Eliminar este método de pagamento permanentemente?",
-      "new_link_default": "Novo Link",
-      "new_method_default": "Novo Método"
+      "file_too_large": "O ficheiro é demasiado grande. Máximo 2MB para otimização do site.",
+      "confirm_delete_payment": "Eliminar este método de pagamento permanentemente?",
+      "new_link_label": "Novo Link",
+      "new_method": "Novo Método"
     },
     "products_v": {
       "title": "Gestão de Produtos",

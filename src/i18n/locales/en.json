@@ -213,8 +213,12 @@
         "settings_v": {
             "title": "Store Settings",
             "sync_active": "Cloud Sync Active",
-            "sync_off": "Cloud Sync Off (Local)",
-            "saved_success": "Changes saved!",
+            "sync_local": "Cloud Sync Off (Local)",
+            "saved": "Changes saved!",
+            "audit": {
+                "updated": "Settings Updated",
+                "tab": "Tab"
+            },
             "tabs": {
                 "general": "General & Content",
                 "design": "Design & Graphics",
@@ -226,25 +230,25 @@
                 "store_name": "Store Name",
                 "hero_title": "Hero Title (Home Page)",
                 "hero_images": "Hero Images (Comparison 1)",
-                "comparison_2": "Second Comparison (Middle of Page)",
-                "before": "Image \"Before\"",
-                "after": "Image \"After\"",
+                "second_comparison": "Second Comparison (Middle of Page)",
+                "image_before": "Image \"Before\"",
+                "image_after": "Image \"After\"",
                 "upload_before": "UPLOAD BEFORE",
                 "upload_after": "UPLOAD AFTER",
-                "footer_text_label": "Footer Text",
-                "social": "Social Networks",
-                "save": "Save Settings"
+                "footer_text": "Footer Text",
+                "social_networks": "Social Networks",
+                "save_btn": "Save Settings"
             },
             "design": {
                 "visual_identity": "Visual Identity",
                 "primary_color": "Primary Color (Brand)",
                 "secondary_color": "Secondary Color (Gradients)",
                 "element_style": "Element Style",
-                "global_radius": "Global Rounding (Radius)",
+                "radius_global": "Global Rounding (Radius)",
                 "radius_options": {
                     "none": "None",
                     "soft": "Soft",
-                    "standard": "Standard",
+                    "default": "Standard",
                     "round": "Round",
                     "extra": "Extra"
                 },
@@ -254,43 +258,42 @@
                     "inter": "Inter (Modern Default)",
                     "serif": "Serif (Classic/Elegant)",
                     "mono": "Monospaced (Technical)",
-                    "sans": "System Sans-Serif"
+                    "system": "System Sans-Serif"
                 },
-                "apply": "Apply Design"
+                "apply_btn": "Apply Design"
             },
             "payments": {
-                "title": "Methods & Providers",
-                "new": "New Method",
+                "methods_providers": "Methods & Providers",
+                "new_method": "New Method",
                 "meth_name": "Method Name",
-                "provider": "Provider / Gateway",
-                "env": "Environment",
+                "provider_gateway": "Provider / Gateway",
+                "environment": "Environment",
                 "env_options": {
                     "sandbox": "Sandbox / Testing",
                     "live": "Live / Production"
                 },
-                "type": "Payment Type",
-                "type_options": {
-                    "card": "Card (Visa/Mastercard)",
-                    "paypal": "PayPal Wallet",
-                    "mbway": "MB Way",
-                    "multibanco": "Multibanco (Reference)",
-                    "apple_google": "Apple Pay / Google Pay"
-                },
-                "credentials": "Gateway Credentials",
-                "pub_key": "Public Key / Client ID",
-                "sec_key": "Secret Key (Reference Only)",
-                "close": "Close Config",
-                "save_all": "Save All Methods"
+                "payment_type": "Payment Type",
+                "card": "Card (Visa/Mastercard)",
+                "paypal_wallet": "PayPal Wallet",
+                "mbway": "MB Way",
+                "multibanco": "Multibanco (Reference)",
+                "apple_google_pay": "Apple Pay / Google Pay",
+                "gateway_credentials": "Gateway Credentials",
+                "public_key": "Public Key / Client ID",
+                "secret_key": "Secret Key (Reference Only)",
+                "close_config": "Close Config",
+                "save_all_btn": "Save All Methods"
             },
             "menus": {
-                "main": "Main Menu",
-                "footer": "Footer Menu",
-                "add_link": "Add Link"
+                "main_menu": "Main Menu",
+                "footer_menu": "Footer Menu",
+                "add_link": "Add Link",
+                "link_name": "Link Name"
             },
-            "error_file_large": "The file is too large. Maximum 2MB for site optimization.",
-            "confirm_delete_method": "Permanently delete this payment method?",
-            "new_link_default": "New Link",
-            "new_method_default": "New Method"
+            "file_too_large": "The file is too large. Maximum 2MB for site optimization.",
+            "confirm_delete_payment": "Permanently delete this payment method?",
+            "new_link_label": "New Link",
+            "new_method": "New Method"
         },
         "products_v": {
             "title": "Product Management",

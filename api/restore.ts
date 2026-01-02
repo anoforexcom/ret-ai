@@ -23,16 +23,15 @@ export default async function handler(req: any, res: any) {
       return res.status(400).json({ error: 'Nenhuma imagem fornecida.' });
     }
 
-    console.log(`Enviando para Replicate... (Estilo: ${modelName}, Render: ${renderFactor})`);
+    console.log(`Enviando para Replicate... (Modelo: DDColor)`);
 
-    // Executa o modelo DeOldify
+    // Executa o modelo DDColor (Mais moderno e rápido que DeOldify)
     const output = await replicate.run(
-      "arielreplicate/deoldify_image:0da600fab0c45a66211339f1c16b71345d22f26ef5fea3dca1bb90bb5711e950",
+      "piddnad/ddcolor:ca494ba129e44e45f661d6ece83c4c98a9a7c774309beca01429b58fce8aa695",
       {
         input: {
-          input_image: `data:image/jpeg;base64,${imageBase64}`,
-          model_name: modelName,
-          render_factor: renderFactor
+          image: `data:image/jpeg;base64,${imageBase64}`,
+          model_size: "large"
         }
       }
     );
@@ -40,10 +39,10 @@ export default async function handler(req: any, res: any) {
     console.log("Replicate finalizou o processamento.");
 
     let resultUrl = "";
-    if (Array.isArray(output)) {
+    if (typeof output === 'string') {
+      resultUrl = output;
+    } else if (Array.isArray(output)) {
       resultUrl = output[0];
-    } else {
-      resultUrl = output as string;
     }
 
     if (!resultUrl) {

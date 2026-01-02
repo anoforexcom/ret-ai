@@ -5,7 +5,7 @@
  * Redimensiona uma imagem para garantir que não ultrapasse um limite de pixels.
  * Isso acelera o upload e o processamento da IA.
  */
-export const resizeImage = (base64Str: string, maxDimension: number = 1600): Promise<string> => {
+export const resizeImage = (base64Str: string, maxDimension: number = 1280): Promise<string> => {
   return new Promise((resolve) => {
     const img = new Image();
     img.onload = () => {

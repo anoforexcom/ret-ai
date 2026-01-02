@@ -398,62 +398,62 @@
                 "history": "Orders",
                 "wallet": "Wallet",
                 "logout": "Logout"
+            }
+        },
+        "dashboard_v": {
+            "completed_restores": "Restored",
+            "view_history": "View all history",
+            "new_restore_title": "New Restoration",
+            "new_restore_desc": "Bring another memory to life today",
+            "studio_btn": "Go to Studio",
+            "recent_orders": "Orders",
+            "view_all": "View All",
+            "paid_badge": "Paid",
+            "no_orders": "You haven't placed any orders yet.",
+            "security_title": "Security",
+            "pw_desc": "Set a new password for your account.",
+            "new_pw_label": "New Password",
+            "min_chars": "Minimum 4 characters",
+            "update_btn": "Update Password",
+            "pw_updated": "Password updated!"
+        },
+        "history_v": {
+            "title": "History",
+            "table": {
+                "order": "Order",
+                "date": "Date",
+                "plan": "Plan / Item",
+                "amount": "Value",
+                "actions": "Actions"
             },
-            "v": {
-                "completed_restores": "Restored",
-                "view_history": "View all history",
-                "new_restore_title": "New Restoration",
-                "new_restore_desc": "Bring another memory to life today",
-                "studio_btn": "Go to Studio",
-                "recent_orders": "Orders",
-                "view_all": "View All",
-                "paid_badge": "Paid",
-                "no_orders": "You haven't placed any orders yet.",
-                "security_title": "Security",
-                "pw_desc": "Set a new password for your account.",
-                "new_pw_label": "New Password",
-                "min_chars": "Minimum 4 characters",
-                "update_btn": "Update Password",
-                "pw_updated": "Password updated!"
+            "balance_payment": "Balance",
+            "download_tooltip": "Download HD Photo",
+            "no_orders": "You haven't placed any orders yet."
+        },
+        "wallet_v": {
+            "title": "Top-up",
+            "desc": "Add funds to use for future restorations.",
+            "current_balance": "Current Balance",
+            "choose_amount": "Choose top-up amount",
+            "recommended": "RECOMMENDED",
+            "bonus_tag": "BONUS",
+            "ssl_secure": "Payment processed securely via 256-bit SSL.",
+            "status": {
+                "processing": "PROCESSING...",
+                "success": "TOP-UP SUCCESSFUL!",
+                "load": "LOAD",
+                "now": "NOW"
             },
-            "history_v": {
-                "title": "History",
-                "table": {
-                    "order": "Order",
-                    "date": "Date",
-                    "plan": "Plan / Item",
-                    "amount": "Value",
-                    "actions": "Actions"
-                },
-                "balance_payment": "Balance",
-                "download_tooltip": "Download HD Photo",
-                "no_orders": "You haven't placed any orders yet."
+            "why_topup": {
+                "title": "Why top-up balance?",
+                "item1": "Faster checkouts (no cards)",
+                "item2": "Get extra bonuses on high top-ups",
+                "item3": "Unified billing"
             },
-            "wallet_v": {
-                "title": "Top-up",
-                "desc": "Add funds to use for future restorations.",
-                "current_balance": "Current Balance",
-                "choose_amount": "Choose top-up amount",
-                "recommended": "RECOMMENDED",
-                "bonus_tag": "BONUS",
-                "ssl_secure": "Payment processed securely via 256-bit SSL.",
-                "status": {
-                    "processing": "PROCESSING...",
-                    "success": "TOP-UP SUCCESSFUL!",
-                    "load": "LOAD",
-                    "now": "NOW"
-                },
-                "why_topup": {
-                    "title": "Why top-up balance?",
-                    "item1": "Faster checkouts (no cards)",
-                    "item2": "Get extra bonuses on high top-ups",
-                    "item3": "Unified billing"
-                },
-                "audit": {
-                    "topup": "Balance Top-up",
-                    "customer_loaded": "Customer loaded",
-                    "bonus": "Bonus"
-                }
+            "audit": {
+                "topup": "Balance Top-up",
+                "customer_loaded": "Customer loaded",
+                "bonus": "Bonus"
             }
         }
     },

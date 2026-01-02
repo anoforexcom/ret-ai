@@ -398,62 +398,62 @@
         "history": "Encomendas",
         "wallet": "Carteira",
         "logout": "Sair"
+      }
+    },
+    "dashboard_v": {
+      "completed_restores": "Restauros",
+      "view_history": "Ver todo o histórico",
+      "new_restore_title": "Novo Restauro",
+      "new_restore_desc": "Dê vida a mais uma memória hoje",
+      "studio_btn": "Ir para o Estúdio",
+      "recent_orders": "Encomendas Recent.",
+      "view_all": "Ver Todas",
+      "paid_badge": "Pago",
+      "no_orders": "Ainda não realizou encomendas.",
+      "security_title": "Segurança",
+      "pw_desc": "Defina uma nova palavra-passe para a sua conta.",
+      "new_pw_label": "Nova Password",
+      "min_chars": "Mínimo 4 caracteres",
+      "update_btn": "Atualizar Palavra-passe",
+      "pw_updated": "Palavra-passe atualizada!"
+    },
+    "history_v": {
+      "title": "Histórico",
+      "table": {
+        "order": "Encomenda",
+        "date": "Data",
+        "plan": "Plano / Item",
+        "amount": "Valor",
+        "actions": "Ações"
       },
-      "v": {
-        "completed_restores": "Restauros",
-        "view_history": "Ver todo o histórico",
-        "new_restore_title": "Novo Restauro",
-        "new_restore_desc": "Dê vida a mais uma memória hoje",
-        "studio_btn": "Ir para o Estúdio",
-        "recent_orders": "Encomendas Recent.",
-        "view_all": "Ver Todas",
-        "paid_badge": "Pago",
-        "no_orders": "Ainda não realizou encomendas.",
-        "security_title": "Segurança",
-        "pw_desc": "Defina uma nova palavra-passe para a sua conta.",
-        "new_pw_label": "Nova Password",
-        "min_chars": "Mínimo 4 caracteres",
-        "update_btn": "Atualizar Palavra-passe",
-        "pw_updated": "Palavra-passe atualizada!"
+      "balance_payment": "Saldo",
+      "download_tooltip": "Baixar Foto HD",
+      "no_orders": "Ainda não realizou encomendas."
+    },
+    "wallet_v": {
+      "title": "Recarregar",
+      "desc": "Adicione fundos para usar em restauros futuros.",
+      "current_balance": "Saldo Atual",
+      "choose_amount": "Escolha o valor do carregamento",
+      "recommended": "RECOMENDADO",
+      "bonus_tag": "BÓNUS",
+      "ssl_secure": "Pagamento processado de forma segura via SSL 256-bit.",
+      "status": {
+        "processing": "PROCESSANDO...",
+        "success": "CARREGAMENTO COM SUCESSO!",
+        "load": "CARREGAR",
+        "now": "AGORA"
       },
-      "history_v": {
-        "title": "Histórico",
-        "table": {
-          "order": "Encomenda",
-          "date": "Data",
-          "plan": "Plano / Item",
-          "amount": "Valor",
-          "actions": "Ações"
-        },
-        "balance_payment": "Saldo",
-        "download_tooltip": "Baixar Foto HD",
-        "no_orders": "Ainda não realizou encomendas."
+      "why_topup": {
+        "title": "Porquê carregar saldo?",
+        "item1": "Checkouts mais rápidos (sem cartões)",
+        "item2": "Ganhe bónus extra em carregamentos altos",
+        "item3": "Faturação única unificada"
       },
-      "wallet_v": {
-        "title": "Recarregar",
-        "desc": "Adicione fundos para usar em restauros futuros.",
-        "current_balance": "Saldo Atual",
-        "choose_amount": "Escolha o valor do carregamento",
-        "recommended": "RECOMENDADO",
-        "bonus_tag": "BÓNUS",
-        "ssl_secure": "Pagamento processado de forma segura via SSL 256-bit.",
-        "status": {
-          "processing": "PROCESSANDO...",
-          "success": "CARREGAMENTO COM SUCESSO!",
-          "load": "CARREGAR",
-          "now": "AGORA"
-        },
-        "why_topup": {
-          "title": "Porquê carregar saldo?",
-          "item1": "Checkouts mais rápidos (sem cartões)",
-          "item2": "Ganhe bónus extra em carregamentos altos",
-          "item3": "Faturação única unificada"
-        },
-        "audit": {
-          "topup": "Recarga de Saldo",
-          "customer_loaded": "Cliente carregou",
-          "bonus": "Bónus"
-        }
+      "audit": {
+        "topup": "Recarga de Saldo",
+        "customer_loaded": "Cliente carregou",
+        "bonus": "Bónus"
       }
     }
   },

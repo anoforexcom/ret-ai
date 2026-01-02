@@ -239,19 +239,23 @@ export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   }, []);
 
   const updateConfig = (newConfig: Partial<StoreConfig>) => {
-    const updated = { ...config, ...newConfig };
-    setConfig(updated);
+    setConfig(prev => {
+      const updated = { ...prev, ...newConfig };
 
-    // Sempre guardar no localStorage para resiliência (mesmo sem Firestore)
-    localStorage.setItem('retro_v10_config', JSON.stringify(updated));
+      // Persistência Local
+      localStorage.setItem('retro_v10_config', JSON.stringify(updated));
 
-    if (db) {
-      db.collection('settings').doc('global').set(cleanForFirestore(updated), { merge: true })
-        .catch((err: any) => {
-          console.error("Error updating config in Firestore:", err);
-          if (err.code === 'permission-denied') setSyncStatus('error');
-        });
-    }
+      // Persistência Firestore
+      if (db) {
+        db.collection('settings').doc('global').set(cleanForFirestore(updated), { merge: true })
+          .catch((err: any) => {
+            console.error("Error updating config in Firestore:", err);
+            if (err.code === 'permission-denied') setSyncStatus('error');
+          });
+      }
+
+      return updated;
+    });
   };
 
   const addOrder = (order: Order) => {
@@ -297,15 +301,26 @@ export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   };
 
   const updateCustomerBalance = (id: string, amount: number) => {
-    // Customers are currently stored in config.customers
-    const updatedCustomers = config.customers.map(c =>
-      c.id === id ? { ...c, balance: c.balance + amount } : c
-    );
-    updateConfig({ customers: updatedCustomers });
+    setConfig(prev => {
+      const updatedCustomers = (prev.customers || []).map(c =>
+        c.id === id ? { ...c, balance: c.balance + amount } : c
+      );
+      const updated = { ...prev, customers: updatedCustomers };
 
-    if (currentCustomer?.id === id) {
-      setCurrentCustomer(prev => prev ? { ...prev, balance: prev.balance + amount } : null);
-    }
+      // Update local storage and firestore
+      localStorage.setItem('retro_v10_config', JSON.stringify(updated));
+      if (db) {
+        db.collection('settings').doc('global').set(cleanForFirestore(updated), { merge: true })
+          .catch(err => console.error("Error updating balance:", err));
+      }
+
+      // Update current customer if needed
+      if (currentCustomer?.id === id) {
+        setCurrentCustomer(prevC => prevC ? { ...prevC, balance: prevC.balance + amount } : null);
+      }
+
+      return updated;
+    });
   };
 
   const updateCustomerPassword = (id: string, newPassword: string) => {
@@ -345,7 +360,17 @@ export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       createdAt: new Date().toISOString(),
       password: data.password || '123456'
     };
-    updateConfig({ customers: [...config.customers, newC] });
+
+    setConfig(prev => {
+      const updated = { ...prev, customers: [...(prev.customers || []), newC] };
+      localStorage.setItem('retro_v10_config', JSON.stringify(updated));
+      if (db) {
+        db.collection('settings').doc('global').set(cleanForFirestore(updated), { merge: true })
+          .catch(err => console.error("Error registering customer:", err));
+      }
+      return updated;
+    });
+
     setCurrentCustomer(newC);
     return newC;
   };

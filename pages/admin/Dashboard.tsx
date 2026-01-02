@@ -198,7 +198,18 @@ const Dashboard: React.FC = () => {
   };
 
   const daysInRange = getDaysArray(dateRange.start, dateRange.end);
-  console.log("📊 Dashboard Render:", { ordersCount: orders.length, range: dateRange });
+  console.log("📊 Dashboard Stats:", {
+    ordersCount: orders.length,
+    filteredOrders: filteredOrders.length,
+    customersCount: (config.customers || []).length,
+    escrowTotal: escrowBalance.toFixed(2)
+  });
+
+  // Debug Ana Rosa especificamente se houver suspeita de falha
+  const anaRosa = (config.customers || []).find(c => c.firstName.toLowerCase().includes('ana') && c.lastName.toLowerCase().includes('rosa'));
+  if (anaRosa) {
+    console.log("🔍 Debug Customer [Ana Rosa]:", anaRosa);
+  }
   // Limitar a 30 dias para não quebrar o layout do gráfico se o range for enorme
   const chartDays = daysInRange.length > 31 ? daysInRange.slice(-31) : daysInRange;
 

@@ -33,8 +33,8 @@ const CustomerLayout: React.FC = () => {
               <Globe className="h-4 w-4" />
               <span className="text-xs font-bold uppercase">{isCurrentPt ? 'EN' : 'PT'}</span>
             </button>
-            <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-4">
-              <User className="h-8 w-8" />
+            <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-4 backdrop-blur-sm transform -rotate-3">
+              <Wand2 className="h-8 w-8 text-white" />
             </div>
             <h2 className="text-2xl font-bold">{t('customer.login.title')}</h2>
             <p className="text-indigo-100 text-sm mt-1">{t('customer.login.subtitle')}</p>
@@ -120,8 +120,8 @@ const CustomerLayout: React.FC = () => {
       <div className="bg-indigo-900 text-white py-12 px-4">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="flex flex-col md:flex-row items-center gap-4">
-            <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center font-bold text-2xl border-2 border-white/20">
-              {currentCustomer.firstName.charAt(0)}
+            <div className="w-16 h-16 rounded-2xl bg-white flex items-center justify-center shadow-lg transform rotate-3 hover:rotate-0 transition-transform duration-300">
+              <Wand2 className="h-8 w-8 text-indigo-600" />
             </div>
             <div className="text-center md:text-left">
               <h1 className="text-2xl font-bold">{t('customer.dashboard.welcome', { name: currentCustomer.firstName })}</h1>

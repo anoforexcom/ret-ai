@@ -18,7 +18,7 @@ interface ConfigContextType {
   currentCustomer: CustomerAccount | null;
   customerLogin: (email: string, password?: string) => { success: boolean, message: string };
   customerLogout: () => void;
-  registerCustomer: (customer: Omit<CustomerAccount, 'id' | 'balance' | 'createdAt'>) => CustomerAccount;
+  registerCustomer: (customer: Omit<CustomerAccount, 'id' | 'balance' | 'createdAt'>, initialBalance?: number) => CustomerAccount;
   updateCustomerBalance: (customerId: string, amount: number) => void;
   updateCustomerPassword: (customerId: string, newPassword: string) => void;
   syncStatus: 'connected' | 'disconnected' | 'error';
@@ -337,11 +337,11 @@ export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   const customerLogout = () => setCurrentCustomer(null);
 
-  const registerCustomer = (data: any) => {
+  const registerCustomer = (data: any, initialBalance: number = 0) => {
     const newC: CustomerAccount = {
       ...data,
       id: `C-${Date.now()}`,
-      balance: 0,
+      balance: initialBalance,
       createdAt: new Date().toISOString(),
       password: data.password || '123456'
     };

@@ -79,30 +79,31 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onSuccess 
 
   const handleCheckoutSuccess = (methodName: string) => {
     let finalCustomer = currentCustomer;
+    let balanceToCredit = 0;
+
+    // 1. Calcular bónus/saldo de Pack se aplicável
+    if (selectedTier.photos > 1) {
+      // Se for Bundle, 1 foto é consumida agora, o resto vai para saldo
+      const unitPrice = selectedTier.price / selectedTier.photos;
+      balanceToCredit = unitPrice * (selectedTier.photos - 1);
+    }
 
     if (activeMethod?.type === 'balance' && currentCustomer) {
+      // Se pagou com saldo, apenas retira o valor total
       updateCustomerBalance(currentCustomer.id, -selectedTier.price);
     } else {
-      // Registo ou utilização de conta existente para outros métodos
+      // Outros métodos: Cartão, MB Way, etc.
       if (!currentCustomer && shouldRegister && email && firstName) {
+        // Regista o novo cliente já com o saldo do bundle (ATÓMICO)
         finalCustomer = registerCustomer({
           firstName,
           lastName,
           email,
           password: regPassword || undefined
-        });
-      }
-
-      // Lógica de Crédito de Saldo para Bundles
-      if (selectedTier.photos > 1) {
-        // Se for Bundle, 1 foto é consumida agora, o resto vai para saldo
-        // Cálculo: (Preço Total / Total Photos) * (Total Photos - 1)
-        const unitPrice = selectedTier.price / selectedTier.photos;
-        const balanceToCredit = unitPrice * (selectedTier.photos - 1);
-
-        if (finalCustomer) {
-          updateCustomerBalance(finalCustomer.id, balanceToCredit);
-        }
+        }, balanceToCredit);
+      } else if (currentCustomer && balanceToCredit > 0) {
+        // Cliente já logado recebe o crédito do bundle
+        updateCustomerBalance(currentCustomer.id, balanceToCredit);
       }
     }
 

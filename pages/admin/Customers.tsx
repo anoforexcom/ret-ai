@@ -1,13 +1,23 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useConfig } from '../../contexts/ConfigContext';
-import { User, Mail, Calendar, TrendingUp, Coins, BadgeCheck, Edit2, X } from 'lucide-react';
+import { User, Mail, Calendar, TrendingUp, Coins, BadgeCheck, Edit2, X, Plus, UserPlus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 const Customers: React.FC = () => {
-    const { orders, config, updateCustomerBalance } = useConfig();
+    const { orders, config, updateCustomerBalance, registerCustomer } = useConfig();
     const { t, i18n } = useTranslation();
-    const [editingCustomer, setEditingCustomer] = React.useState<any>(null);
-    const [newBalance, setNewBalance] = React.useState<string>("");
+
+    const [editingCustomer, setEditingCustomer] = useState<any>(null);
+    const [newBalance, setNewBalance] = useState<string>("");
+
+    const [showRegisterModal, setShowRegisterModal] = useState(false);
+    const [registerData, setRegisterData] = useState({
+        firstName: '',
+        lastName: '',
+        email: '',
+        password: '',
+        balance: '0'
+    });
 
     // Processar dados de clientes a partir das encomendas E das contas registadas
     const registeredMap = new Map(); // Mapeia ID -> Customer
@@ -24,6 +34,8 @@ const Customers: React.FC = () => {
 
         const customerData = {
             id: c.id,
+            firstName: c.firstName,
+            lastName: c.lastName,
             name: fullName,
             email: c.email.trim(),
             totalSpent: 0,
@@ -44,7 +56,6 @@ const Customers: React.FC = () => {
 
     // 2. Processar Encomendas para somar gastos
     orders.forEach(order => {
-        // Normalização do estado (muito permissivo para garantir que nada escapa)
         const status = (order.status || "").toLowerCase().trim();
         const isPaid = [
             'completed', 'pago', 'paid', 'success', 'concluído', 'concluido',
@@ -56,7 +67,6 @@ const Customers: React.FC = () => {
         const orderName = (order.customerName || "").trim().toLowerCase();
         const orderIdFromOrder = order.customerId;
 
-        // Converter montante de forma robusta (lida com strings, vírgulas, etc)
         let orderAmount = 0;
         if (typeof order.amount === 'number') {
             orderAmount = order.amount;
@@ -64,19 +74,12 @@ const Customers: React.FC = () => {
             orderAmount = parseFloat(order.amount.toString().replace(',', '.').replace(/[^\d.]/g, '')) || 0;
         }
 
-        // Tentar encontrar o cliente registado correspondente
         let targetCustomer: any = null;
-
-        // Prioridade 1: Match por ID
         if (orderIdFromOrder) targetCustomer = registeredMap.get(orderIdFromOrder);
-
-        // Prioridade 2: Match por Email (se não encontrar por ID)
         if (!targetCustomer && orderEmail) {
             const mappedId = emailToIdMap.get(orderEmail);
             if (mappedId) targetCustomer = registeredMap.get(mappedId);
         }
-
-        // Prioridade 3: Match por Nome (Último recurso para encomendas antigas sem ID/Email)
         if (!targetCustomer && orderName) {
             const mappedId = nameToIdMap.get(orderName);
             if (mappedId) targetCustomer = registeredMap.get(mappedId);
@@ -89,9 +92,7 @@ const Customers: React.FC = () => {
                 targetCustomer.lastOrder = order.date;
             }
         } else if (orderEmail || order.customerName) {
-            // É um visitante (não registado ou não encontrado nas contas)
             const visitorKey = orderEmail || order.customerName || "unknown";
-
             if (!visitorMap.has(visitorKey)) {
                 const guestData = {
                     name: order.customerName || 'Visitante',
@@ -105,7 +106,6 @@ const Customers: React.FC = () => {
                 visitorMap.set(visitorKey, guestData);
                 allFinalCustomers.push(guestData);
             }
-
             const guest = visitorMap.get(visitorKey);
             guest.totalSpent += orderAmount;
             guest.orderCount += 1;
@@ -116,15 +116,52 @@ const Customers: React.FC = () => {
     });
 
     const customers = allFinalCustomers.sort((a, b) => b.totalSpent - a.totalSpent);
-
     const totalSpentAll = customers.reduce((acc, c) => acc + c.totalSpent, 0);
     const avgClv = customers.length > 0 ? totalSpentAll / customers.length : 0;
 
+    const handlePromoteVisitor = (visitor: any) => {
+        const names = visitor.name.split(' ');
+        setRegisterData({
+            firstName: names[0] || '',
+            lastName: names.slice(1).join(' ') || '',
+            email: (visitor.email && visitor.email !== 'Vários') ? visitor.email : '',
+            password: '',
+            balance: '0'
+        });
+        setShowRegisterModal(true);
+    };
+
+    const handleManualRegister = () => {
+        if (!registerData.email || !registerData.firstName) return;
+
+        registerCustomer({
+            firstName: registerData.firstName,
+            lastName: registerData.lastName,
+            email: registerData.email,
+            password: registerData.password || undefined
+        }, parseFloat(registerData.balance) || 0);
+
+        setShowRegisterModal(false);
+        setRegisterData({ firstName: '', lastName: '', email: '', password: '', balance: '0' });
+    };
+
     return (
-        <div className="animate-fadeIn">
-            <div className="mb-8">
-                <h1 className="text-2xl font-bold text-slate-900">{t('admin.customers_v.title')}</h1>
-                <p className="text-slate-500 text-sm mt-1">{t('admin.customers_v.subtitle')}</p>
+        <div className="animate-fadeIn pb-20">
+            <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h1 className="text-2xl font-bold text-slate-900">{t('admin.customers_v.title')}</h1>
+                    <p className="text-slate-500 text-sm mt-1">{t('admin.customers_v.subtitle')}</p>
+                </div>
+                <button
+                    onClick={() => {
+                        setRegisterData({ firstName: '', lastName: '', email: '', password: '', balance: '0' });
+                        setShowRegisterModal(true);
+                    }}
+                    className="flex items-center justify-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl transition-all shadow-lg shadow-indigo-100"
+                >
+                    <Plus className="h-5 w-5" />
+                    {t('admin.customers_v.add_customer')}
+                </button>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -197,7 +234,7 @@ const Customers: React.FC = () => {
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 text-right">
-                                        {customer.isRegistered && (
+                                        {customer.isRegistered ? (
                                             <button
                                                 onClick={() => {
                                                     setEditingCustomer(customer);
@@ -208,6 +245,14 @@ const Customers: React.FC = () => {
                                             >
                                                 <Edit2 className="h-4 w-4" />
                                             </button>
+                                        ) : (
+                                            <button
+                                                onClick={() => handlePromoteVisitor(customer)}
+                                                className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                                                title={t('admin.customers_v.register_visitor')}
+                                            >
+                                                <UserPlus className="h-4 w-4" />
+                                            </button>
                                         )}
                                     </td>
                                 </tr>
@@ -217,7 +262,89 @@ const Customers: React.FC = () => {
                 </div>
             </div>
 
-            {/* Modal de Ajuste de Saldo */}
+            {/* Modal de Registo/Conversão */}
+            {showRegisterModal && (
+                <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                    <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden animate-slideUp">
+                        <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+                            <h3 className="font-bold text-slate-900">
+                                {registerData.email ? t('admin.customers_v.modal_register.title_visitor') : t('admin.customers_v.modal_register.title')}
+                            </h3>
+                            <button onClick={() => setShowRegisterModal(false)} className="text-slate-400 hover:text-slate-600">
+                                <X className="h-5 w-5" />
+                            </button>
+                        </div>
+                        <div className="p-8">
+                            <div className="grid grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{t('admin.customers_v.modal_register.first_name')}</label>
+                                    <input
+                                        value={registerData.firstName}
+                                        onChange={e => setRegisterData({ ...registerData, firstName: e.target.value })}
+                                        className="w-full h-11 px-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-medium"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{t('admin.customers_v.modal_register.last_name')}</label>
+                                    <input
+                                        value={registerData.lastName}
+                                        onChange={e => setRegisterData({ ...registerData, lastName: e.target.value })}
+                                        className="w-full h-11 px-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-medium"
+                                    />
+                                </div>
+                            </div>
+                            <div className="mb-4">
+                                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{t('admin.customers_v.modal_register.email')}</label>
+                                <input
+                                    value={registerData.email}
+                                    onChange={e => setRegisterData({ ...registerData, email: e.target.value })}
+                                    className="w-full h-11 px-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-medium"
+                                />
+                            </div>
+                            <div className="grid grid-cols-2 gap-4 mb-6">
+                                <div>
+                                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{t('admin.customers_v.modal_register.password')}</label>
+                                    <input
+                                        type="password"
+                                        value={registerData.password}
+                                        onChange={e => setRegisterData({ ...registerData, password: e.target.value })}
+                                        className="w-full h-11 px-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-medium"
+                                        placeholder="Min. 4 chars"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{t('admin.customers_v.modal_register.balance')}</label>
+                                    <input
+                                        type="number"
+                                        step="0.01"
+                                        value={registerData.balance}
+                                        onChange={e => setRegisterData({ ...registerData, balance: e.target.value })}
+                                        className="w-full h-11 px-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-bold text-indigo-600"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="flex flex-col gap-3">
+                                <button
+                                    onClick={handleManualRegister}
+                                    disabled={!registerData.email || !registerData.firstName}
+                                    className="w-full h-12 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-bold rounded-xl transition-all shadow-lg shadow-indigo-100"
+                                >
+                                    {t('admin.customers_v.modal_register.save')}
+                                </button>
+                                <button
+                                    onClick={() => setShowRegisterModal(false)}
+                                    className="w-full h-12 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold rounded-xl transition-all"
+                                >
+                                    {t('admin.customers_v.modal_register.cancel')}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal de Ajuste de Saldo (Simplificado para Clientes Registados) */}
             {editingCustomer && (
                 <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
                     <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden animate-slideUp">

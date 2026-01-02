@@ -144,7 +144,20 @@
                 "registered": "Registered",
                 "visitor": "Visitor"
             },
-            "orders_count": "orders"
+            "orders_count": "orders",
+            "add_customer": "New Customer",
+            "register_visitor": "Register Visitor",
+            "modal_register": {
+                "title": "Register New Customer",
+                "title_visitor": "Convert Visitor to Customer",
+                "first_name": "First Name",
+                "last_name": "Last Name",
+                "email": "Email",
+                "balance": "Initial Balance (€)",
+                "password": "Password",
+                "save": "Create Account",
+                "cancel": "Cancel"
+            }
         },
         "financials_v": {
             "title": "Financial Management",

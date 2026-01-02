@@ -144,7 +144,20 @@
         "registered": "Registado",
         "visitor": "Visitante"
       },
-      "orders_count": "encomendas"
+      "orders_count": "encomendas",
+      "add_customer": "Novo Cliente",
+      "register_visitor": "Registar Visitante",
+      "modal_register": {
+        "title": "Registar Novo Cliente",
+        "title_visitor": "Converter Visitante em Cliente",
+        "first_name": "Nome",
+        "last_name": "Apelido",
+        "email": "Email",
+        "balance": "Saldo Inicial (€)",
+        "password": "Palavra-passe",
+        "save": "Criar Conta",
+        "cancel": "Cancelar"
+      }
     },
     "financials_v": {
       "title": "Gestão Financeira",

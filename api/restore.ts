@@ -27,21 +27,22 @@ export default async function handler(req: any, res: any) {
       return res.status(400).json({ error: 'Nenhuma imagem fornecida.' });
     }
 
-    console.log(`Enviando para Replicate... (Modelo: DDColor)`);
+    console.log(`Enviando para Replicate... (Modelo: Tencentarc)`);
     let output;
 
     try {
-      // Tenta o motor DDColor primeiro (Melhor qualidade)
+      // Tenta o motor original Tencentarc (Mais estável para o utilizador)
       output = await replicate.run(
-        "piddnad/ddcolor:ca494ba129e44e45f661d6ece83c4c98a9a7c774309beca01429b58fce8aa695",
+        "tencentarc/photorestoration:9283608cc6b7c9b2f3735f36e2f6912b058c97918ff4a9fa354565ff99f1329c",
         {
           input: {
             image: `data:image/jpeg;base64,${imageBase64}`,
-            model_size: "large"
+            upscale: 2,
+            face_enhance: true
           }
         }
       );
-      console.log("DDColor finalizou com sucesso.");
+      console.log("Tencentarc finalizou com sucesso.");
     } catch (primaryError: any) {
       console.error("DEBUG: ERRO DETETADO NO MOTOR DDColor:");
       console.error("Mensagem:", primaryError.message);

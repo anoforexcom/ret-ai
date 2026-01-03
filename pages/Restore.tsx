@@ -62,17 +62,25 @@ const Restore: React.FC = () => {
       setStatus(AppStatus.ERROR);
 
       const errorMsg = err.message || "";
+
+      // Se a mensagem for longa (provavelmente o nosso erro detalhado do backend), usamos direto
+      const isDescriptiveError = errorMsg.split(' ').length > 5;
+
       // Deteta erros de quota (429/RESOURCE_EXHAUSTED) ou chave não encontrada
       if (
-        errorMsg.includes("Requested entity was not found") ||
-        errorMsg.includes("RESOURCE_EXHAUSTED") ||
-        errorMsg.includes("quota") ||
-        errorMsg.includes("limit") ||
-        errorMsg.includes("429")
+        !isDescriptiveError && (
+          errorMsg.includes("Requested entity was not found") ||
+          errorMsg.includes("RESOURCE_EXHAUSTED") ||
+          errorMsg.includes("quota") ||
+          errorMsg.includes("limit") ||
+          errorMsg.includes("429") ||
+          errorMsg.includes("402")
+        )
       ) {
         setHasKey(false);
         setError(t('restore.error_quota'));
       } else {
+        // Para erros descritivos ou inesperados, mostra a mensagem crua
         setError(errorMsg || t('restore.error_unexpected'));
       }
     }

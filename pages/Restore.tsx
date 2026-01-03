@@ -217,9 +217,16 @@ const Restore: React.FC = () => {
                 </div>
 
                 {error && (
-                  <div className="p-4 bg-red-50 border border-red-100 rounded-xl text-red-600 text-sm flex items-center gap-3 animate-shake">
-                    <AlertCircle className="h-5 w-5 flex-shrink-0" />
-                    <div className="flex-1">{error}</div>
+                  <div className="p-4 bg-red-50 border border-red-100 rounded-xl text-red-600 text-sm space-y-2 animate-shake">
+                    <div className="flex items-center gap-3">
+                      <AlertCircle className="h-5 w-5 flex-shrink-0" />
+                      <div className="flex-1 font-bold">{error}</div>
+                    </div>
+                    {(err as any)?.debug_status && (
+                      <div className="text-[10px] opacity-70 ml-8 font-mono bg-white/50 p-2 rounded border border-red-200">
+                        DEBUG: Code {(err as any).debug_status} | {(err as any).details}
+                      </div>
+                    )}
                   </div>
                 )}
 

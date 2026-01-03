@@ -84,7 +84,10 @@ export const restoreImage = async (file: File | string): Promise<string> => {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error || "Ocorreu um erro no servidor ao processar a imagem.");
+      const error = new Error(errorData.error || "Ocorreu um erro no servidor ao processar a imagem.") as any;
+      error.debug_status = errorData.debug_status;
+      error.details = errorData.details;
+      throw error;
     }
 
     const data = await response.json();

@@ -13,7 +13,9 @@ export default async function handler(req: any, res: any) {
     return res.status(405).json({ error: 'Método não permitido' });
   }
 
+  const token = process.env.REPLICATE_API_TOKEN;
   console.log("--- INÍCIO DO PROCESSO REAL DE COLORIZAÇÃO ---");
+  console.log(`Token Replicate presente: ${token ? 'SIM (Começa com ' + token.substring(0, 4) + '...)' : 'NÃO'}`);
 
   try {
     const { imageBase64, modelName = "Artistic", renderFactor = 28 } = req.body;
@@ -39,7 +41,10 @@ export default async function handler(req: any, res: any) {
       );
       console.log("DDColor finalizou com sucesso.");
     } catch (primaryError: any) {
-      console.warn("ERRO NO MOTOR DDColor:", primaryError.message);
+      console.error("DEBUG: ERRO DETETADO NO MOTOR DDColor:");
+      console.error("Mensagem:", primaryError.message);
+      console.error("Status:", primaryError.status);
+      console.error("Objeto de erro completo:", JSON.stringify(primaryError, null, 2));
 
       // Deteta se o erro é de quota, rate limit ou similar para tentar fallback
       const errorMsg = primaryError.message?.toLowerCase() || "";
@@ -52,10 +57,11 @@ export default async function handler(req: any, res: any) {
         errorMsg.includes("credit") ||
         errorMsg.includes("payment required") ||
         errorMsg.includes("429") ||
-        errorMsg.includes("402");
+        errorMsg.includes("402") ||
+        errorMsg.includes("free tier");
 
       if (isQuotaError) {
-        console.log("Limite de quota ou erro de créditos no DDColor. Tentando fallback para DeOldify...");
+        console.log("Condição de Quota detetada. Iniciando Fallback para DeOldify...");
         try {
           output = await replicate.run(
             "arielreplicate/deoldify_image:0da600fab0c45a66211339215a9ad513b75ca55a16c41a3a4bbaf901419730f9",
@@ -67,37 +73,27 @@ export default async function handler(req: any, res: any) {
               }
             }
           );
-          console.log("Fallback para DeOldify concluído com sucesso.");
+          console.log("Sucesso no Fallback!");
         } catch (fallbackError: any) {
-          console.error("ERRO NO FALLBACK (DeOldify):", fallbackError.message);
+          console.error("DEBUG: ERRO NO MOTOR DE FALLBACK (DeOldify):");
+          console.error("Mensagem:", fallbackError.message);
+          console.error("Status:", fallbackError.status);
+          console.error("Objeto completo (Fallback):", JSON.stringify(fallbackError, null, 2));
+
           return res.status(402).json({
-            error: "A quota total da sua conta Replicate foi atingida ou o saldo é insuficiente. Por favor, carregue a sua conta em replicate.com para continuar a usar o motor de IA.",
-            details: fallbackError.message
+            error: "A quota total da sua conta Replicate foi atingida ou o saldo é insuficiente.",
+            details: fallbackError.message,
+            debug_status: fallbackError.status
           });
         }
       } else {
-        // Se não for especificamente um erro de quota, tentamos fallback de qualquer forma se for um erro de servidor (5xx)
-        if (primaryError.status !== 400 && primaryError.status !== 401) {
-          console.log("Erro de servidor no DDColor. Tentando fallback para DeOldify como precaução...");
-          try {
-            output = await replicate.run(
-              "arielreplicate/deoldify_image:0da600fab0c45a66211339215a9ad513b75ca55a16c41a3a4bbaf901419730f9",
-              {
-                input: {
-                  image: `data:image/jpeg;base64,${imageBase64}`,
-                  model_name: "Artistic",
-                  render_factor: renderFactor
-                }
-              }
-            );
-            console.log("Fallback preventivo para DeOldify concluído com sucesso.");
-          } catch (fError: any) {
-            console.error("ERRO NO FALLBACK PREVENTIVO:", fError.message);
-            return res.status(500).json({ error: "O motor de IA encontrou um erro persistente em ambos os modelos. Verifique a consola ou os seus créditos no Replicate." });
-          }
-        } else {
-          return res.status(primaryError.status || 500).json({ error: primaryError.message || 'Erro no processamento' });
-        }
+        // Se for um erro inesperado (ex: auth failed)
+        console.log("Erro não relacionado com quota. Abortando.");
+        return res.status(primaryError.status || 500).json({
+          error: "O motor de IA encontrou um erro técnico.",
+          details: primaryError.message,
+          debug_status: primaryError.status
+        });
       }
     }
 

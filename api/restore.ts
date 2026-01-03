@@ -8,6 +8,8 @@ const replicate = new Replicate({
   auth: process.env.REPLICATE_API_TOKEN,
 });
 
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
 export default async function handler(req: any, res: any) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Método não permitido' });
@@ -61,6 +63,12 @@ export default async function handler(req: any, res: any) {
         errorMsg.includes("free tier");
 
       if (isQuotaError) {
+        // Se for 429, esperamos um pouco para limpar o burst limit do Replicate
+        if (primaryError.status === 429 || errorMsg.includes("throttled")) {
+          console.log("Rate limit atingido (429). Aguardando 5 segundos antes do fallback...");
+          await sleep(5000);
+        }
+
         console.log("Condição de Quota detetada. Iniciando Fallback para DeOldify...");
         try {
           output = await replicate.run(
@@ -76,12 +84,16 @@ export default async function handler(req: any, res: any) {
           console.log("Sucesso no Fallback!");
         } catch (fallbackError: any) {
           console.error("DEBUG: ERRO NO MOTOR DE FALLBACK (DeOldify):");
-          console.error("Mensagem:", fallbackError.message);
-          console.error("Status:", fallbackError.status);
-          console.error("Objeto completo (Fallback):", JSON.stringify(fallbackError, null, 2));
+          const fErrorMsg = fallbackError.message?.toLowerCase() || "";
 
-          return res.status(402).json({
-            error: "A quota total da sua conta Replicate foi atingida ou o saldo é insuficiente.",
+          let friendlyError = "A quota total da sua conta Replicate foi atingida ou o saldo é insuficiente.";
+
+          if (fErrorMsg.includes("less than $5.0")) {
+            friendlyError = "O Replicate impõe limites estritos quando o saldo é inferior a $5.0. Por favor, carregue a conta com pelo menos $10 para remover esta restrição.";
+          }
+
+          return res.status(fallbackError.status || 402).json({
+            error: friendlyError,
             details: fallbackError.message,
             debug_status: fallbackError.status
           });

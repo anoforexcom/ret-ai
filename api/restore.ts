@@ -27,22 +27,22 @@ export default async function handler(req: any, res: any) {
       return res.status(400).json({ error: 'Nenhuma imagem fornecida.' });
     }
 
-    console.log(`Enviando para Replicate... (Modelo: Tencentarc)`);
+    console.log(`Enviando para Replicate... (Modelo: DeOldify - ORIGINAL)`);
     let output;
 
     try {
-      // Tenta o motor original Tencentarc (Mais estável para o utilizador)
+      // Tenta o motor original DeOldify (O mais estável para esta conta)
       output = await replicate.run(
-        "tencentarc/photorestoration:9283608cc6b7c9b2f3735f36e2f6912b058c97918ff4a9fa354565ff99f1329c",
+        "arielreplicate/deoldify_image:0da600fab0c45a66211339215a9ad513b75ca55a16c41a3a4bbaf901419730f9",
         {
           input: {
             image: `data:image/jpeg;base64,${imageBase64}`,
-            upscale: 2,
-            face_enhance: true
+            model_name: "Artistic",
+            render_factor: renderFactor
           }
         }
       );
-      console.log("Tencentarc finalizou com sucesso.");
+      console.log("DeOldify finalizou com sucesso.");
     } catch (primaryError: any) {
       console.error("DEBUG: ERRO DETETADO NO MOTOR TENCENTARC:");
       console.error("Mensagem:", primaryError.message);

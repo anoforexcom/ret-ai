@@ -44,10 +44,9 @@ export default async function handler(req: any, res: any) {
       );
       console.log("Tencentarc finalizou com sucesso.");
     } catch (primaryError: any) {
-      console.error("DEBUG: ERRO DETETADO NO MOTOR DDColor:");
+      console.error("DEBUG: ERRO DETETADO NO MOTOR TENCENTARC:");
       console.error("Mensagem:", primaryError.message);
       console.error("Status:", primaryError.status);
-      console.error("Objeto de erro completo:", JSON.stringify(primaryError, null, 2));
 
       // Deteta se o erro é de quota, rate limit ou similar para tentar fallback
       const errorMsg = primaryError.message?.toLowerCase() || "";
@@ -61,7 +60,9 @@ export default async function handler(req: any, res: any) {
         errorMsg.includes("payment required") ||
         errorMsg.includes("429") ||
         errorMsg.includes("402") ||
-        errorMsg.includes("free tier");
+        errorMsg.includes("free tier") ||
+        errorMsg.includes("throttled") ||
+        errorMsg.includes("less than $5.0");
 
       if (isQuotaError) {
         // Se for 429, esperamos o tempo de reset médio (6 RPM = 10s por pedido + margem)
@@ -70,7 +71,7 @@ export default async function handler(req: any, res: any) {
           await sleep(11000);
         }
 
-        console.log("Condição de Quota detetada. Iniciando Fallback para DeOldify...");
+        console.log("Condição de Quota detetada no Tencentarc. Iniciando Fallback para DeOldify...");
         try {
           output = await replicate.run(
             "arielreplicate/deoldify_image:0da600fab0c45a66211339215a9ad513b75ca55a16c41a3a4bbaf901419730f9",
@@ -90,8 +91,8 @@ export default async function handler(req: any, res: any) {
 
           let friendlyError = "A quota total da sua conta Replicate foi atingida ou o saldo é insuficiente.";
 
-          if (fErrorMsg.includes("less than $5.0")) {
-            friendlyError = "O Replicate reporta saldo inferior a $5.0 (Restrição de 6 RPM). Se tens saldo, verifica se o REPLICATE_API_TOKEN no .env está correto.";
+          if (fErrorMsg.includes("less than $5.0") || errorMsg.includes("less than $5.0")) {
+            friendlyError = "O Replicate ainda reporta saldo baixo ou limite de taxa. Se já carregaste, aguarda 1-2 minutos para o sistema deles atualizar.";
           }
 
           return res.status(fErrorStatus).json({
@@ -102,7 +103,7 @@ export default async function handler(req: any, res: any) {
         }
       } else {
         // Se for um erro inesperado (ex: auth failed)
-        console.log("Erro não relacionado com quota. Abortando.");
+        console.log("Erro não relacionado com quota no Tencentarc. Abortando.");
         return res.status(primaryError.status || 500).json({
           error: "O motor de IA encontrou um erro técnico.",
           details: primaryError.message,

@@ -13,6 +13,7 @@ const Restore: React.FC = () => {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [restoredUrl, setRestoredUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [debugInfo, setDebugInfo] = useState<{ status?: number, details?: string } | null>(null);
   const [showPayment, setShowPayment] = useState(false);
   const [hasKey, setHasKey] = useState<boolean>(true); // Sempre true, o backend controla a chave
 
@@ -43,6 +44,7 @@ const Restore: React.FC = () => {
       setPreviewUrl(URL.createObjectURL(file));
       setRestoredUrl(null);
       setError(null);
+      setDebugInfo(null);
       setStatus(AppStatus.IDLE);
     }
   };
@@ -52,6 +54,7 @@ const Restore: React.FC = () => {
 
     setStatus(AppStatus.PROCESSING);
     setError(null);
+    setDebugInfo(null);
 
     try {
       const result = await restoreImage(selectedFile);
@@ -82,6 +85,14 @@ const Restore: React.FC = () => {
       } else {
         // Para erros descritivos ou inesperados, mostra a mensagem crua
         setError(errorMsg || t('restore.error_unexpected'));
+      }
+
+      // Guarda info de debug se disponível
+      if (err.debug_status || err.details) {
+        setDebugInfo({
+          status: err.debug_status,
+          details: err.details
+        });
       }
     }
   };
@@ -222,9 +233,9 @@ const Restore: React.FC = () => {
                       <AlertCircle className="h-5 w-5 flex-shrink-0" />
                       <div className="flex-1 font-bold">{error}</div>
                     </div>
-                    {(err as any)?.debug_status && (
+                    {debugInfo && (
                       <div className="text-[10px] opacity-70 ml-8 font-mono bg-white/50 p-2 rounded border border-red-200">
-                        DEBUG: Code {(err as any).debug_status} | {(err as any).details}
+                        DEBUG: Code {debugInfo.status} | {debugInfo.details}
                       </div>
                     )}
                   </div>

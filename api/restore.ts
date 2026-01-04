@@ -28,27 +28,28 @@ export default async function handler(req: any, res: any) {
     }
 
     console.log(`Enviando para Replicate... (Modelo: DeOldify - ORIGINAL)`);
-    let output;
+    let output: any;
 
     try {
       // Tenta o motor original DeOldify (Confirmado pelo utilizador)
+      // Nota: input_image é o campo esperado para esta versão de acordo com o log de erro anterior
       output = await replicate.run(
         "arielreplicate/deoldify_image:0da600fab0c45a66211339f1c16b71345d22f26ef5fea3dca1bb90bb5711e950",
         {
           input: {
             input_image: `data:image/jpeg;base64,${imageBase64}`,
             model_name: "Artistic",
-            render_factor: renderFactor
+            render_factor: Number(renderFactor)
           }
         }
       );
-      console.log("DeOldify finalizou com sucesso.");
+      console.log("DeOldify finalizou a chamada API.");
+      console.log("Output Raw Type:", typeof output);
     } catch (primaryError: any) {
       console.error("DEBUG: ERRO DETETADO NO MOTOR DEOLDIFY:");
       console.error("Mensagem:", primaryError.message);
       console.error("Status:", primaryError.status);
 
-      // Deteta se o erro é de quota, rate limit ou similar para tentar fallback
       const errorMsg = primaryError.message?.toLowerCase() || "";
       const isQuotaError =
         primaryError.status === 429 ||
@@ -57,21 +58,15 @@ export default async function handler(req: any, res: any) {
         errorMsg.includes("limit") ||
         errorMsg.includes("balance") ||
         errorMsg.includes("credit") ||
-        errorMsg.includes("payment required") ||
-        errorMsg.includes("429") ||
-        errorMsg.includes("402") ||
-        errorMsg.includes("free tier") ||
-        errorMsg.includes("throttled") ||
-        errorMsg.includes("less than $5.0");
+        errorMsg.includes("payment required");
 
       if (isQuotaError) {
-        // Se for 429, esperamos o tempo de reset médio (6 RPM = 10s por pedido + margem)
         if (primaryError.status === 429 || errorMsg.includes("throttled")) {
-          console.log("Rate limit atingido (429). Aguardando 11 segundos para o bucket recarregar...");
+          console.log("Rate limit atingido. Aguardando Reset...");
           await sleep(11000);
         }
 
-        console.log("Condição de Quota detetada no motor principal. Iniciando Fallback...");
+        console.log("Iniciando Fallback (Mesmos parâmetros)...");
         try {
           output = await replicate.run(
             "arielreplicate/deoldify_image:0da600fab0c45a66211339f1c16b71345d22f26ef5fea3dca1bb90bb5711e950",
@@ -79,61 +74,56 @@ export default async function handler(req: any, res: any) {
               input: {
                 input_image: `data:image/jpeg;base64,${imageBase64}`,
                 model_name: "Artistic",
-                render_factor: renderFactor
+                render_factor: Number(renderFactor)
               }
             }
           );
-          console.log("Sucesso no Fallback!");
         } catch (fallbackError: any) {
-          console.error("DEBUG: ERRO NO MOTOR DE FALLBACK (DeOldify):");
-          const fErrorStatus = fallbackError.status || fallbackError.response?.status || 429;
-          const fErrorMsg = fallbackError.message?.toLowerCase() || "";
-
-          let friendlyError = "A quota total da sua conta Replicate foi atingida ou o saldo é insuficiente.";
-
-          if (fErrorMsg.includes("less than $5.0") || errorMsg.includes("less than $5.0")) {
-            friendlyError = "O Replicate ainda reporta saldo baixo ou limite de taxa. Se já carregaste, aguarda 1-2 minutos para o sistema deles atualizar.";
-          }
-
-          return res.status(fErrorStatus).json({
-            error: friendlyError,
+          return res.status(fallbackError.status || 500).json({
+            error: "Quota excedida ou erro no motor de IA.",
             details: fallbackError.message,
-            debug_status: fErrorStatus
+            debug_status: fallbackError.status
           });
         }
       } else {
-        // Se for um erro inesperado (ex: auth failed)
-        console.log("Erro não relacionado com quota. Abortando.");
         return res.status(primaryError.status || 500).json({
-          error: "O motor de IA encontrou um erro técnico.",
+          error: "Erro técnico no motor de IA.",
           details: primaryError.message,
           debug_status: primaryError.status
         });
       }
     }
 
-    console.log("Replicate finalizou o processamento.");
+    console.log("Processando resultado do Replicate...");
 
+    // Extracção robusta do URL
     let resultUrl = "";
-    if (typeof output === 'string') {
-      resultUrl = output;
-    } else if (Array.isArray(output)) {
-      resultUrl = output[0];
+    if (output) {
+      if (typeof output === 'string') {
+        resultUrl = output;
+      } else if (Array.isArray(output) && output.length > 0) {
+        resultUrl = output[0];
+      } else if (typeof output === 'object') {
+        // Alguns modelos retornam FileOutput ou objeto com .url
+        resultUrl = output.url || output.output || (output.toString ? output.toString() : "");
+      }
     }
 
-    if (!resultUrl) {
-      console.log("Erro: Sem URL de saída.");
-      return res.status(500).json({ error: 'O motor de IA não devolveu nenhum resultado.' });
+    if (!resultUrl || resultUrl === "[object Object]") {
+      console.log("Erro: Resultado vazio ou inválido.", output);
+      return res.status(500).json({
+        error: 'O motor de IA não devolveu nenhum resultado utilizável.',
+        details: `Tipo: ${typeof output}. Raw: ${JSON.stringify(output)}`,
+        debug_status: 500
+      });
     }
 
-    console.log("Iniciando conversão para Base64 interna (Proxy)...");
+    console.log("A baixar imagem final do URL:", resultUrl);
     const imageRes = await fetch(resultUrl);
-    if (!imageRes.ok) throw new Error("Falha ao capturar imagem final.");
+    if (!imageRes.ok) throw new Error("Falha ao capturar imagem final do Replicate.");
 
     const arrayBuffer = await imageRes.arrayBuffer();
     const base64 = Buffer.from(arrayBuffer).toString('base64');
-
-    console.log("Sucesso! Enviando imagem para o usuário.");
 
     return res.status(200).json({
       restoredImage: base64,
@@ -141,8 +131,8 @@ export default async function handler(req: any, res: any) {
     });
 
   } catch (error: any) {
-    console.error("ERRO NO BACKEND:", error);
-    return res.status(500).json({ error: error.message || 'Erro no processamento' });
+    console.error("ERRO GERAL NO BACKEND:", error);
+    return res.status(500).json({ error: error.message || 'Erro interno' });
   } finally {
     console.log("--- FIM DO PROCESSO ---");
   }

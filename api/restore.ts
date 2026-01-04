@@ -32,7 +32,7 @@ export default async function handler(req: any, res: any) {
 
     try {
       // Tenta o motor original DeOldify (Confirmado pelo utilizador)
-      // Nota: input_image é o campo esperado para esta versão de acordo com o log de erro anterior
+      // O campo deve ser exatamente "input_image" para esta versão do DeOldify
       output = await replicate.run(
         "arielreplicate/deoldify_image:0da600fab0c45a66211339f1c16b71345d22f26ef5fea3dca1bb90bb5711e950",
         {
@@ -44,7 +44,6 @@ export default async function handler(req: any, res: any) {
         }
       );
       console.log("DeOldify finalizou a chamada API.");
-      console.log("Output Raw Type:", typeof output);
     } catch (primaryError: any) {
       console.error("DEBUG: ERRO DETETADO NO MOTOR DEOLDIFY:");
       console.error("Mensagem:", primaryError.message);
@@ -62,11 +61,11 @@ export default async function handler(req: any, res: any) {
 
       if (isQuotaError) {
         if (primaryError.status === 429 || errorMsg.includes("throttled")) {
-          console.log("Rate limit atingido. Aguardando Reset...");
+          console.log("Rate limit atingido. Aguardando 11 segundos...");
           await sleep(11000);
         }
 
-        console.log("Iniciando Fallback (Mesmos parâmetros)...");
+        console.log("Tentativa de Fallback automática...");
         try {
           output = await replicate.run(
             "arielreplicate/deoldify_image:0da600fab0c45a66211339f1c16b71345d22f26ef5fea3dca1bb90bb5711e950",
@@ -80,47 +79,59 @@ export default async function handler(req: any, res: any) {
           );
         } catch (fallbackError: any) {
           return res.status(fallbackError.status || 500).json({
-            error: "Quota excedida ou erro no motor de IA.",
+            error: "Quota insuficiente ou erro persistente na IA.",
             details: fallbackError.message,
             debug_status: fallbackError.status
           });
         }
       } else {
         return res.status(primaryError.status || 500).json({
-          error: "Erro técnico no motor de IA.",
+          error: "O motor de IA encontrou um erro técnico.",
           details: primaryError.message,
           debug_status: primaryError.status
         });
       }
     }
 
-    console.log("Processando resultado do Replicate...");
+    console.log("Processando resultado (Extracção de URL)...");
 
-    // Extracção robusta do URL
+    // Extracção ULTRA-robusta do URL para evitar o erro "Failed to parse URL"
     let resultUrl = "";
     if (output) {
       if (typeof output === 'string') {
         resultUrl = output;
       } else if (Array.isArray(output) && output.length > 0) {
-        resultUrl = output[0];
-      } else if (typeof output === 'object') {
-        // Alguns modelos retornam FileOutput ou objeto com .url
-        resultUrl = output.url || output.output || (output.toString ? output.toString() : "");
+        resultUrl = typeof output[0] === 'string' ? output[0] : "";
+      } else if (typeof output === 'object' && output !== null) {
+        // Se for um FileOutput ou similar, tentamos .url property/getter mas verificamos tipo
+        const potUrl = output.url;
+        if (typeof potUrl === 'string') {
+          resultUrl = potUrl;
+        } else if (typeof potUrl === 'function') {
+          resultUrl = potUrl();
+        } else if (output.toString && typeof output.toString === 'function') {
+          const str = output.toString();
+          if (str && str.startsWith('http')) {
+            resultUrl = str;
+          }
+        }
       }
     }
 
-    if (!resultUrl || resultUrl === "[object Object]") {
-      console.log("Erro: Resultado vazio ou inválido.", output);
+    console.log("Resultado final da extracção de URL:", resultUrl);
+
+    if (!resultUrl || typeof resultUrl !== 'string' || !resultUrl.startsWith('http')) {
+      console.log("Erro: Falha grave na extracção do URL.", { outputType: typeof output, outputJson: JSON.stringify(output) });
       return res.status(500).json({
-        error: 'O motor de IA não devolveu nenhum resultado utilizável.',
-        details: `Tipo: ${typeof output}. Raw: ${JSON.stringify(output)}`,
+        error: 'O motor de IA não devolveu um URL válido.',
+        details: `Raw Output: ${JSON.stringify(output)}`,
         debug_status: 500
       });
     }
 
-    console.log("A baixar imagem final do URL:", resultUrl);
+    console.log("A baixar imagem final...");
     const imageRes = await fetch(resultUrl);
-    if (!imageRes.ok) throw new Error("Falha ao capturar imagem final do Replicate.");
+    if (!imageRes.ok) throw new Error(`Falha ao capturar imagem final do URL: ${resultUrl}`);
 
     const arrayBuffer = await imageRes.arrayBuffer();
     const base64 = Buffer.from(arrayBuffer).toString('base64');
@@ -131,8 +142,8 @@ export default async function handler(req: any, res: any) {
     });
 
   } catch (error: any) {
-    console.error("ERRO GERAL NO BACKEND:", error);
-    return res.status(500).json({ error: error.message || 'Erro interno' });
+    console.error("ERRO CRÍTICO NO BACKEND:", error);
+    return res.status(500).json({ error: error.message || 'Erro inesperado' });
   } finally {
     console.log("--- FIM DO PROCESSO ---");
   }

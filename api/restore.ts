@@ -27,24 +27,24 @@ export default async function handler(req: any, res: any) {
       return res.status(400).json({ error: 'Nenhuma imagem fornecida.' });
     }
 
-    console.log(`Enviando para Replicate... (Modelo: GFPGAN - ORIGINAL)`);
+    console.log(`Enviando para Replicate... (Modelo: DeOldify - ORIGINAL)`);
     let output;
 
     try {
-      // Tenta o motor original GFPGAN (O mais estável para esta conta antes das otimizações)
+      // Tenta o motor original DeOldify (Confirmado pelo utilizador)
       output = await replicate.run(
-        "tencentarc/gfpgan:9283608cc6b7c309b588f79377f095c9a83529ecc33bbc3bc97d81a9723ad9a2",
+        "arielreplicate/deoldify_image:0da600fab0c45a66211339f1c16b71345d22f26ef5fea3dca1bb90bb5711e950",
         {
           input: {
             image: `data:image/jpeg;base64,${imageBase64}`,
-            upscale: 2,
-            face_enhance: true
+            model_name: "Artistic",
+            render_factor: renderFactor
           }
         }
       );
-      console.log("GFPGAN finalizou com sucesso.");
+      console.log("DeOldify finalizou com sucesso.");
     } catch (primaryError: any) {
-      console.error("DEBUG: ERRO DETETADO NO MOTOR TENCENTARC:");
+      console.error("DEBUG: ERRO DETETADO NO MOTOR DEOLDIFY:");
       console.error("Mensagem:", primaryError.message);
       console.error("Status:", primaryError.status);
 

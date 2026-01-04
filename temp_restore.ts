@@ -8,47 +8,45 @@ const replicate = new Replicate({
   auth: process.env.REPLICATE_API_TOKEN,
 });
 
-const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-
 export default async function handler(req: any, res: any) {
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Método não permitido' });
+    return res.status(405).json({ error: 'M├®todo n├úo permitido' });
   }
 
   const token = process.env.REPLICATE_API_TOKEN;
-  console.log("--- INÍCIO DO PROCESSO REAL DE COLORIZAÇÃO ---");
-  console.log(`Token Replicate presente: ${token ? 'SIM (Começa com ' + token.substring(0, 4) + '...)' : 'NÃO'}`);
+  console.log("--- IN├ìCIO DO PROCESSO REAL DE COLORIZA├ç├âO ---");
+  console.log(`Token Replicate presente: ${token ? 'SIM (Come├ºa com ' + token.substring(0, 4) + '...)' : 'N├âO'}`);
 
   try {
     const { imageBase64, modelName = "Artistic", renderFactor = 28 } = req.body;
 
     if (!imageBase64) {
-      console.log("Erro: Imagem não fornecida.");
+      console.log("Erro: Imagem n├úo fornecida.");
       return res.status(400).json({ error: 'Nenhuma imagem fornecida.' });
     }
 
-    console.log(`Enviando para Replicate... (Modelo: GFPGAN - ORIGINAL)`);
+    console.log(`Enviando para Replicate... (Modelo: DDColor)`);
     let output;
 
     try {
-      // Tenta o motor original GFPGAN (O mais estável para esta conta antes das otimizações)
+      // Tenta o motor DDColor primeiro (Melhor qualidade)
       output = await replicate.run(
-        "tencentarc/gfpgan:9283608cc6b7c309b588f79377f095c9a83529ecc33bbc3bc97d81a9723ad9a2",
+        "piddnad/ddcolor:ca494ba129e44e45f661d6ece83c4c98a9a7c774309beca01429b58fce8aa695",
         {
           input: {
             image: `data:image/jpeg;base64,${imageBase64}`,
-            upscale: 2,
-            face_enhance: true
+            model_size: "large"
           }
         }
       );
-      console.log("GFPGAN finalizou com sucesso.");
+      console.log("DDColor finalizou com sucesso.");
     } catch (primaryError: any) {
-      console.error("DEBUG: ERRO DETETADO NO MOTOR TENCENTARC:");
+      console.error("DEBUG: ERRO DETETADO NO MOTOR DDColor:");
       console.error("Mensagem:", primaryError.message);
       console.error("Status:", primaryError.status);
+      console.error("Objeto de erro completo:", JSON.stringify(primaryError, null, 2));
 
-      // Deteta se o erro é de quota, rate limit ou similar para tentar fallback
+      // Deteta se o erro ├® de quota, rate limit ou similar para tentar fallback
       const errorMsg = primaryError.message?.toLowerCase() || "";
       const isQuotaError =
         primaryError.status === 429 ||
@@ -60,18 +58,10 @@ export default async function handler(req: any, res: any) {
         errorMsg.includes("payment required") ||
         errorMsg.includes("429") ||
         errorMsg.includes("402") ||
-        errorMsg.includes("free tier") ||
-        errorMsg.includes("throttled") ||
-        errorMsg.includes("less than $5.0");
+        errorMsg.includes("free tier");
 
       if (isQuotaError) {
-        // Se for 429, esperamos o tempo de reset médio (6 RPM = 10s por pedido + margem)
-        if (primaryError.status === 429 || errorMsg.includes("throttled")) {
-          console.log("Rate limit atingido (429). Aguardando 11 segundos para o bucket recarregar...");
-          await sleep(11000);
-        }
-
-        console.log("Condição de Quota detetada no Tencentarc. Iniciando Fallback para DeOldify...");
+        console.log("Condi├º├úo de Quota detetada. Iniciando Fallback para DeOldify...");
         try {
           output = await replicate.run(
             "arielreplicate/deoldify_image:0da600fab0c45a66211339215a9ad513b75ca55a16c41a3a4bbaf901419730f9",
@@ -86,26 +76,21 @@ export default async function handler(req: any, res: any) {
           console.log("Sucesso no Fallback!");
         } catch (fallbackError: any) {
           console.error("DEBUG: ERRO NO MOTOR DE FALLBACK (DeOldify):");
-          const fErrorStatus = fallbackError.status || fallbackError.response?.status || 429;
-          const fErrorMsg = fallbackError.message?.toLowerCase() || "";
+          console.error("Mensagem:", fallbackError.message);
+          console.error("Status:", fallbackError.status);
+          console.error("Objeto completo (Fallback):", JSON.stringify(fallbackError, null, 2));
 
-          let friendlyError = "A quota total da sua conta Replicate foi atingida ou o saldo é insuficiente.";
-
-          if (fErrorMsg.includes("less than $5.0") || errorMsg.includes("less than $5.0")) {
-            friendlyError = "O Replicate ainda reporta saldo baixo ou limite de taxa. Se já carregaste, aguarda 1-2 minutos para o sistema deles atualizar.";
-          }
-
-          return res.status(fErrorStatus).json({
-            error: friendlyError,
+          return res.status(402).json({
+            error: "A quota total da sua conta Replicate foi atingida ou o saldo ├® insuficiente.",
             details: fallbackError.message,
-            debug_status: fErrorStatus
+            debug_status: fallbackError.status
           });
         }
       } else {
         // Se for um erro inesperado (ex: auth failed)
-        console.log("Erro não relacionado com quota no Tencentarc. Abortando.");
+        console.log("Erro n├úo relacionado com quota. Abortando.");
         return res.status(primaryError.status || 500).json({
-          error: "O motor de IA encontrou um erro técnico.",
+          error: "O motor de IA encontrou um erro t├®cnico.",
           details: primaryError.message,
           debug_status: primaryError.status
         });
@@ -122,18 +107,18 @@ export default async function handler(req: any, res: any) {
     }
 
     if (!resultUrl) {
-      console.log("Erro: Sem URL de saída.");
-      return res.status(500).json({ error: 'O motor de IA não devolveu nenhum resultado.' });
+      console.log("Erro: Sem URL de sa├¡da.");
+      return res.status(500).json({ error: 'O motor de IA n├úo devolveu nenhum resultado.' });
     }
 
-    console.log("Iniciando conversão para Base64 interna (Proxy)...");
+    console.log("Iniciando convers├úo para Base64 interna (Proxy)...");
     const imageRes = await fetch(resultUrl);
     if (!imageRes.ok) throw new Error("Falha ao capturar imagem final.");
 
     const arrayBuffer = await imageRes.arrayBuffer();
     const base64 = Buffer.from(arrayBuffer).toString('base64');
 
-    console.log("Sucesso! Enviando imagem para o usuário.");
+    console.log("Sucesso! Enviando imagem para o usu├írio.");
 
     return res.status(200).json({
       restoredImage: base64,

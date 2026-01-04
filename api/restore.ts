@@ -36,7 +36,7 @@ export default async function handler(req: any, res: any) {
         "arielreplicate/deoldify_image:0da600fab0c45a66211339f1c16b71345d22f26ef5fea3dca1bb90bb5711e950",
         {
           input: {
-            image: `data:image/jpeg;base64,${imageBase64}`,
+            input_image: `data:image/jpeg;base64,${imageBase64}`,
             model_name: "Artistic",
             render_factor: renderFactor
           }
@@ -71,13 +71,13 @@ export default async function handler(req: any, res: any) {
           await sleep(11000);
         }
 
-        console.log("Condição de Quota detetada no Tencentarc. Iniciando Fallback para DeOldify...");
+        console.log("Condição de Quota detetada no motor principal. Iniciando Fallback...");
         try {
           output = await replicate.run(
-            "arielreplicate/deoldify_image:0da600fab0c45a66211339215a9ad513b75ca55a16c41a3a4bbaf901419730f9",
+            "arielreplicate/deoldify_image:0da600fab0c45a66211339f1c16b71345d22f26ef5fea3dca1bb90bb5711e950",
             {
               input: {
-                image: `data:image/jpeg;base64,${imageBase64}`,
+                input_image: `data:image/jpeg;base64,${imageBase64}`,
                 model_name: "Artistic",
                 render_factor: renderFactor
               }
@@ -103,7 +103,7 @@ export default async function handler(req: any, res: any) {
         }
       } else {
         // Se for um erro inesperado (ex: auth failed)
-        console.log("Erro não relacionado com quota no Tencentarc. Abortando.");
+        console.log("Erro não relacionado com quota. Abortando.");
         return res.status(primaryError.status || 500).json({
           error: "O motor de IA encontrou um erro técnico.",
           details: primaryError.message,

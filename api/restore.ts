@@ -101,18 +101,31 @@ export default async function handler(req: any, res: any) {
       if (typeof output === 'string') {
         resultUrl = output;
       } else if (Array.isArray(output) && output.length > 0) {
-        resultUrl = typeof output[0] === 'string' ? output[0] : "";
-      } else if (typeof output === 'object' && output !== null) {
-        // Se for um FileOutput ou similar, tentamos .url property/getter mas verificamos tipo
-        const potUrl = output.url;
-        if (typeof potUrl === 'string') {
-          resultUrl = potUrl;
-        } else if (typeof potUrl === 'function') {
-          resultUrl = potUrl();
+        // Se for um array, pegamos o primeiro elemento e tentamos converter para string (link)
+        const first = output[0];
+        resultUrl = typeof first === 'string' ? first : (first?.url ? String(first.url) : String(first));
+      } else if (typeof output === 'object') {
+        // Se for um FileOutput ou similar, .url pode ser um objecto URL ou string
+        if (output.url) {
+          resultUrl = String(output.url);
         } else if (output.toString && typeof output.toString === 'function') {
           const str = output.toString();
           if (str && str.startsWith('http')) {
             resultUrl = str;
+          }
+        }
+      }
+    }
+
+    // Se ainda for "[object Object]", tentamos uma última conversão forçada
+    if (resultUrl === "[object Object]" || !resultUrl.startsWith('http')) {
+      // Se o output em si for o link mas o String() falhou de forma estranha
+      if (typeof output === 'object' && output !== null && !resultUrl.startsWith('http')) {
+        // Tenta encontrar qualquer string que comece com http dentro do objecto (caso raro)
+        for (const key in output) {
+          if (typeof output[key] === 'string' && output[key].startsWith('http')) {
+            resultUrl = output[key];
+            break;
           }
         }
       }

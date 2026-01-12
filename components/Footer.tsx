@@ -60,11 +60,6 @@ const Footer: React.FC = () => {
             <h3 className="text-sm font-semibold text-white tracking-wider uppercase mb-4">{t('footer.support')}</h3>
             <ul className="space-y-3">
               <li><Link to="/contact" className="text-sm hover:text-white transition-colors">{t('footer.contact')}</Link></li>
-              <li>
-                <Link to="/admin" className="text-xs flex items-center gap-1.5 text-slate-500 hover:text-indigo-400 transition-colors pt-4">
-                  <Lock className="h-3 w-3" /> {t('footer.admin_access')}
-                </Link>
-              </li>
             </ul>
             <div className="mt-6">
               <p className="text-sm text-slate-400 mb-2">

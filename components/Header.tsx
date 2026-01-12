@@ -96,15 +96,6 @@ const Header: React.FC = () => {
 
             <div className="h-6 w-px bg-slate-200"></div>
 
-            {/* Admin Quick Link */}
-            <Link
-              to="/admin"
-              className="flex items-center gap-1.5 text-slate-400 hover:text-indigo-600 transition-colors text-sm font-medium"
-              title={t('menu.admin_area')}
-            >
-              <Lock className="h-4 w-4" /> {t('menu.admin')}
-            </Link>
-
             {currentCustomer ? (
               <div className="flex items-center gap-4">
                 <Link to="/customer" className="flex items-center gap-2 px-3 py-1.5 bg-indigo-50 text-indigo-700 rounded-lg text-sm font-bold hover:bg-indigo-100 transition-colors">

@@ -94,7 +94,6 @@ const Header: React.FC = () => {
               )}
             </button>
 
-            <div className="h-6 w-px bg-slate-200"></div>
 
             {currentCustomer ? (
               <div className="flex items-center gap-4">

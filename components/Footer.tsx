@@ -143,7 +143,6 @@ const Footer: React.FC = () => {
                 </svg>
               </a>
             )}
-            <Link to="/admin" className="text-xs text-slate-600 hover:text-indigo-500">Admin</Link>
           </div>
         </div>
       </div>

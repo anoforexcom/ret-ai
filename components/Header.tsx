@@ -198,9 +198,6 @@ const Header: React.FC = () => {
               <Link to="/customer" onClick={() => setIsOpen(false)} className="flex items-center gap-2 pl-3 pr-4 py-2 text-base font-medium text-gray-600 hover:bg-gray-50">
                 <User className="h-4 w-4" /> {t('menu.account')}
               </Link>
-              <Link to="/admin" onClick={() => setIsOpen(false)} className="flex items-center gap-2 pl-3 pr-4 py-2 text-base font-medium text-indigo-600 hover:bg-gray-50">
-                <Lock className="h-4 w-4" /> {t('menu.admin_area')}
-              </Link>
             </div>
           </div>
         </div>
